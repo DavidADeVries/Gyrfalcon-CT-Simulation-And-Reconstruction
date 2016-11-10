@@ -611,7 +611,7 @@ classdef Detector
             positiveZStep = zStep + 0.5;
             negativeZStep = zStep - 0.5;
             
-            clockwiseShift = clockwiseStep * detector.singeDetectorDimensions(1).getValueInSIUnits();
+            clockwiseShift = clockwiseStep * detector.singleDetectorDimensions(1).getValueInSIUnits();
             counterClockwiseShift = counterClockwiseStep * detector.singleDetectorDimensions(1).getValueInSIUnits();
             
             positiveZShift = positiveZStep * detector.singleDetectorDimensions(2).getValueInSIUnits();
@@ -650,17 +650,17 @@ classdef Detector
                 counterClockwiseAngle = theta - counterClockwiseShift;
                     
                 if zIsAngular
-                    clockwiseShiftXPosZ = radius * cosd(clockwiseAngle) * cosd(positiveZShift);
-                    clockwiseShiftYPosZ = radius * sind(clockwiseAngle) * cosd(positiveZShift);
+                    clockwiseShiftXPosZ = detectorPosition(1) + radius * cosd(clockwiseAngle) * cosd(positiveZShift);
+                    clockwiseShiftYPosZ = detectorPosition(2) + radius * sind(clockwiseAngle) * cosd(positiveZShift);
                     
-                    clockwiseShiftXNegZ = radius * cosd(clockwiseAngle) * cosd(negativeZShift);
-                    clockwiseShiftYNegZ = radius * sind(clockwiseAngle) * cosd(positiveZShift);
+                    clockwiseShiftXNegZ = detectorPosition(1) + radius * cosd(clockwiseAngle) * cosd(negativeZShift);
+                    clockwiseShiftYNegZ = detectorPosition(2) + radius * sind(clockwiseAngle) * cosd(positiveZShift);
                     
-                    counterClockwiseShiftXPosZ = radius * cosd(counterClockwiseAngle) * cosd(positiveZShift);
-                    counterClockwiseShiftYPosZ = radius * sind(counterClockwiseAngle) * cosd(positiveZShift);
+                    counterClockwiseShiftXPosZ = detectorPosition(1) + radius * cosd(counterClockwiseAngle) * cosd(positiveZShift);
+                    counterClockwiseShiftYPosZ = detectorPosition(2) + radius * sind(counterClockwiseAngle) * cosd(positiveZShift);
                     
-                    counterClockwiseShiftXNegZ = radius * cosd(counterClockwiseAngle) * cosd(negativeZShift);
-                    counterClockwiseShiftYNegZ = radius * sind(counterClockwiseAngle) * cosd(negativeZShift);
+                    counterClockwiseShiftXNegZ = detectorPosition(1) + radius * cosd(counterClockwiseAngle) * cosd(negativeZShift);
+                    counterClockwiseShiftYNegZ = detectorPosition(2) + radius * sind(counterClockwiseAngle) * cosd(negativeZShift);
                                                             
                     clockwisePosZ(1) = clockwiseShiftXPosZ;
                     clockwiseNegZ(1) = clockwiseShiftXNegZ;
@@ -674,11 +674,11 @@ classdef Detector
                     counterClockwisePosZ(2) = counterClockwiseShiftYPosZ;
                     counterClockwiseNegZ(2) = counterClockwiseShiftYNegZ;
                 else                    
-                    clockwiseShiftX = cosd(clockwiseAngle) * radius;
-                    clockwiseShiftY = sind(clockwiseAngle) * radius;
+                    clockwiseShiftX = detectorPosition(1) + cosd(clockwiseAngle) * radius;
+                    clockwiseShiftY = detectorPosition(2) + sind(clockwiseAngle) * radius;
                     
-                    counterClockwiseShiftX = cosd(counterClockwiseAngle) * radius;
-                    counterClockwiseShiftY = sind(clockwiseAngle) * radius;
+                    counterClockwiseShiftX = detectorPosition(1) + cosd(counterClockwiseAngle) * radius;
+                    counterClockwiseShiftY = detectorPosition(2) + sind(clockwiseAngle) * radius;
                                         
                     clockwisePosZ(1) = clockwiseShiftX;
                     clockwiseNegZ(1) = clockwiseShiftX;
@@ -693,11 +693,11 @@ classdef Detector
                     counterClockwiseNegZ(2) = counterClockwiseShiftY;
                 end
             else
-                clockwiseShiftX = clockwiseShift * sind(theta);
-                counterClockwiseShiftX = counterClockwiseShift * sind(theta);
+                clockwiseShiftX = detectorPosition(1) + clockwiseShift * cosd(theta + 90);
+                counterClockwiseShiftX = detectorPosition(1) + counterClockwiseShift * cosd(theta + 90);
                 
-                clockwiseShiftY = clockwiseShift * cosd(theta);
-                counterClockwiseShiftY = counterClockwiseShift * cosd(theta);
+                clockwiseShiftY = detectorPosition(2) + clockwiseShift * sind(theta + 90);
+                counterClockwiseShiftY = detectorPosition(2) + counterClockwiseShift * sind(theta + 90);
                 
                 clockwisePosZ(1) = clockwiseShiftX;
                 clockwiseNegZ(1) = clockwiseShiftX;

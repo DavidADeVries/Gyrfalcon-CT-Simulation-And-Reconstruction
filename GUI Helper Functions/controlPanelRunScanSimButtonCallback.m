@@ -7,7 +7,7 @@ simulation = Simulation;
 
 simulation = simulation.createFromGUI(handles);
 
-data = simulation.runScanSimulation();
+data = simulation.runScanSimulation(handles.axesHandle);
 
 
 end

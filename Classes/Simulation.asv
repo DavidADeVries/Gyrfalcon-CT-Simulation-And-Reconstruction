@@ -90,6 +90,20 @@ classdef Simulation
                        
         end
         
+        function plotHandles = plotScanStep(simulation, sourcePosition, detectorCornerCoords)
+            hold on
+            
+            points = [sourcePosition; detectorCornerCoords];
+            
+            x = points(:,1);
+            y = points(:,2);
+            z = points(:,3);
+            
+            plotHandles = plot3(x,y,z,'Marker','*','MarkerFaceColor','w');
+            
+            plotHandles = {plotHandles};
+        end
+        
         function handles = setGUIFromSimulation(simulation, handles)
             
             % PHANTOM
@@ -155,7 +169,7 @@ classdef Simulation
             simulation.saveFileName = handles.simulationSaveFileName;
         end
         
-        function data = runScanSimulation(simulation)
+        function data = runScanSimulation(simulation, axesHandle)
             slices = simulation.scan.getSlicesInM();
             
             numSlices = length(slices);
@@ -171,7 +185,7 @@ classdef Simulation
             end            
         end
         
-        function sliceData = runScanSimulationForSlice(simulation, slicePosition)
+        function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition)
             angles = simulation.scan.getScanAnglesInDegrees();
             
             numAngles = length(angles);
@@ -206,12 +220,62 @@ classdef Simulation
             end
         end
         
-        function positionData = runScanSimulationForPerAnglePosition(slicePosition, angle, perAngleXY, perAngleZ)
-            [sourcePosition, directionUnitVector] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
+        function positionData = runScanSimulationForPerAnglePosition(simulation, slicePosition, angle, perAngleXY, perAngleZ)
+            [sourcePosition, sourceDirectionUnitVector] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
             
             detectorPosition = simulation.detector.getDetectorPosition(slicePosition, angle);
             
-            xy
+            xyNumDetectors = simulation.detector.wholeDetectorDimensions(1);
+            zNumDetectors = simulation.detector.wholeDetectorDimensions(2);
+            
+            positionData = zeros(zNumDetectors, xyNumDetectors);
+            
+            for zDetector=1:zNumDetectors
+                for xyDetector=1:xyNumDetectors
+                    [clockwisePosZ,...
+                     clockwiseNegZ,...
+                     counterClockwisePosZ,...
+                     counterClockwiseNegZ]...
+                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector);
+                    
+                    detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
+                 
+                    plotHandles = simulation.plotScanStep(sourcePosition, detectorCornerCoords);
+                    
+                    detectorData = simulation.runScanSimulationForDetector(sourcePosition, sourceDirectionUnitVector, detectorCornerCoords);
+                    
+                    pause(5); % pause for 5 seconds
+                    
+                    deleteHandles(plotHandles);
+                 
+                    positionData(zDetector, xyDetector) = detectorData;
+                end
+            end
+                
+        end
+        
+        function detectorData = runScanSimulationForDetector(simulation, sourcePosition, sourceDirectionUnitVector, detectorCornerCoords)
+            scatteringNoiseLevel = simulation.scatteringNoiseLevel;
+            detectorNoiseLevel = simulation.detectorNoiseLevel;
+            partialPixel = simulation.partialPixelModelling;
+            
+            beamCharacterization = simulation.scan.beamCharacterization;
+            
+            phantomData = simulation.phantom.data;
+            voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
+            phantomLocationInM = simulation.phantom.getLocationInM();
+            
+            detectorData = runBeamTrace(...
+                sourcePosition,...
+                sourceDirectionUnitVector,...
+                detectorCornerCoords,...
+                phantomData,...
+                voxelDimsInM,...
+                phantomLocationInM,...
+                beamCharacterization,...
+                scatteringNoiseLevel,...
+                detectorNoiseLevel,...
+                partialPixel);
         end
         
     end

@@ -125,8 +125,8 @@ classdef Scan
             midXYStep = (totalNumXYSteps + 1) / 2;
             midZStep = (totalNumZSteps + 1) / 2;
             
-            xyPos = (xyStep - midXYStep) * scan.perAngleResolution(1);
-            zPos = (zStep - midZStep) * scan.perAngleResolution(2);
+            xyPos = (xyStep - midXYStep) * scan.perAngleTranslationResolution(1);
+            zPos = (zStep - midZStep) * scan.perAngleTranslationResolution(2);
             
             perAngleXYInM = units.convertToM(xyPos);
             perAngleZInM = units.convertToM(zPos);
