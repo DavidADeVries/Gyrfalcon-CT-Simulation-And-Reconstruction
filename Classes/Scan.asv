@@ -122,7 +122,18 @@ classdef Scan
             totalNumXYSteps = scan.perAngleTranslationDimensions(1);
             totalNumZSteps = scan.perAngleTranslationDimensions(2);
             
+            midXYStep = (totalNumXYSteps + 1) / 2;
+            midZStep = (totalNumZSteps + 1) / 2;
             
+            xyPos = (xyStep - midXYStep) * scan.perAngleTranslationResolution(1);
+            zPos = (zStep - midZStep) * scan.perAngleTranslationResolution(2);
+            
+            perAngleXYInM = units.convertToM(xyPos);
+            perAngleZInM = units.convertToM(zPos);
+        end
+        
+        function handles = plotPerAngle(scan, axesHandle, slicePosition, angle)
+            axes(axesHandle)
         end
         
         function [] = plot(scan, source, axesHandle)

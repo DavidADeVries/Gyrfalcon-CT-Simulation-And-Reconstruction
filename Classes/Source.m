@@ -91,6 +91,37 @@ classdef Source
             locationInM = units.convertToM(source.location);
         end
         
+        function handles = plotSource(source, axesHandle, sourcePosition, sourceDirectionUnitVector)
+            axes(axesHandle);
+            hold on
+            
+            x1 = sourcePosition(1);
+            y1 = sourcePosition(2);
+            z1 = sourcePosition(3);
+            
+            edgeColour = Constants.Source_Colour;
+            faceColour = Constants.Source_Colour;
+            lineStyle = [];
+            lineWidth = [];
+            
+            circleHandle = circleOrArcPatch(...
+                x1,y1,z1, Constants.Point_Source_Radius, 0, 360,...
+                edgeColour, faceColour, lineStyle, lineWidth);
+            
+            
+            radius = norm([x1,y1]);
+            
+            vector = 2 * radius * sourceDirectionUnitVector;
+            
+            x2 = x1 + vector(1);
+            y2 = y1 + vector(2);
+            z2 = z1 + vector(3);
+            
+            midlineHandle = line([x1,x2], [y1,y2], [z1,z2], 'Parent', axesHandle, 'Color', Constants.Source_Colour, 'LineStyle', '--');
+            
+            handles = {circleHandle, midlineHandle};
+        end
+        
         function [] = plot(source, axesHandle)
             dimensions = source.dimensions;
             
@@ -268,8 +299,8 @@ classdef Source
             
             [x,y] = pol2cart(sourceAngle * Constants.deg_to_rad, radius);
             
-            perAngleX = sind(sourceAngle) * perAngleXY;
-            perAngleY = cosd(sourceAngle) * perAngleXY;
+            perAngleX = cosd(sourceAngle + 90) * perAngleXY;
+            perAngleY = sind(sourceAngle + 90) * perAngleXY;
             
             x = x + perAngleX;
             y = y + perAngleY;

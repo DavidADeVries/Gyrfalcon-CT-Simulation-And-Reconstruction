@@ -116,12 +116,17 @@ classdef Simulation
             plotHandles = {handle};
         end
         
-        function plotHandles = plotAngle(simulation, axesHandles, slicePosition, angle)
-            plotHandles = simulation.detector.plot(axesHandles, slicePosition, angle);
+        function plotHandles = plotAngle(simulation, axesHandle, slicePosition, angle)
+            detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle);
+            scanHandles = simulation.scan.plotPerAngle(simulation.source, axesHandle, slicePosition, angle);
+            
+            plotHandles = [detectorHandles, scanHandles];
         end
         
         function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector)
-            plotHandles = {};
+            sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector);
+            
+            plotHandles = sourceHandles;
         end
         
         function plotHandles = plotDetectorRaster(simulation, axesHandle, detectorCornerCoords)
@@ -246,6 +251,8 @@ classdef Simulation
             
             if displaySlices
                 plotHandles = simulation.plotSlice(axesHandle, slicePosition);
+                
+                pause(0.001);
             end
             
             for i=1:numAngles
@@ -271,6 +278,8 @@ classdef Simulation
             
             if displayAngles
                 plotHandles = simulation.plotAngle(axesHandle, slicePosition, angle);
+                
+                pause(0.001);
             end
             
             for zStep=1:zNumSteps
@@ -300,6 +309,8 @@ classdef Simulation
                         
             if displayPerAnglePosition
                 plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector);
+                
+                pause(0.001);
             end
             
             if displayDetectorRaster

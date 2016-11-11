@@ -132,6 +132,110 @@ classdef Scan
             perAngleZInM = units.convertToM(zPos);
         end
         
+        function handles = plotPerAngle(scan, source, axesHandle, slicePosition, angle)
+            axes(axesHandle);
+            hold on
+            
+            handles = {};
+            
+            locationInM = source.locationUnits.convertToM(source.location);
+            
+            if ~isempty(slicePosition) % set z to slice position
+                locationInM(3) = slicePosition;
+            end
+            
+            if ~isempty(angle)
+                [theta,radius] = cart2pol(locationInM(1),locationInM(2));
+                theta = theta * Constants.rad_to_deg;
+                
+                theta = theta - angle; %negative because our angles are clockwise
+                
+                theta = theta * Constants.deg_to_rad;
+                [x,y] = pol2cart(theta,radius);
+                
+                locationInM(1) = x;
+                locationInM(2) = y;
+            end
+            
+            % plot per angle translation grid
+            translationResolutionInM = scan.perAngleTranslationUnits.convertToM(scan.perAngleTranslationResolution);
+            
+            x = locationInM(1);
+            y = locationInM(2);
+            z = locationInM(3);
+            
+            [theta,radius] = cart2pol(x,y);                
+            theta = theta * Constants.rad_to_deg;
+            
+            aboutZ = [0,0,1];
+            
+            xyResolution = translationResolutionInM(1);
+            zResolution = translationResolutionInM(2);
+            
+            xyNumSteps = scan.perAngleTranslationDimensions(1);
+            zNumSteps = scan.perAngleTranslationDimensions(2);
+            
+            if xyNumSteps ~= 0
+                xyNumSteps = xyNumSteps - 1;
+            end
+            
+            if zNumSteps ~= 0
+                zNumSteps = zNumSteps - 1;
+            end
+            
+            xyStart = -xyResolution*(xyNumSteps/2);
+            xyEnd = xyResolution*(xyNumSteps/2);
+            
+            zStart = z-(zNumSteps/2)*zResolution;
+            zEnd = z+(zNumSteps/2)*zResolution;
+            
+            lineColour = Constants.Per_Angle_Translation_Colour;
+            
+            if xyStart == xyEnd % draw line along z
+                
+                handle = line([x,x],[y,y],[zStart,zEnd],'Color',lineColour);
+                                
+                % add handle
+                handles = [handles, {handle}];
+                
+                for zVal=zStart:zResolution:zEnd
+                    y1 = y - Constants.Per_Angle_Translation_Tick_Length;
+                    y2 = y + Constants.Per_Angle_Translation_Tick_Length;
+                    
+                    lineHandle = line([x,x],[y1,y2],[zVal,zVal],'Color',lineColour);
+                    
+                    origin = [x, y, zVal];
+                    
+                    rotate(lineHandle, aboutZ, theta, origin);
+                    
+                    % add handle
+                    handles = [handles, {lineHandle}];
+                end
+            else
+                for zVal=zStart:zResolution:zEnd
+                    lineHandle = line([radius,radius],[xyStart,xyEnd],[zVal,zVal],'Color',lineColour);
+                    
+                    % add handle
+                    handles = [handles, {lineHandle}];
+                        
+                    rotate(lineHandle, aboutZ, theta);
+                    
+                    for xyVal=xyStart:xyResolution:xyEnd
+                        z1 = zVal - Constants.Per_Angle_Translation_Tick_Length;
+                        z2 = zVal + Constants.Per_Angle_Translation_Tick_Length;
+                        
+                        lineHandle = line([radius,radius],[xyVal,xyVal],[z1,z2],'Color',lineColour);
+                                                
+                        rotate(lineHandle, aboutZ, theta);
+                        
+                        % add handle
+                        handles = [handles, {lineHandle}];
+                    end
+                end
+            end
+            
+        end
+        
         function [] = plot(scan, source, axesHandle)
             locationInM = source.locationUnits.convertToM(source.location);
                         
@@ -201,70 +305,11 @@ classdef Scan
             end
             
             % per angle translation plotting
-            translationResolutionInM = scan.perAngleTranslationUnits.convertToM(scan.perAngleTranslationResolution);
             
-            x = locationInM(1);
-            y = locationInM(2);
-            z = locationInM(3);
+            slicePosition = []; % set these to empy so that source location will be used
+            angle = [];
             
-            [theta,radius] = cart2pol(x,y);                
-            theta = theta * Constants.rad_to_deg;
-            
-            aboutZ = [0,0,1];
-            
-            xyResolution = translationResolutionInM(1);
-            zResolution = translationResolutionInM(2);
-            
-            xyNumSteps = scan.perAngleTranslationDimensions(1);
-            zNumSteps = scan.perAngleTranslationDimensions(2);
-            
-            if xyNumSteps ~= 0
-                xyNumSteps = xyNumSteps - 1;
-            end
-            
-            if zNumSteps ~= 0
-                zNumSteps = zNumSteps - 1;
-            end
-            
-            xyStart = -xyResolution*(xyNumSteps/2);
-            xyEnd = xyResolution*(xyNumSteps/2);
-            
-            zStart = z-(zNumSteps/2)*zResolution;
-            zEnd = z+(zNumSteps/2)*zResolution;
-            
-            lineColour = Constants.Per_Angle_Translation_Colour;
-            
-            if xyStart == xyEnd % draw line along z
-                
-                line([x,x],[y,y],[zStart,zEnd],'Color',lineColour);
-                
-                for zVal=zStart:zResolution:zEnd
-                    y1 = y - Constants.Per_Angle_Translation_Tick_Length;
-                    y2 = y + Constants.Per_Angle_Translation_Tick_Length;
-                    
-                    lineHandle = line([x,x],[y1,y2],[zVal,zVal],'Color',lineColour);
-                    
-                    origin = [x, y, zVal];
-                    
-                    rotate(lineHandle, aboutZ, theta, origin);
-                end
-            else
-                for zVal=zStart:zResolution:zEnd
-                    lineHandle = line([radius,radius],[xyStart,xyEnd],[zVal,zVal],'Color',lineColour);
-                    
-                    rotate(lineHandle, aboutZ, theta);
-                    
-                    for xyVal=xyStart:xyResolution:xyEnd
-                        z1 = zVal - Constants.Per_Angle_Translation_Tick_Length;
-                        z2 = zVal + Constants.Per_Angle_Translation_Tick_Length;
-                        
-                        lineHandle = line([radius,radius],[xyVal,xyVal],[z1,z2],'Color',lineColour);
-                                                
-                        rotate(lineHandle, aboutZ, theta);
-                    end
-                end
-            end
-                          
+            scan.plotPerAngle(source, axesHandle, slicePosition, angle);             
         end
         
         function handles = setGUI(scan, handles)
