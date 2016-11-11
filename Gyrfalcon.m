@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 18-Oct-2016 15:39:21
+% Last Modified by GUIDE v2.5 11-Nov-2016 10:24:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -966,3 +966,108 @@ function sourceBeamAngleZEdit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --------------------------------------------------------------------
+function scanSimViewMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function scanSimViewSlices_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewSlices (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+val = get(hObject, 'Checked');
+
+switch val
+    case 'on'
+        val = 'off';
+    case 'off'
+        val = 'on';
+    otherwise
+        error('Invalid Checked Value');
+end
+
+set(hObject, 'Checked', val);
+
+set(handles.scanSimViewAngles, 'Checked', val);
+set(handles.scanSimViewPerAnglePosition, 'Checked', val);
+set(handles.scanSimViewDetectorRaster, 'Checked', val);
+
+% --------------------------------------------------------------------
+function scanSimViewAngles_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewAngles (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+val = get(hObject, 'Checked');
+
+switch val
+    case 'on'
+        val = 'off';
+        
+        set(handles.scanSimViewPerAnglePosition, 'Checked', val);
+        set(handles.scanSimViewDetectorRaster, 'Checked', val);
+    case 'off'
+        val = 'on';
+        
+        set(handles.scanSimViewSlices, 'Checked', val);
+    otherwise
+        error('Invalid Checked Value');
+end
+
+set(hObject, 'Checked', val);
+
+
+% --------------------------------------------------------------------
+function scanSimViewPerAnglePosition_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewPerAnglePosition (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+val = get(hObject, 'Checked');
+
+switch val
+    case 'on'
+        val = 'off';
+        
+        set(handles.scanSimViewDetectorRaster, 'Checked', val);
+    case 'off'
+        val = 'on';
+        
+        set(handles.scanSimViewSlices, 'Checked', val);
+        set(handles.scanSimViewAngles, 'Checked', val);
+    otherwise
+        error('Invalid Checked Value');
+end
+
+set(hObject, 'Checked', val);
+
+
+% --------------------------------------------------------------------
+function scanSimViewDetectorRaster_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewDetectorRaster (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+val = get(hObject, 'Checked');
+
+switch val
+    case 'on'
+        val = 'off';
+    case 'off'
+        val = 'on';
+        
+        set(handles.scanSimViewSlices, 'Checked', val);
+        set(handles.scanSimViewAngles, 'Checked', val);
+        set(handles.scanSimViewPerAnglePosition, 'Checked', val);
+    otherwise
+        error('Invalid Checked Value');
+end
+
+set(hObject, 'Checked', val);
+
