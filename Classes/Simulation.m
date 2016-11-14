@@ -123,8 +123,8 @@ classdef Simulation
             plotHandles = [detectorHandles, scanHandles];
         end
         
-        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector)
-            sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector);
+        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed)
+            sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
             
             plotHandles = sourceHandles;
         end
@@ -298,7 +298,7 @@ classdef Simulation
         end
         
         function positionData = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster)
-            [sourcePosition, sourceDirectionUnitVector] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
+            [sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
             
             detectorPosition = simulation.detector.getDetectorPosition(slicePosition, angle);
             
@@ -308,7 +308,7 @@ classdef Simulation
             positionData = zeros(zNumDetectors, xyNumDetectors);
                         
             if displayPerAnglePosition
-                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector);
+                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
                 
                 pause(0.001);
             end

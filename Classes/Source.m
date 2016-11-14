@@ -91,13 +91,15 @@ classdef Source
             locationInM = units.convertToM(source.location);
         end
         
-        function handles = plotSource(source, axesHandle, sourcePosition, sourceDirectionUnitVector)
+        function handles = plotSource(source, axesHandle, sourcePosition, sourceDirectionUnitVector, perAngleShiftsUsed)
             axes(axesHandle);
             hold on
             
             x1 = sourcePosition(1);
             y1 = sourcePosition(2);
             z1 = sourcePosition(3);
+            
+            % plot source circle
             
             edgeColour = Constants.Source_Colour;
             faceColour = Constants.Source_Colour;
@@ -108,8 +110,16 @@ classdef Source
                 x1,y1,z1, Constants.Point_Source_Radius, 0, 360,...
                 edgeColour, faceColour, lineStyle, lineWidth);
             
+            % plot midline
             
-            radius = norm([x1,y1]);
+            % these x,y,z are representative of the middle of the per angle
+            % translation grid
+            x = x1 - perAngleShiftsUsed(1);
+            y = y1 - perAngleShiftsUsed(2);
+            z = z1 - perAngleShiftsUsed(3);
+            
+            [theta, radius] = cart2pol(x,y);
+            theta = theta * Constants.rad_to_deg;
             
             vector = 2 * radius * sourceDirectionUnitVector;
             
@@ -119,7 +129,43 @@ classdef Source
             
             midlineHandle = line([x1,x2], [y1,y2], [z1,z2], 'Parent', axesHandle, 'Color', Constants.Source_Colour, 'LineStyle', '--');
             
-            handles = {circleHandle, midlineHandle};
+            % plot beam angle lines
+            
+            units = source.beamAngleUnits;
+            
+            beamAngles = units.convertToDegrees(source.beamAngle);
+            
+            xyAngle = beamAngles(1) / 2;
+            zAngle = beamAngles(2) / 2;
+            
+            xyShift = 2 * radius * tand(xyAngle);
+            zShift = 2* radius * tand(zAngle);
+            
+            xShift = xyShift * cosd(theta + 90);
+            yShift = xyShift * sind(theta + 90);
+            
+            line1Endpoint = [x2 + xShift, y2 + yShift, z2 + zShift];
+            line2Endpoint = [x2 - xShift, y2 - yShift, z2 + zShift];
+            line3Endpoint = [x2 + xShift, y2 + yShift, z2 - zShift];
+            line4Endpoint = [x2 - xShift, y2 - yShift, z2 - zShift];
+            
+            line1Handle = line([x1, line1Endpoint(1)], [y1, line1Endpoint(2)], [z1, line1Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            line2Handle = line([x1, line2Endpoint(1)], [y1, line2Endpoint(2)], [z1, line2Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            line3Handle = line([x1, line3Endpoint(1)], [y1, line3Endpoint(2)], [z1, line3Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            line4Handle = line([x1, line4Endpoint(1)], [y1, line4Endpoint(2)], [z1, line4Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            
+            rectLine1Handle = line([line1Endpoint(1), line2Endpoint(1)], [line1Endpoint(2), line2Endpoint(2)], [line1Endpoint(3), line2Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            rectLine2Handle = line([line2Endpoint(1), line4Endpoint(1)], [line2Endpoint(2), line4Endpoint(2)], [line2Endpoint(3), line4Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            rectLine3Handle = line([line1Endpoint(1), line3Endpoint(1)], [line1Endpoint(2), line3Endpoint(2)], [line1Endpoint(3), line3Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            rectLine4Handle = line([line3Endpoint(1), line4Endpoint(1)], [line3Endpoint(2), line4Endpoint(2)], [line3Endpoint(3), line4Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour);
+            
+            crossLine1Handle = line([line1Endpoint(1), line4Endpoint(1)], [line1Endpoint(2), line4Endpoint(2)], [line1Endpoint(3), line4Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour, 'LineStyle', '--');
+            crossLine2Handle = line([line2Endpoint(1), line3Endpoint(1)], [line2Endpoint(2), line3Endpoint(2)], [line2Endpoint(3), line3Endpoint(3)], 'Parent', axesHandle, 'Color', Constants.Source_Colour, 'LineStyle', '--');
+            
+            handles = {circleHandle, midlineHandle,...
+                line1Handle, line2Handle, line3Handle, line4Handle,...
+                rectLine1Handle, rectLine2Handle, rectLine3Handle, rectLine4Handle,...
+                crossLine1Handle, crossLine2Handle};
         end
         
         function [] = plot(source, axesHandle)
@@ -286,7 +332,7 @@ classdef Source
             source.saveFileName = handles.sourceSaveFileName;
         end
         
-        function [sourcePosition, directionUnitVector] = getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ)
+        function [sourcePosition, directionUnitVector, perAngleShift] = getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ)
             startingLocation = source.getLocationInM();
             
             z = slicePosition + perAngleZ;
@@ -310,6 +356,7 @@ classdef Source
             
             sourcePosition = [x, y, z];
             directionUnitVector = [dirX, dirY, dirZ];
+            perAngleShift = [perAngleX, perAngleY, perAngleZ];
         end
         
     end
