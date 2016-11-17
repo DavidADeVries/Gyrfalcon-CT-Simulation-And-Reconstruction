@@ -142,7 +142,12 @@ classdef Simulation
             y = detectorCornerCoords(:,2);
             z = detectorCornerCoords(:,3);
             
-            plotHandles = patch(x,y,z,'w');
+            plotHandles = patch(...
+                'XData',x,'YData',y,'ZData',z,...
+                'FaceColor',Constants.Detector_Raster_Colour,...
+                'FaceAlpha',Constants.Detector_Raster_Alpha,...
+                'EdgeColor','none',...
+                'LineStle','none');
             
             plotHandles = {plotHandles};
         end
@@ -252,7 +257,7 @@ classdef Simulation
             if displaySlices
                 plotHandles = simulation.plotSlice(axesHandle, slicePosition);
                 
-                pause(0.001);
+                pause(0.000001);
             end
             
             for i=1:numAngles
@@ -279,7 +284,7 @@ classdef Simulation
             if displayAngles
                 plotHandles = simulation.plotAngle(axesHandle, slicePosition, angle);
                 
-                pause(0.001);
+                pause(0.000001);
             end
             
             for zStep=1:zNumSteps
@@ -310,7 +315,7 @@ classdef Simulation
             if displayPerAnglePosition
                 plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
                 
-                pause(0.001);
+                pause(0.000001);
             end
             
             if displayDetectorRaster
@@ -332,7 +337,7 @@ classdef Simulation
                         
                         rasterPlotHandles = [rasterPlotHandles, handles];
                         
-                        pause(0.001);
+                        pause(0.000001);
                     end
                     
                     detectorData = simulation.runScanSimulationForDetector(sourcePosition, sourceDirectionUnitVector, detectorCornerCoords);

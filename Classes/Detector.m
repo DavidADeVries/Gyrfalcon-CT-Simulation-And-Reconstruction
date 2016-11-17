@@ -217,7 +217,7 @@ classdef Detector
                     botR = radius + detectorLineHeight;
                     
                     if zIsAngular
-                        z = 0;
+                        z = locationInM(3);
                         
                         theta = xyLines_z;
                         psi = xyAngle/2;
@@ -254,7 +254,7 @@ classdef Detector
                     y = xyLines_y;
                     
                     if zIsAngular
-                        z = [0,0];
+                        z = [locationInM(3), locationInM(3)];
                     else
                         z = [xyLines_z, xyLines_z];
                     end
@@ -263,8 +263,10 @@ classdef Detector
                     botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
                     
                     if zIsAngular % rotate about y to get them in position
-                        rotate(topLineHandle, aboutY, xyLines_z);
-                        rotate(botLineHandle, aboutY, xyLines_z);
+                        origin = [0,0,locationInM(3)];
+                        
+                        rotate(topLineHandle, aboutY, xyLines_z, origin);
+                        rotate(botLineHandle, aboutY, xyLines_z, origin);
                     end
                 end
                 
@@ -308,7 +310,7 @@ classdef Detector
                 
                 if zIsAngular
                     x = 0;
-                    z = 0;
+                    z = locationInM(3);
                     
                     topR = radius;
                     botR = radius + detectorLineHeight;
@@ -501,8 +503,9 @@ classdef Detector
             % clockwise coordinates first, and then the more counter-clockwise
             % coordinates
             
-            [theta, radius] = cart2pol(detectorPosition(1), detectorPosition(2));
+            [theta, psi, radius] = cart2sph(detectorPosition(1), detectorPosition(2), 0); % set z to zero, and then shift it down later
             theta = theta * Constants.rad_to_deg;
+            psi = psi * Constants.rad_to_deg;
             
             totalNumXYDetectors = detector.wholeDetectorDimensions(1);
             totalNumZDetectors = detector.wholeDetectorDimensions(2);
@@ -538,8 +541,11 @@ classdef Detector
                     posZVal = detectorPosition(3) + radius * sind(positiveZShift);
                     negZVal = detectorPosition(3) + radius * sind(negativeZShift);
                 else
-                    posZVal = detectorPosition(3) + radius * sind(positiveZShift);
-                    negZVal = detectorPosition(3) + radius * sind(negativeZShift);
+                    posZShift = radius * sind(positiveZShift);
+                    negZShift = radius * sind(negativeZShift);
+                                                                                
+                    posZVal = detectorPosition(3) + posZShift;
+                    negZVal = detectorPosition(3) + negZShift;
                 end
             else
                 posZVal = detectorPosition(3) + positiveZShift;
@@ -558,35 +564,51 @@ classdef Detector
                 counterClockwiseAngle = theta - counterClockwiseShift;
                     
                 if zIsAngular
-                    clockwiseShiftXPosZ = detectorPosition(1) + radius * cosd(clockwiseAngle) * cosd(positiveZShift);
-                    clockwiseShiftYPosZ = detectorPosition(2) + radius * sind(clockwiseAngle) * cosd(positiveZShift);
+                    posZPsi = psi + positiveZShift;
+                    posZPsi = posZPsi * Constants.deg_to_rad;
                     
-                    clockwiseShiftXNegZ = detectorPosition(1) + radius * cosd(clockwiseAngle) * cosd(negativeZShift);
-                    clockwiseShiftYNegZ = detectorPosition(2) + radius * sind(clockwiseAngle) * cosd(positiveZShift);
+                    negZPsi = psi + negativeZShift;
+                    negZPsi = negZPsi * Constants.deg_to_rad;
                     
-                    counterClockwiseShiftXPosZ = detectorPosition(1) + radius * cosd(counterClockwiseAngle) * cosd(positiveZShift);
-                    counterClockwiseShiftYPosZ = detectorPosition(2) + radius * sind(counterClockwiseAngle) * cosd(positiveZShift);
+                    clockwiseTheta = theta - clockwiseShift; %negative because clockwise positive in Gyrfalcon
+                    clockwiseTheta = clockwiseTheta * Constants.deg_to_rad;
                     
-                    counterClockwiseShiftXNegZ = detectorPosition(1) + radius * cosd(counterClockwiseAngle) * cosd(negativeZShift);
-                    counterClockwiseShiftYNegZ = detectorPosition(2) + radius * sind(counterClockwiseAngle) * cosd(negativeZShift);
-                                                            
-                    clockwisePosZ(1) = clockwiseShiftXPosZ;
-                    clockwiseNegZ(1) = clockwiseShiftXNegZ;
+                    counterClockwiseTheta = theta - counterClockwiseShift;
+                    counterClockwiseTheta = counterClockwiseTheta * Constants.deg_to_rad;
                     
-                    counterClockwisePosZ(1) = counterClockwiseShiftXPosZ;
-                    counterClockwiseNegZ(1) = counterClockwiseShiftXNegZ;
+                    [x,y,z] = sph2cart(clockwiseTheta, posZPsi, radius);
                     
-                    clockwisePosZ(2) = clockwiseShiftYPosZ;
-                    clockwiseNegZ(2) = clockwiseShiftYNegZ;
+                    z = z + detectorPosition(3); %need to add the z back in
                     
-                    counterClockwisePosZ(2) = counterClockwiseShiftYPosZ;
-                    counterClockwiseNegZ(2) = counterClockwiseShiftYNegZ;
-                else                    
-                    clockwiseShiftX = detectorPosition(1) + cosd(clockwiseAngle) * radius;
-                    clockwiseShiftY = detectorPosition(2) + sind(clockwiseAngle) * radius;
+                    clockwisePosZ(1:3) = [x,y,z];
                     
-                    counterClockwiseShiftX = detectorPosition(1) + cosd(counterClockwiseAngle) * radius;
-                    counterClockwiseShiftY = detectorPosition(2) + sind(clockwiseAngle) * radius;
+                    [x,y,z] = sph2cart(clockwiseTheta, negZPsi, radius);
+                    
+                    z = z + detectorPosition(3);
+                    
+                    clockwiseNegZ(1:3) = [x,y,z];
+                    
+                    [x,y,z] = sph2cart(counterClockwiseTheta, posZPsi, radius);
+                    
+                    z = z + detectorPosition(3);
+                    
+                    counterClockwisePosZ(1:3) = [x,y,z];
+                    
+                    [x,y,z] = sph2cart(counterClockwiseTheta, negZPsi, radius);
+                    
+                    z = z + detectorPosition(3);
+                    
+                    counterClockwiseNegZ(1:3) = [x,y,z];
+                else
+                    [x,y] = pol2cart(clockwiseAngle*Constants.deg_to_rad, radius);
+                    
+                    clockwiseShiftX = x;
+                    clockwiseShiftY = y;
+                    
+                    [x,y] = pol2cart(counterClockwiseAngle*Constants.deg_to_rad, radius);
+                    
+                    counterClockwiseShiftX = x;
+                    counterClockwiseShiftY = y;
                                         
                     clockwisePosZ(1) = clockwiseShiftX;
                     clockwiseNegZ(1) = clockwiseShiftX;
@@ -607,17 +629,53 @@ classdef Detector
                 clockwiseShiftY = detectorPosition(2) + clockwiseShift * sind(theta + 90);
                 counterClockwiseShiftY = detectorPosition(2) + counterClockwiseShift * sind(theta + 90);
                 
-                clockwisePosZ(1) = clockwiseShiftX;
-                clockwiseNegZ(1) = clockwiseShiftX;
+                if zIsAngular
+                    % the xy radius changes due to curvature in the z
+                    % direction
+                    posZRadius = radius * cosd(positiveZShift);
+                    negZRadius = radius * cosd(negativeZShift);
+                    
+                    % find the x,y if the just the radius was reduced
+                    [x, y] = pol2cart(theta * Constants.deg_to_rad, posZRadius);
+                    
+                    % find the shift needed for x and y to compensate for z
+                    % curvature
+                    posZ_xShift = x - detectorPosition(1);
+                    posZ_yShift = y - detectorPosition(2);
+                    
+                    % do the same for the lower (negative) z value
+                    [x, y] = pol2cart(theta * Constants.deg_to_rad, negZRadius);
+                    
+                    negZ_xShift = x - detectorPosition(1);
+                    negZ_yShift = y - detectorPosition(2);
+                    
+                    % set points using the found shifts
+                    clockwisePosZ(1) = clockwiseShiftX + posZ_xShift;
+                    clockwisePosZ(2) = clockwiseShiftY + posZ_yShift;
+                    
+                    clockwiseNegZ(1) = clockwiseShiftX + negZ_xShift;
+                    clockwiseNegZ(2) = clockwiseShiftY + negZ_yShift;
+                    
+                    counterClockwisePosZ(1) = counterClockwiseShiftX + posZ_xShift;
+                    counterClockwisePosZ(2) = counterClockwiseShiftY + posZ_yShift;
+                    
+                    counterClockwiseNegZ(1) = counterClockwiseShiftX + negZ_xShift;
+                    counterClockwiseNegZ(2) = counterClockwiseShiftY + negZ_yShift;
+                                        
+                else                    
+                    clockwisePosZ(1) = clockwiseShiftX;
+                    clockwiseNegZ(1) = clockwiseShiftX;
+                    
+                    counterClockwisePosZ(1) = counterClockwiseShiftX;
+                    counterClockwiseNegZ(1) = counterClockwiseShiftX;
+                    
+                    clockwisePosZ(2) = clockwiseShiftY;
+                    clockwiseNegZ(2) = clockwiseShiftY;
+                    
+                    counterClockwisePosZ(2) = counterClockwiseShiftY;
+                    counterClockwiseNegZ(2) = counterClockwiseShiftY;
+                end
                 
-                counterClockwisePosZ(1) = counterClockwiseShiftX;
-                counterClockwiseNegZ(1) = counterClockwiseShiftX;
-                
-                clockwisePosZ(2) = clockwiseShiftY;
-                clockwiseNegZ(2) = clockwiseShiftY;
-                
-                counterClockwisePosZ(2) = counterClockwiseShiftY;
-                counterClockwiseNegZ(2) = counterClockwiseShiftY;
             end
                                
             
