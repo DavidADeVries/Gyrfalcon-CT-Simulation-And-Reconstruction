@@ -207,7 +207,7 @@ classdef Source
                 zAngle1 = - zBeamAngle/2;
                 zAngle2 = zBeamAngle/2;
                 
-                rotationOrigin = [x,y,0];
+                rotationOrigin = [x,y,z];
                 
                 aboutY = [0,1,0];
                 aboutZ = [0,0,1]; %about z-axis
