@@ -224,11 +224,15 @@ classdef Detector
                         arcRadius = topR;
                         
                         top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        top_ang1 = -abs(top_ang1); % confirm negative
+                        
                         top_ang2 = -top_ang1;
                         
                         arcRadius = botR;
                         
                         bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        bot_ang1 = -abs(bot_ang1); % confirm negative
+                        
                         bot_ang2 = -bot_ang1;
                     else
                         z = xyLines_z;
@@ -244,8 +248,10 @@ classdef Detector
                     botLineHandle = circleOrArcPatch(x, y, z, botR, bot_ang1, bot_ang2, backEdgeColour, faceColour, lineStyle, lineWidth);
                     
                     if zIsAngular % rotate about y to get them in position
-                        rotate(topLineHandle, aboutY, xyLines_z);
-                        rotate(botLineHandle, aboutY, xyLines_z);
+                        origin = [0,0,locationInM(3)];
+                        
+                        rotate(topLineHandle, aboutY, xyLines_z, origin);
+                        rotate(botLineHandle, aboutY, xyLines_z, origin);
                     end
                 else
                     topX = xyLines_top_x;
@@ -323,11 +329,15 @@ classdef Detector
                         arcRadius = topR;
                         
                         top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        top_ang1 = -abs(top_ang1); % confirm negative
+                        
                         top_ang2 = -top_ang1;
                         
                         arcRadius = botR;
                         
                         bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        bot_ang1 = -abs(bot_ang1); % confirm negative
+                        
                         bot_ang2 = -bot_ang1;
                     else
                         y = xyLines_y;
@@ -564,39 +574,42 @@ classdef Detector
                 counterClockwiseAngle = theta - counterClockwiseShift;
                     
                 if zIsAngular
-                    posZPsi = psi + positiveZShift;
-                    posZPsi = posZPsi * Constants.deg_to_rad;
+                    clockwisePosZAngle = findAngleForPerpendicularArc(clockwiseShift, positiveZShift, radius);
+                    clockwisePosZAngle = clockwisePosZAngle * Constants.deg_to_rad;
                     
-                    negZPsi = psi + negativeZShift;
-                    negZPsi = negZPsi * Constants.deg_to_rad;
-                    
-                    clockwiseTheta = theta - clockwiseShift; %negative because clockwise positive in Gyrfalcon
-                    clockwiseTheta = clockwiseTheta * Constants.deg_to_rad;
-                    
-                    counterClockwiseTheta = theta - counterClockwiseShift;
-                    counterClockwiseTheta = counterClockwiseTheta * Constants.deg_to_rad;
-                    
-                    [x,y,z] = sph2cart(clockwiseTheta, posZPsi, radius);
+                    [x,y,z] = sph2cart(clockwiseAngle * Constants.deg_to_rad, clockwisePosZAngle, radius);
                     
                     z = z + detectorPosition(3); %need to add the z back in
                     
                     clockwisePosZ(1:3) = [x,y,z];
                     
-                    [x,y,z] = sph2cart(clockwiseTheta, negZPsi, radius);
                     
-                    z = z + detectorPosition(3);
+                    clockwiseNegZAngle = findAngleForPerpendicularArc(clockwiseShift, negativeZShift, radius);
+                    clockwiseNegZAngle = clockwiseNegZAngle * Constants.deg_to_rad;
+                    
+                    [x,y,z] = sph2cart(clockwiseAngle * Constants.deg_to_rad, clockwiseNegZAngle, radius);
+                    
+                    z = z + detectorPosition(3); %need to add the z back in
                     
                     clockwiseNegZ(1:3) = [x,y,z];
                     
-                    [x,y,z] = sph2cart(counterClockwiseTheta, posZPsi, radius);
                     
-                    z = z + detectorPosition(3);
+                    counterClockwisePosZAngle = findAngleForPerpendicularArc(counterClockwiseShift, positiveZShift, radius);
+                    counterClockwisePosZAngle = counterClockwisePosZAngle * Constants.deg_to_rad;
+                    
+                    [x,y,z] = sph2cart(counterClockwiseAngle * Constants.deg_to_rad, counterClockwisePosZAngle, radius);
+                    
+                    z = z + detectorPosition(3); %need to add the z back in
                     
                     counterClockwisePosZ(1:3) = [x,y,z];
                     
-                    [x,y,z] = sph2cart(counterClockwiseTheta, negZPsi, radius);
                     
-                    z = z + detectorPosition(3);
+                    counterClockwiseNegZAngle = findAngleForPerpendicularArc(counterClockwiseShift, negativeZShift, radius);
+                    counterClockwiseNegZAngle = counterClockwiseNegZAngle * Constants.deg_to_rad;
+                    
+                    [x,y,z] = sph2cart(counterClockwiseAngle * Constants.deg_to_rad, counterClockwiseNegZAngle, radius);
+                    
+                    z = z + detectorPosition(3); %need to add the z back in
                     
                     counterClockwiseNegZ(1:3) = [x,y,z];
                 else
@@ -738,7 +751,7 @@ height = y * tand(psi);
 % figured out
 % Angle MUST be negative!
 
-angle = -abs(asind(height / radius));
+angle = asind(height / radius);
 
 end
 

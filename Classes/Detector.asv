@@ -503,7 +503,7 @@ classdef Detector
             % clockwise coordinates first, and then the more counter-clockwise
             % coordinates
             
-            [theta, psi, radius] = cart2sph(detectorPosition(1), detectorPosition(2), detectorPosition(3));
+            [theta, psi, radius] = cart2sph(detectorPosition(1), detectorPosition(2), 0); % set z to zero, and then shift it down later
             theta = theta * Constants.rad_to_deg;
             psi = psi * Constants.rad_to_deg;
             
@@ -564,47 +564,44 @@ classdef Detector
                 counterClockwiseAngle = theta - counterClockwiseShift;
                     
                 if zIsAngular
-                    posZPsi = psi + positiveZShift;
-                    negZPsi = psi + negativeZShift;
+                    clockwisePosZAngle = findAngleForPerpendicularArc(clockwiseShift, positiveZShift, radius);
+                    clockwisePosZAngle = clockwisePosZAngle * Constants.deg_to_rad;
                     
-                    clockwiseTheta = theta - clockwiseShi
+                    [x,y,z] = sph2cart(clockwiseAngle * Constants.deg_to_rad, clockwisePosZAngle, radius);
                     
-%                     posZRadius = radius * cosd(positiveZShift);
-%                     negZRadius = radius * cosd(negativeZShift);
-%                     
-%                     [x,y] = pol2cart(clockwiseAngle, posZRadius);
-%                     
-%                     clockwiseShiftXPosZ = x;
-%                     clockwiseShiftYPosZ = y;
-%                     
-%                     [x,y] = pol2cart(clockwiseAngle, negZRadius);
-%                     
-%                     clockwiseShiftXNegZ = x;
-%                     clockwiseShiftYNegZ = y;
-%                     
-%                     [x,y] = pol2cart(counterClockwiseAngle, posZRadius);
-%                     
-%                     counterClockwiseShiftXPosZ = x;
-%                     counterClockwiseShiftYPosZ = y;
-%                     
-%                     [x,y] = pol2cart(counterClockwiseAngle, negZRadius);
-%                     
-%                     counterClockwiseShiftXNegZ = x;
-%                     counterClockwiseShiftYNegZ = y;
-
+                    z = z + detectorPosition(3); %need to add the z back in
                     
-                                                            
-                    clockwisePosZ(1) = clockwiseShiftXPosZ;
-                    clockwiseNegZ(1) = clockwiseShiftXNegZ;
+                    clockwisePosZ(1:3) = [x,y,z];
                     
-                    counterClockwisePosZ(1) = counterClockwiseShiftXPosZ;
-                    counterClockwiseNegZ(1) = counterClockwiseShiftXNegZ;
                     
-                    clockwisePosZ(2) = clockwiseShiftYPosZ;
-                    clockwiseNegZ(2) = clockwiseShiftYNegZ;
+                    clockwiseNegZAngle = findAngleForPerpendicularArc(clockwiseShift, negativeZShift, radius);
+                    clockwiseNegZAngle = clockwiseNegZAngle * Constants.deg_to_rad;
                     
-                    counterClockwisePosZ(2) = counterClockwiseShiftYPosZ;
-                    counterClockwiseNegZ(2) = counterClockwiseShiftYNegZ;
+                    [x,y,z] = sph2cart(clockwiseAngle * Constants.deg_to_rad, clockwiseNegZAngle, radius);
+                    
+                    z = z + detectorPosition(3); %need to add the z back in
+                    
+                    clockwiseNegZ(1:3) = [x,y,z];
+                    
+                    
+                    counterClockwisePosZAngle = findAngleForPerpendicularArc(counterClockwiseShift, positiveZShift, radius);
+                    counterClockwisePosZAngle = counterClockwisePosZAngle * Constants.deg_to_rad;
+                    
+                    [x,y,z] = sph2cart(counterClockwiseAngle * Constants.deg_to_rad, counterClockwisePosZAngle, radius);
+                    
+                    z = z + detectorPosition(3); %need to add the z back in
+                    
+                    counterClockwisePosZ(1:3) = [x,y,z];
+                    
+                    
+                    counterClockwiseNegZAngle = findAngleForPerpendicularArc(counterClockwiseShift, negativeZShift, radius);
+                    counterClockwiseNegZAngle = counterClockwiseNegZAngle * Constants.deg_to_rad;
+                    
+                    [x,y,z] = sph2cart(counterClockwiseAngle, counterClockwiseNegZAngle, radius);
+                    
+                    z = z + detectorPosition(3); %need to add the z back in
+                    
+                    counterClockwiseNegZ(1:3) = [x,y,z];
                 else
                     [x,y] = pol2cart(clockwiseAngle*Constants.deg_to_rad, radius);
                     
