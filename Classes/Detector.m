@@ -32,14 +32,16 @@ classdef Detector
         
         wholeDetectorDimensions
         singleDetectorDimensions
-        movesWithSource
+        
+        movesWithScanAngle
+        movesWithPerAngleTranslation
         
         savePath
         saveFileName
     end
     
     methods
-        function detector = Detector(location, wholeDetectorDimensions, singleDetectorDimensions, detectorMovesWithSource)
+        function detector = Detector(location, wholeDetectorDimensions, singleDetectorDimensions, detectorMovesWithScanAngle, detectorMovesWithPerAngleTranslation)
             if nargin > 0
                 % validate detector parameters and fill in blanks if needed
                 
@@ -83,7 +85,8 @@ classdef Detector
                 detector.location = location;
                 detector.wholeDetectorDimensions = wholeDetectorDimensions;
                 detector.singleDetectorDimensions = singleDetectorDimensions;
-                detector.movesWithSource = detectorMovesWithSource;
+                detector.movesWithScanAngle = detectorMovesWithScanAngle;
+                detector.movesWithPerAngleTranslation = detectorMovesWithPerAngleTranslation;
             end
         end
         
@@ -465,7 +468,8 @@ classdef Detector
             setSelectionForPopupMenu(handles.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units', xyUnits);
             setSelectionForPopupMenu(handles.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units', zUnits);
             
-            set(handles.detectorMovesWithSourceCheckbox, 'Value', detector.movesWithSource);
+            set(handles.detectorMovesWithScanAngleCheckbox, 'Value', detector.movesWithScanAngle);
+            set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', detector.movesWithPerAngleTranslation);
             
             if isempty(detector.saveFileName)
                 setString(handles.detectorFileNameText, 'Not Saved');
@@ -501,7 +505,8 @@ classdef Detector
             
             detector.singleDetectorDimensions = [xyDimension, zDimension];
             
-            detector.movesWithSource = get(handles.detectorMovesWithSourceCheckbox, 'Value');
+            detector.movesWithScanAngle = get(handles.detectorMovesWithScanAngleCheckbox, 'Value');
+            detector.movesWithPerAngleTranslation = get(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value');
             
             detector.savePath = handles.detectorSavePath;
             detector.saveFileName = handles.detectorSaveFileName;

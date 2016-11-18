@@ -32,14 +32,16 @@ classdef Detector
         
         wholeDetectorDimensions
         singleDetectorDimensions
-        movesWithSource
+        
+        movesWithScanAngle
+        movesWithPerAngleTranslation
         
         savePath
         saveFileName
     end
     
     methods
-        function detector = Detector(location, wholeDetectorDimensions, singleDetectorDimensions, detectorMovesWithSource)
+        function detector = Detector(location, wholeDetectorDimensions, singleDetectorDimensions, detectorMovesWithScanAngle, detectorMovesWithPerAngleTranslation)
             if nargin > 0
                 % validate detector parameters and fill in blanks if needed
                 
@@ -83,7 +85,8 @@ classdef Detector
                 detector.location = location;
                 detector.wholeDetectorDimensions = wholeDetectorDimensions;
                 detector.singleDetectorDimensions = singleDetectorDimensions;
-                detector.movesWithSource = detectorMovesWithSource;
+                detector.movesWithScanAngle = detectorMovesWithScanAngle;
+                detector.movesWithPerAngleTranslation = detectorMovesWithPerAngleTranslation;
             end
         end
         
@@ -224,11 +227,15 @@ classdef Detector
                         arcRadius = topR;
                         
                         top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        top_ang1 = -abs(top_ang1); % confirm negative
+                        
                         top_ang2 = -top_ang1;
                         
                         arcRadius = botR;
                         
                         bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        bot_ang1 = -abs(bot_ang1); % confirm negative
+                        
                         bot_ang2 = -bot_ang1;
                     else
                         z = xyLines_z;
@@ -244,8 +251,10 @@ classdef Detector
                     botLineHandle = circleOrArcPatch(x, y, z, botR, bot_ang1, bot_ang2, backEdgeColour, faceColour, lineStyle, lineWidth);
                     
                     if zIsAngular % rotate about y to get them in position
-                        rotate(topLineHandle, aboutY, xyLines_z);
-                        rotate(botLineHandle, aboutY, xyLines_z);
+                        origin = [0,0,locationInM(3)];
+                        
+                        rotate(topLineHandle, aboutY, xyLines_z, origin);
+                        rotate(botLineHandle, aboutY, xyLines_z, origin);
                     end
                 else
                     topX = xyLines_top_x;
@@ -323,11 +332,15 @@ classdef Detector
                         arcRadius = topR;
                         
                         top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        top_ang1 = -abs(top_ang1); % confirm negative
+                        
                         top_ang2 = -top_ang1;
                         
                         arcRadius = botR;
                         
                         bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+                        bot_ang1 = -abs(bot_ang1); % confirm negative
+                        
                         bot_ang2 = -bot_ang1;
                     else
                         y = xyLines_y;
@@ -455,7 +468,8 @@ classdef Detector
             setSelectionForPopupMenu(handles.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units', xyUnits);
             setSelectionForPopupMenu(handles.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units', zUnits);
             
-            set(handles.detectorMovesWithSourceCheckbox, 'Value', detector.movesWithSource);
+            set(handles.detectorMovesWithScanAngleCheckbox, 'Value', detector.movesWithScanAngle);
+            set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', detector.movesWithPerAngleTranslation);
             
             if isempty(detector.saveFileName)
                 setString(handles.detectorFileNameText, 'Not Saved');
@@ -491,7 +505,7 @@ classdef Detector
             
             detector.singleDetectorDimensions = [xyDimension, zDimension];
             
-            detector.movesWithSource = get(handles.detectorMovesWithSourceCheckbox, 'Value');
+            detector.movesWithScanAngle = get(handles.detectorMovesWithSCheckbox, 'Value');
             
             detector.savePath = handles.detectorSavePath;
             detector.saveFileName = handles.detectorSaveFileName;
@@ -597,7 +611,7 @@ classdef Detector
                     counterClockwiseNegZAngle = findAngleForPerpendicularArc(counterClockwiseShift, negativeZShift, radius);
                     counterClockwiseNegZAngle = counterClockwiseNegZAngle * Constants.deg_to_rad;
                     
-                    [x,y,z] = sph2cart(counterClockwiseAngle, counterClockwiseNegZAngle, radius);
+                    [x,y,z] = sph2cart(counterClockwiseAngle * Constants.deg_to_rad, counterClockwiseNegZAngle, radius);
                     
                     z = z + detectorPosition(3); %need to add the z back in
                     
@@ -741,7 +755,7 @@ height = y * tand(psi);
 % figured out
 % Angle MUST be negative!
 
-angle = -abs(asind(height / radius));
+angle = asind(height / radius);
 
 end
 

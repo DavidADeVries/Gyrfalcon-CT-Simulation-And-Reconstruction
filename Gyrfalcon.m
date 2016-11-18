@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 11-Nov-2016 10:24:00
+% Last Modified by GUIDE v2.5 18-Nov-2016 15:55:35
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -283,13 +283,13 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in detectorMovesWithSourceCheckbox.
-function detectorMovesWithSourceCheckbox_Callback(hObject, eventdata, handles)
-% hObject    handle to detectorMovesWithSourceCheckbox (see GCBO)
+% --- Executes on button press in detectorMovesWithScanAngleCheckbox.
+function detectorMovesWithScanAngleCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorMovesWithScanAngleCheckbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of detectorMovesWithSourceCheckbox
+% Hint: get(hObject,'Value') returns toggle state of detectorMovesWithScanAngleCheckbox
 
 
 
@@ -1071,3 +1071,11 @@ end
 
 set(hObject, 'Checked', val);
 
+
+% --- Executes on button press in detectorMovesWithPerAngleTranslationCheckbox.
+function detectorMovesWithPerAngleTranslationCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorMovesWithPerAngleTranslationCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of detectorMovesWithPerAngleTranslationCheckbox
