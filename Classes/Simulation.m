@@ -81,13 +81,86 @@ classdef Simulation
             
             axes(axesHandle);
             
-            redrawAxes(handles);
+            redrawAxes(axesHandle);
             
             simulation.phantom.plot(axesHandle);
-            simulation.detector.plot(axesHandle);
+            
+            slicePosition = [];
+            angle = [];
+            
+            simulation.detector.plot(axesHandle, slicePosition, angle, 0, 0);
             simulation.source.plot(axesHandle);
             simulation.scan.plot(simulation.source, axesHandle);
                        
+        end
+        
+        function plotHandles = plotSlice(simulation, axesHandle, slicePosition)
+            axes(axesHandle);
+            hold on
+            
+            locationInM = simulation.source.getLocationInM();
+            
+            x = 0;
+            y = 0; % at origin
+            r = norm([locationInM(1), locationInM(2)]); % found above
+            ang1 = 0;
+            ang2 = 360; % to make circle
+            
+            edgeColour = Constants.Slice_Colour;
+            faceColour = 'none';
+            lineStyle = '--';
+            lineWidth = [];
+            
+            handle = circleOrArcPatch(x, y, slicePosition, r, ang1, ang2, edgeColour, faceColour, lineStyle, lineWidth);
+            
+            plotHandles = {handle};
+        end
+        
+        function plotHandles = plotAngle(simulation, axesHandle, slicePosition, angle)
+            if ~simulation.detector.movesWithPerAngleTranslation
+                detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle, 0, 0);
+            else
+                detectorHandles = {};
+            end
+            
+            scanHandles = simulation.scan.plotPerAngle(simulation.source, axesHandle, slicePosition, angle);
+            
+            plotHandles = [detectorHandles, scanHandles];
+        end
+        
+        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ)
+            if simulation.detector.movesWithPerAngleTranslation
+                detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle, perAngleXY, perAngleZ);
+            else
+                detectorHandles = {};
+            end
+            
+            sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
+            
+            plotHandles = [detectorHandles, sourceHandles];
+        end
+        
+        function plotHandles = plotDetectorRaster(simulation, axesHandle, detectorCornerCoords)
+            axes(axesHandle);
+            hold on
+            
+            temp = detectorCornerCoords(3,:);
+            
+            detectorCornerCoords(3,:) = detectorCornerCoords(4,:);
+            detectorCornerCoords(4,:) = temp;
+            
+            x = detectorCornerCoords(:,1);
+            y = detectorCornerCoords(:,2);
+            z = detectorCornerCoords(:,3);
+            
+            plotHandles = patch(...
+                'XData',x,'YData',y,'ZData',z,...
+                'FaceColor',Constants.Detector_Raster_Colour,...
+                'FaceAlpha',Constants.Detector_Raster_Alpha,...
+                'EdgeColor','none',...
+                'LineStyle','none');
+            
+            plotHandles = {plotHandles};
         end
         
         function handles = setGUIFromSimulation(simulation, handles)
@@ -155,39 +228,63 @@ classdef Simulation
             simulation.saveFileName = handles.simulationSaveFileName;
         end
         
-        function data = runScanSimulation(simulation)
+        function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster)
             slices = simulation.scan.getSlicesInM();
             
             numSlices = length(slices);
             
             data = cell(numSlices, 1);
             
+            % we're going to be displaying the scan, so get the axis ready
+            if displaySlices || displayAngles || displayPerAnglePosition || displayDetectorRaster
+                                
+                axes(axesHandle);
+                
+                [az,el] = view;
+                
+                redrawAxes(axesHandle);
+                
+                view(az,el);
+                
+                simulation.phantom.plot(axesHandle);
+            end
+            
             for i=1:numSlices
                 slicePosition = slices(i);
                 
-                sliceData = simulation.runScanSimulationForSlice(slicePosition);
+                sliceData = simulation.runScanSimulationForSlice(axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster);
                 
                 data{i} = sliceData;
             end            
         end
         
-        function sliceData = runScanSimulationForSlice(simulation, slicePosition)
+        function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster)
             angles = simulation.scan.getScanAnglesInDegrees();
             
             numAngles = length(angles);
             
             sliceData = cell(numAngles, 1);
             
+            if displaySlices
+                plotHandles = simulation.plotSlice(axesHandle, slicePosition);
+                
+                pause(0.000001);
+            end
+            
             for i=1:numAngles
-                angle = angles(i);
+                angle = angles(i);                
                 
-                angleData = simulation.runScanSimulationForAngle(slicePosition, angle);
-                
+                angleData = simulation.runScanSimulationForAngle(axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster);
+                                
                 sliceData{i} = angleData;
+            end
+            
+            if displaySlices
+                deleteHandles(plotHandles);
             end
         end
         
-        function angleData = runScanSimulationForAngle(simulation, slicePosition, angle)
+        function angleData = runScanSimulationForAngle(simulation, axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster)
             perAngleTranslationDimensions = simulation.scan.perAngleTranslationDimensions;
             
             xyNumSteps = perAngleTranslationDimensions(1);
@@ -195,19 +292,29 @@ classdef Simulation
             
             angleData = cell(zNumSteps, xyNumSteps);
             
+            if displayAngles
+                plotHandles = simulation.plotAngle(axesHandle, slicePosition, angle);
+                
+                pause(0.000001);
+            end
+            
             for zStep=1:zNumSteps
                 for xyStep=1:xyNumSteps
                     [perAngleXYInM, perAngleZInM] = simulation.scan.getPerAnglePositionInM(xyStep, zStep);
                     
-                    positionData = simulation.runScanSimulationForPerAnglePosition(slicePosition, angle, perAngleXYInM, perAngleZInM);
+                    positionData = simulation.runScanSimulationForPerAnglePosition(axesHandle, slicePosition, angle, perAngleXYInM, perAngleZInM, displayPerAnglePosition, displayDetectorRaster);
                     
                     angleData{zStep, xyStep} = positionData;
                 end
             end
+            
+            if displayAngles
+                deleteHandles(plotHandles);
+            end
         end
         
-        function positionData = runScanSimulationForPerAnglePosition(slicePosition, angle, perAngleXY, perAngleZ)
-            [sourcePosition, directionUnitVector] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
+        function positionData = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster)
+            [sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
             
             detectorPosition = simulation.detector.getDetectorPosition(slicePosition, angle);
             
@@ -215,6 +322,16 @@ classdef Simulation
             zNumDetectors = simulation.detector.wholeDetectorDimensions(2);
             
             positionData = zeros(zNumDetectors, xyNumDetectors);
+                        
+            if displayPerAnglePosition
+                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ);
+                
+                pause(0.000001);
+            end
+            
+            if displayDetectorRaster
+                rasterPlotHandles = {};
+            end
             
             for zDetector=1:zNumDetectors
                 for xyDetector=1:xyNumDetectors
@@ -222,12 +339,55 @@ classdef Simulation
                      clockwiseNegZ,...
                      counterClockwisePosZ,...
                      counterClockwiseNegZ]...
-                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector);
+                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector, perAngleShiftUsed);
                     
+                    detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
+                    
+                    if displayDetectorRaster
+                        handles = simulation.plotDetectorRaster(axesHandle, detectorCornerCoords);
+                        
+                        rasterPlotHandles = [rasterPlotHandles, handles];
+                        
+                        pause(0.000001);
+                    end
+                    
+                    detectorData = simulation.runScanSimulationForDetector(sourcePosition, sourceDirectionUnitVector, detectorCornerCoords);
+                                                         
                     positionData(zDetector, xyDetector) = detectorData;
                 end
             end
-                
+            
+            if displayPerAnglePosition
+                deleteHandles(plotHandles);
+            end
+            
+            if displayDetectorRaster
+                deleteHandles(rasterPlotHandles);
+            end
+        end
+        
+        function detectorData = runScanSimulationForDetector(simulation, sourcePosition, sourceDirectionUnitVector, detectorCornerCoords)
+            scatteringNoiseLevel = simulation.scatteringNoiseLevel;
+            detectorNoiseLevel = simulation.detectorNoiseLevel;
+            partialPixel = simulation.partialPixelModelling;
+            
+            beamCharacterization = simulation.scan.beamCharacterization;
+            
+            phantomData = simulation.phantom.data;
+            voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
+            phantomLocationInM = simulation.phantom.getLocationInM();
+            
+            detectorData = runBeamTrace(...
+                sourcePosition,...
+                sourceDirectionUnitVector,...
+                detectorCornerCoords,...
+                phantomData,...
+                voxelDimsInM,...
+                phantomLocationInM,...
+                beamCharacterization,...
+                scatteringNoiseLevel,...
+                detectorNoiseLevel,...
+                partialPixel);
         end
         
     end

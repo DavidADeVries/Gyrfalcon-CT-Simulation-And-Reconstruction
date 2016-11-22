@@ -7,7 +7,17 @@ simulation = Simulation;
 
 simulation = simulation.createFromGUI(handles);
 
-data = simulation.runScanSimulation();
+displaySlices = strcmp(get(handles.scanSimViewSlices, 'Checked'), 'on');
+displayAngles = strcmp(get(handles.scanSimViewAngles, 'Checked'), 'on');
+displayPerAnglePosition = strcmp(get(handles.scanSimViewPerAnglePosition, 'Checked'), 'on');
+displayDetectorRaster = strcmp(get(handles.scanSimViewDetectorRaster, 'Checked'), 'on');
+
+data = simulation.runScanSimulation(...
+    handles.axesHandle,...
+    displaySlices,...
+    displayAngles,...
+    displayPerAnglePosition,...
+    displayDetectorRaster);
 
 
 end

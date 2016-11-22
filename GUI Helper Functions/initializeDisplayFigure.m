@@ -9,7 +9,7 @@ axesHandle = axes();
 handles.displayFigureHandle = figureHandle;
 handles.axesHandle = axesHandle;
 
-redrawAxes(handles);
+redrawAxes(axesHandle);
 
 end
 

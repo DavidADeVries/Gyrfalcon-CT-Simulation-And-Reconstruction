@@ -83,6 +83,20 @@ classdef Phantom
             end
         end
         
+        function voxelDimsInM = getVoxelDimensionsInM(phant)
+            units = phant.voxelDimensionUnits;
+            voxelDims = phant.voxelDimensions;
+            
+            voxelDimsInM = units.convertToM(voxelDims);
+        end
+        
+        function locationInM = getLocationInM(phant)
+            units = phant.locationUnits;
+            location = phant.location;
+            
+            locationInM = units.convertToM(location);
+        end
+        
         function [] = plot(phantom, axesHandle)
             data = phantom.data;
             

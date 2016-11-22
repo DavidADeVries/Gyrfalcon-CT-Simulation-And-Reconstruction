@@ -10,6 +10,7 @@ classdef Constants
         
         Detector_Colour = 'r';
         Detector_Back_Colour = [1 0 0] .* 0.75;
+        detector_line_height = 0.05; % in M
         
         Source_Colour = 'g';
         Slice_Colour = 'b';
@@ -17,6 +18,8 @@ classdef Constants
         Per_Angle_Translation_Tick_Length = 1/100; %in m
         Point_Source_Radius = 1/100; %in m's, 10mm
         Phantom_Alpha = 0.5;
+        Detector_Raster_Colour = [1,0.6,0.6];
+        Detector_Raster_Alpha = 0.5;
         
         No_File_Name_String = 'No File Selected';
         

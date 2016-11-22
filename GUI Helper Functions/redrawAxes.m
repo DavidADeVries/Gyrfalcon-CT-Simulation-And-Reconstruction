@@ -1,8 +1,6 @@
-function [] = redrawAxes(handles)
-% [] = redrawAxes(handles)
+function [] = redrawAxes(axesHandles)
+% [] = redrawAxes(axesHandles)
 % clears the axes and redraws the axes
-
-axesHandles = handles.axesHandle;
 
 axes(axesHandles); % set as current axes
 
