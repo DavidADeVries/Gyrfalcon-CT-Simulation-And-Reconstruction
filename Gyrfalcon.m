@@ -291,6 +291,13 @@ function detectorMovesWithScanAngleCheckbox_Callback(hObject, eventdata, handles
 
 % Hint: get(hObject,'Value') returns toggle state of detectorMovesWithScanAngleCheckbox
 
+val = get(hObject, 'Value');
+
+if ~val %% if it's false, we need to make sure move with per angle steps is checked off
+    set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', val);
+    
+    guidata(hObject, handles);
+end
 
 
 function phantomStartingLocationXEdit_Callback(hObject, eventdata, handles)
@@ -1079,3 +1086,11 @@ function detectorMovesWithPerAngleTranslationCheckbox_Callback(hObject, eventdat
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of detectorMovesWithPerAngleTranslationCheckbox
+
+val = get(hObject, 'Value');
+
+if val %% if it's true, we need to make sure move with scan angle is checked on
+    set(handles.detectorMovesWithScanAngleCheckbox, 'Value', val);
+    
+    guidata(hObject, handles);
+end

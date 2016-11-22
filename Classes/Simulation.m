@@ -88,7 +88,7 @@ classdef Simulation
             slicePosition = [];
             angle = [];
             
-            simulation.detector.plot(axesHandle, slicePosition, angle);
+            simulation.detector.plot(axesHandle, slicePosition, angle, 0, 0);
             simulation.source.plot(axesHandle);
             simulation.scan.plot(simulation.source, axesHandle);
                        
@@ -117,16 +117,27 @@ classdef Simulation
         end
         
         function plotHandles = plotAngle(simulation, axesHandle, slicePosition, angle)
-            detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle);
+            if ~simulation.detector.movesWithPerAngleTranslation
+                detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle, 0, 0);
+            else
+                detectorHandles = {};
+            end
+            
             scanHandles = simulation.scan.plotPerAngle(simulation.source, axesHandle, slicePosition, angle);
             
             plotHandles = [detectorHandles, scanHandles];
         end
         
-        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed)
+        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ)
+            if simulation.detector.movesWithPerAngleTranslation
+                detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle, perAngleXY, perAngleZ);
+            else
+                detectorHandles = {};
+            end
+            
             sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
             
-            plotHandles = sourceHandles;
+            plotHandles = [detectorHandles, sourceHandles];
         end
         
         function plotHandles = plotDetectorRaster(simulation, axesHandle, detectorCornerCoords)
@@ -313,7 +324,7 @@ classdef Simulation
             positionData = zeros(zNumDetectors, xyNumDetectors);
                         
             if displayPerAnglePosition
-                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
+                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ);
                 
                 pause(0.000001);
             end
@@ -328,7 +339,7 @@ classdef Simulation
                      clockwiseNegZ,...
                      counterClockwisePosZ,...
                      counterClockwiseNegZ]...
-                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector);
+                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector, perAngleShiftUsed);
                     
                     detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
                     

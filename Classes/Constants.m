@@ -10,6 +10,7 @@ classdef Constants
         
         Detector_Colour = 'r';
         Detector_Back_Colour = [1 0 0] .* 0.75;
+        detector_line_height = 0.05; % in M
         
         Source_Colour = 'g';
         Slice_Colour = 'b';

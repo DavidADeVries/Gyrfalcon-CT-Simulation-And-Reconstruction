@@ -74,7 +74,8 @@ setString(handles.detectorSingleDetectorDimensionsZEdit, '0'); % assume 2D
 setPopupMenu(handles.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units', Units.mm);
 setPopupMenu(handles.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units', Units.mm);
 
-set(handles.detectorMovesWithSourceCheckbox, 'Value', 1);
+set(handles.detectorMovesWithScanAngleCheckbox, 'Value', 1);
+set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', 0);
 
 % SOURCE
 setString(handles.sourceFileNameText, Constants.No_File_Name_String);

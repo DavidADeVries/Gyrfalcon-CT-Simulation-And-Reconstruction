@@ -102,7 +102,7 @@ classdef Detector
             
             z = slicePosition;
             
-            if detector.movesWithSource
+            if detector.movesWithScanAngle
                 [theta, radius] = cart2pol(location(1), location(2));
                 theta = theta * Constants.rad_to_deg;
                 
@@ -117,9 +117,11 @@ classdef Detector
             position = [x,y,z];
         end
         
-        function plotHandles = plot(detector, axesHandle, slicePosition, angle)
+        function plotHandles = plot(detector, axesHandle, slicePosition, angle, perAngleXY, perAngleZ)
             axes(axesHandle);
             hold on;
+            
+            perAngleXY = - perAngleXY; %need to do opposite of what source did
             
             plotHandles = {};
             
@@ -127,6 +129,10 @@ classdef Detector
             
             if ~isempty(slicePosition) % set z to slicePosition
                 locationInM(3) = slicePosition;
+            end
+            
+            if detector.movesWithPerAngleTranslation
+                locationInM(3) = locationInM(3) + perAngleZ;
             end
             
             if ~isempty(angle) % set x,y dependent on angle
@@ -147,7 +153,7 @@ classdef Detector
             singleDimensions = detector.singleDetectorDimensions;
             wholeDimensions = detector.wholeDetectorDimensions;
             
-            detectorLineHeight = getDetectorLineHeight(detector);
+            detectorLineHeight = Constants.detector_line_height;
             
             % graphic properities
             edgeColour = Constants.Detector_Colour;
@@ -237,6 +243,19 @@ classdef Detector
                         bot_ang1 = -abs(bot_ang1); % confirm negative
                         
                         bot_ang2 = -bot_ang1;
+                        
+                        if detector.movesWithPerAngleTranslation
+                            y = y + perAngleXY;
+                        end
+                                 
+                        topLineHandle = circleOrArcPatch(x, y, z, topR, top_ang1, top_ang2, edgeColour, faceColour, lineStyle, lineWidth);
+                        botLineHandle = circleOrArcPatch(x, y, z, botR, bot_ang1, bot_ang2, backEdgeColour, faceColour, lineStyle, lineWidth);
+                        
+                        % rotate about y to get them in position
+                        origin = [0, 0, locationInM(3)];
+                        
+                        rotate(topLineHandle, aboutY, xyLines_z, origin);
+                        rotate(botLineHandle, aboutY, xyLines_z, origin);
                     else
                         z = xyLines_z;
                         
@@ -245,17 +264,15 @@ classdef Detector
                         
                         bot_ang1 = (-xyAngle/2);
                         bot_ang2 = (xyAngle/2);
-                    end
-                    
-                    topLineHandle = circleOrArcPatch(x, y, z, topR, top_ang1, top_ang2, edgeColour, faceColour, lineStyle, lineWidth);
-                    botLineHandle = circleOrArcPatch(x, y, z, botR, bot_ang1, bot_ang2, backEdgeColour, faceColour, lineStyle, lineWidth);
-                    
-                    if zIsAngular % rotate about y to get them in position
-                        origin = [0,0,locationInM(3)];
                         
-                        rotate(topLineHandle, aboutY, xyLines_z, origin);
-                        rotate(botLineHandle, aboutY, xyLines_z, origin);
+                        if detector.movesWithPerAngleTranslation
+                            y = y + perAngleXY;
+                        end
+                        
+                        topLineHandle = circleOrArcPatch(x, y, z, topR, top_ang1, top_ang2, edgeColour, faceColour, lineStyle, lineWidth);
+                        botLineHandle = circleOrArcPatch(x, y, z, botR, bot_ang1, bot_ang2, backEdgeColour, faceColour, lineStyle, lineWidth);
                     end
+                    
                 else
                     topX = xyLines_top_x;
                     botX = xyLines_bot_x;
@@ -268,6 +285,10 @@ classdef Detector
                         z = [xyLines_z, xyLines_z];
                     end
                     
+                    if detector.movesWithPerAngleTranslation
+                        y = y + perAngleXY;
+                    end
+                    
                     topLineHandle = line(topX, y, z, 'Parent', axesHandle, 'Color', edgeColour);
                     botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
                     
@@ -278,7 +299,7 @@ classdef Detector
                         rotate(botLineHandle, aboutY, xyLines_z, origin);
                     end
                 end
-                
+                                
                 % rotate so that middle is at start point
                 rotate(topLineHandle, aboutZ, rotAngle);
                 rotate(botLineHandle, aboutZ, rotAngle);
@@ -352,6 +373,12 @@ classdef Detector
                         bot_ang2 = (zAngle/2);
                     end
                     
+                    if detector.movesWithPerAngleTranslation
+                        y = y + perAngleXY;
+                        aboutZOrigin = [0,y,0];
+                    else
+                        aboutZOrigin = [0,0,0];
+                    end
                     
                     topLineHandle = circleOrArcPatch(x, y, z, topR, top_ang1, top_ang2, edgeColour, faceColour, lineStyle, lineWidth);
                     botLineHandle = circleOrArcPatch(x, y, z, botR, bot_ang1, bot_ang2, backEdgeColour, faceColour, lineStyle, lineWidth);
@@ -363,8 +390,8 @@ classdef Detector
                     rotate(botLineHandle, aboutX, 90, origin);
                     
                     if xyIsAngular % rotate about y to get them in position
-                        rotate(topLineHandle, aboutZ, xyLines_y);
-                        rotate(botLineHandle, aboutZ, xyLines_y);
+                        rotate(topLineHandle, aboutZ, xyLines_y, aboutZOrigin);
+                        rotate(botLineHandle, aboutZ, xyLines_y, aboutZOrigin);
                     end
                     
                     % add to plot handles
@@ -382,12 +409,20 @@ classdef Detector
                     
                     z = xyLines_z;
                     
+                    if detector.movesWithPerAngleTranslation
+                        y = y + perAngleXY;
+                        
+                        origin = [0, y, 0];
+                    else
+                        origin = [0,0,0];
+                    end
+                    
                     topLineHandle = line(topX, y, z, 'Parent', axesHandle, 'Color', edgeColour);
                     botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
                     
-                    if xyIsAngular % rotate about y to get them in position
-                        rotate(topLineHandle, aboutZ, xyLines_y);
-                        rotate(botLineHandle, aboutZ, xyLines_y);
+                    if xyIsAngular % rotate about z to get them in position                                                
+                        rotate(topLineHandle, aboutZ, xyLines_y, origin);
+                        rotate(botLineHandle, aboutZ, xyLines_y, origin);
                     end
                 end
                 
@@ -401,7 +436,7 @@ classdef Detector
             end
             
             
-            if detector.movesWithSource
+            if detector.movesWithScanAngle
                 % draw circle outlining the movement of the
                 % detector
                 
@@ -512,7 +547,7 @@ classdef Detector
             detector.saveFileName = handles.detectorSaveFileName;
         end
         
-        function [clockwisePosZ, clockwiseNegZ, counterClockwisePosZ, counterClockwiseNegZ] = getDetectorCoords(detector, detectorPosition, xyDetector, zDetector)
+        function [clockwisePosZ, clockwiseNegZ, counterClockwisePosZ, counterClockwiseNegZ] = getDetectorCoords(detector, detectorPosition, xyDetector, zDetector, perAngleShiftsUsed)
             % [clockwisePosZ, clockwiseNegZ, counterClockwisePosZ, counterClockwiseNegZ] = getDetectorCoords(detector, detectorPosition, xyDetector, zDetector)
             % this gives the 4 coordinates of the detector in question with the most
             % clockwise coordinates first, and then the more counter-clockwise
@@ -696,7 +731,15 @@ classdef Detector
                 
             end
                                
-            
+            % account for perAngleShifts
+            if detector.movesWithPerAngleTranslation
+                %perAngleShiftsUsed = [-1, -1, 1] .* perAngleShiftsUsed; %need to reverse x and y shifts from source
+                
+                clockwisePosZ = clockwisePosZ + perAngleShiftsUsed;
+                clockwiseNegZ = clockwiseNegZ + perAngleShiftsUsed;
+                counterClockwisePosZ = counterClockwisePosZ + perAngleShiftsUsed;
+                counterClockwiseNegZ = counterClockwiseNegZ + perAngleShiftsUsed;
+            end
         end
 
     end
