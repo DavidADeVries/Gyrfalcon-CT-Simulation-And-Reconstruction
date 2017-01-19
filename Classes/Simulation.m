@@ -128,14 +128,14 @@ classdef Simulation
             plotHandles = [detectorHandles, scanHandles];
         end
         
-        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ)
+        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, startBoxCoords, endBoxCoords)
             if simulation.detector.movesWithPerAngleTranslation
                 detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle, perAngleXY, perAngleZ);
             else
                 detectorHandles = {};
             end
             
-            sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
+            sourceHandles = simulation.source.plotSource(axesHandle, startBoxCoords, endBoxCoords);
             
             plotHandles = [detectorHandles, sourceHandles];
         end
@@ -314,7 +314,16 @@ classdef Simulation
         end
         
         function positionData = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster)
-            [sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
+            [...
+                sourceStartBoxCoords,...
+                sourceEndBoxCoords,...
+                sourceDirectionUnitVector,...
+                perAngleShiftUsed] = ...
+                    simulation.source.getSourcePosition(...
+                slicePosition,...
+                angle,...
+                perAngleXY,...
+                perAngleZ);
             
             detectorPosition = simulation.detector.getDetectorPosition(slicePosition, angle);
             
@@ -324,7 +333,7 @@ classdef Simulation
             positionData = zeros(zNumDetectors, xyNumDetectors);
                         
             if displayPerAnglePosition
-                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ);
+                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, perAngleXY, perAngleZ, sourceStartBoxCoords, sourceEndBoxCoords);
                 
                 pause(0.000001);
             end
@@ -351,7 +360,7 @@ classdef Simulation
                         pause(0.000001);
                     end
                     
-                    detectorData = simulation.runScanSimulationForDetector(sourcePosition, sourceDirectionUnitVector, detectorCornerCoords);
+                    detectorData = simulation.runScanSimulationForDetector(sourceStartBoxCoords, sourceEndBoxCoords, sourceDirectionUnitVector, detectorCornerCoords);
                                                          
                     positionData(zDetector, xyDetector) = detectorData;
                 end
@@ -366,7 +375,13 @@ classdef Simulation
             end
         end
         
-        function detectorData = runScanSimulationForDetector(simulation, sourcePosition, sourceDirectionUnitVector, detectorCornerCoords)
+        function detectorData = runScanSimulationForDetector(...
+                simulation,...
+                sourceStartBoxCoords,...
+                sourceEndBoxCoords,...
+                sourceDirectionUnitVector,...
+                detectorCornerCoords)
+            
             scatteringNoiseLevel = simulation.scatteringNoiseLevel;
             detectorNoiseLevel = simulation.detectorNoiseLevel;
             partialPixel = simulation.partialPixelModelling;
@@ -378,7 +393,8 @@ classdef Simulation
             phantomLocationInM = simulation.phantom.getLocationInM();
             
             detectorData = runBeamTrace(...
-                sourcePosition,...
+                sourceStartBoxCoords,...
+                sourceEndBoxCoords,...
                 sourceDirectionUnitVector,...
                 detectorCornerCoords,...
                 phantomData,...

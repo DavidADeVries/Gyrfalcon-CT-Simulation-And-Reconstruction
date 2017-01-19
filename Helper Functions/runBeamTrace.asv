@@ -1,0 +1,20 @@
+function detectorData = runBeamTrace(sourceStartBoxCoords, sourceEndBoxCoords, sourceDirectionUnitVector, detectorCornerCoords, phantomData, voxelDimsInM,  phantomLocationInM,  beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixel, partialPixelModelingResolution)
+% detectorData = runBeamTrace(sourcePosition, sourceDimensions, sourceDirectionUnitVector, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel,  partialPixel)
+% runs the beam trace for a given detector/source/phantom configuration
+
+if coordsAreFromPointCou
+
+
+
+if partial
+
+
+end
+
+
+% HELPER FUNCTIONS
+
+function bool = areCoordsFromPointSource(coords)
+    bool = coords(1,:) == coords(2,:) && coords(2,:) == coords(3,:) && coords(3,:) == coords(4,:);
+    
+end

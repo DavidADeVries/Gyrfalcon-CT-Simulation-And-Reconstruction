@@ -118,8 +118,10 @@ methods
         endCounterClockwisePosZ = endBoxCoords(3,:);
         endCounterClockwiseNegZ = endBoxCoords(4,:);
 
-        if source.isPointSource()
-            % plot point source
+        if startClockwisePosZ == startClockwiseNegZ && ...
+                startClockwiseNegZ == startCounterClockwisePosZ && ...
+                
+            % plot point
             handle = circleOrArcPatch(...
                 startClockwisePosZ(1), startClockwisePosZ(2), startClockwisePosZ(3),...
                 Constants.Point_Source_Radius, 0, 360,...
@@ -294,12 +296,12 @@ methods
                 xyLength = source.dimensions(1).getLengthInM();
                 zLength = source.dimensions(2).getLengthInM();
 
-                rotationVector = [0,0,sourceAngle];
+                rotationVector = [0,0,theta];
 
-                startBoxClockwisePosZ = rotateCoords([radius,-xyLength/2,unshiftedSourceCoords(3)+zLength/2], rotationVector);
-                startBoxClockwiseNegZ = rotateCoords([radius,-xyLength/2,unshiftedSourceCoords(3)-zLength/2], rotationVector);
-                startBoxCounterClockwisePosZ = rotateCoords([radius,+xyLength/2,unshiftedSourceCoords(3)+zLength/2], rotationVector);
-                startBoxCounterClockwiseNegZ = rotateCoords([radius,+xyLength/2,unshiftedSourceCoords(3)-zLength/2], rotationVector);
+                startBoxClockwisePosZ = rotateCoords([r,-xyLength/2,z+zLength/2], rotationVector);
+                startBoxClockwiseNegZ = rotateCoords([r,-xyLength/2,z-zLength/2], rotationVector);
+                startBoxCounterClockwisePosZ = rotateCoords([r,+xyLength/2,z+zLength/2], rotationVector);
+                startBoxCounterClockwiseNegZ = rotateCoords([r,+xyLength/2,z-zLength/2], rotationVector);
             else                    
                 error('Undefined behaviour');
             end
@@ -311,10 +313,10 @@ methods
         xyAngle = xyBeamAngle / 2;
         zAngle = zBeamAngle / 2;
 
-        diameter = 2 * radius;
+        diameter = 2 * norm([x,y]);
 
         beamShift = [-diameter, 0, 0];
-        rotationVector = [0,0,sourceAngle];
+        rotationVector = [0,0,theta];
 
         beamShift = rotateCoords(beamShift, rotationVector);
 

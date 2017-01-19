@@ -21,6 +21,18 @@ classdef PhotonBeam
             beam.energy = energy;
             beam.intensity = intensity;
         end
+        
+        function finalIntensity = modelAbsorption(photonBeam, absorptionValues, absorptionValueDistances)
+            % STEP 1
+            % sum over absorption values times distance
+            
+            absorptionSum = sum(absorptionValues .* absorptionValueDistances);
+            
+            % STEP 2
+            % apply Lambert-Beer's Law
+            
+            finalIntensity = photonBeam.intensity .* exp(-absorptionSum);
+        end
     end
     
 end

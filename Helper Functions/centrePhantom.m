@@ -14,7 +14,7 @@ dataDims(2) = dataDim1;
 
 numDataDims = length(dataDims);
 
-location = zeros(1, numDataDims);
+location = zeros(1, 3);
 
 for i=1:numDataDims % go through 2 or 3 dimensions
     voxelDim = dimensions(i);
