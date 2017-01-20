@@ -11,7 +11,7 @@ switch detectorDimensions
         % for a point detector, we can't have a "resolution" for our
         % detector, so just run a ray trace from source to detector
         
-        detectorPoint = detectorCornerCoords(1,:);
+        detectorPoint = centreOfQuadrangle(detectorCornerCoords);
         
         rawDetectorValue = runRayTrace(...
             pointSourceCoords,...
@@ -24,9 +24,47 @@ switch detectorDimensions
         
         averDetectorValue = rawDetectorValue; %no averaging required, only a single point
     case 1
+        detectorValueSum = 0;
         
+        for i=1:partialPixelModelingResolution
+            detectorPoint = calcDetectorPoint(detectorCornerCoords, i, partialPixelModelingResolution);
+            
+            rawSubDetectorValue = runRayTrace(...
+                pointSourceCoords,...
+                sourceEndBoxCoords,...
+                detectorPoint,...
+                phantomData,...
+                voxelDimsInM,...
+                phantomLocationInM,...
+                beamCharacterization);
+            
+            detectorValueSum = detectorValueSum + rawSubDetectorValue;
+        end
+        
+        averDetectorValue = detectorValueSum ./ partialPixelModelingResolution;
     case 2
+        detectorValueSum = 0;
         
+        for i=1:partialPixelModelingResolution
+            
+            for j=1:partialPixelModelingResolution
+                
+                detectorPoint = calcDetectorPoint(detectorCornerCoords, [i,j], partialPixelModelingResolution);
+                
+                rawSubDetectorValue = runRayTrace(...
+                    pointSourceCoords,...
+                    sourceEndBoxCoords,...
+                    detectorPoint,...
+                    phantomData,...
+                    voxelDimsInM,...
+                    phantomLocationInM,...
+                    beamCharacterization);
+                
+                detectorValueSum = detectorValueSum + rawSubDetectorValue;
+            end
+        end
+        
+        averDetectorValue = detectorValueSum ./ (partialPixelModelingResolution .^ 2);
     otherwise
         error('Invalid detector dimensions');
 end

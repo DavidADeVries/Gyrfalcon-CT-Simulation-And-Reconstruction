@@ -8,19 +8,7 @@ function rawDetectorValue = runRayTrace(pointSourceCoords, sourceEndBoxCoords, p
 if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     % describe line in 3 space
     [deltas, point] = createLineEquation(pointSourceCoords, pointDetectorCoords);
-    
-    phantX = phantomLocationInM(1);
-    
-    phantDelX = voxelDimsInM(1);
-    phantDelY = voxelDimsInM(2);
-    phantDelZ = voxelDimsInM(3);
-    
-    phantDims = size(phantData);
-    
-    phantNumX = phantDims(2);
-    phantNumY = phantDims(1);
-    phantNumZ = phantDims(3);
-    
+        
     linePhantomIntersectionPoints = findLinePhantomIntersections(...
         deltas,...
         point,...
