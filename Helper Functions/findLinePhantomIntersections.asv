@@ -72,25 +72,13 @@ for i=0:phantNumZ
     end
 end
 
-if ~isempty(linePhantomIntersectionPoints)
-    % pre processing to get rid of "different values", but whose norms are
-    % within a nanometer
+% now sort and eliminate doubles/triples (if intersection occured at
+% lattice point in voxel grid)
+
+[~,sortedIndices,~] = unique(linePhantomIntersectionPointNorms);
+
+intersectionPoints = linePhantomIntersectionPoints(sortedIndices,:);
     
-    roundOff = 10^8; % within 1nm
-    
-    roundingNorms = linePhantomIntersectionPointNorms * roundOff;
-    
-    roundedLinePhantomIntersectionPointNorms = round(roundingNorms) / roundOff;
-    
-    % now sort and eliminate doubles/triples (if intersection occured at
-    % lattice point in voxel grid)
-    
-    [~,sortedIndices,~] = unique(roundedLinePhantomIntersectionPointNorms);
-    
-    intersectionPoints = linePhantomIntersectionPoints(sortedIndices,:);
-else
-    intersectionPoints = [];
-end
 
 end
 

@@ -113,12 +113,46 @@ classdef Phantom
             
             if length(dataDims) == 2 % if 2D
                 dataDims = [dataDims, 1];
+            else
+                % plot grid lines
+                deltaX = voxelDimsInM(1);
+                deltaY = voxelDimsInM(2);
+                deltaZ = voxelDimsInM(3);
+                
+                startX = locationInM(1);
+                startY = locationInM(2);
+                startZ = locationInM(3);
+                
+                endX = locationInM(1) + deltaX * dataDims(2);
+                endY = locationInM(2) - deltaY * dataDims(1);
+                endZ = locationInM(3) - deltaZ * dataDims(3);
+                
+                for x=startX:deltaX:endX
+                    line([x,x],[startY,startY],[startZ,endZ],'Parent',axesHandle,'Color','w');                    
+                    line([x,x],[endY,endY],[startZ,endZ],'Parent',axesHandle,'Color','w');
+                    line([x,x],[startY,endY],[startZ,startZ],'Parent',axesHandle,'Color','w');                    
+                    line([x,x],[startY,endY],[endZ,endZ],'Parent',axesHandle,'Color','w');
+                end
+                
+                for y=startY:-deltaY:endY
+                    line([startX,startX],[y,y],[startZ,endZ],'Parent',axesHandle,'Color','w');
+                    line([endX,endX],[y,y],[startZ,endZ],'Parent',axesHandle,'Color','w');
+                    line([startX,endX],[y,y],[startZ,startZ],'Parent',axesHandle,'Color','w');
+                    line([startX,endX],[y,y],[endZ,endZ],'Parent',axesHandle,'Color','w');
+                end
+                
+                for z=startZ:-deltaZ:endZ
+                    line([startX,startX],[startY,endY],[z,z],'Parent',axesHandle,'Color','w');
+                    line([endX,endX],[startY,endY],[z,z],'Parent',axesHandle,'Color','w');
+                    line([startX,endX],[startY,startY],[z,z],'Parent',axesHandle,'Color','w');                    
+                    line([startX,endX],[endY,endY],[z,z],'Parent',axesHandle,'Color','w');
+                end
             end
             
             [vertices, faces, cData, alphaData] = createVerticesAndFaces(locationInM, voxelDimsInM, dataDims, data);
             
             patch('Faces', faces, 'Vertices', vertices, 'FaceVertexCData', cData, 'FaceVertexAlphaData', alphaData, 'FaceAlpha','flat','FaceColor', 'flat', 'EdgeColor','none');
-                   
+            
         end
         
         function handles = setGUI(phantom, handles)            

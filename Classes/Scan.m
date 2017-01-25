@@ -361,22 +361,12 @@ classdef Scan
             z = getDoubleFromHandle(handles.scanPerAngleStepDimensionsZEdit);
             
             scan.perAngleTranslationResolution = [xy, z];
-            
-            % TODO!
-            beamEnergy = 175; %in kEv
-            beamIntensity = 30; %in w/m^2
-            
-            photonBeam = PhotonBeam(beamEnergy, beamIntensity);
-            
-            handles.scanBeamCharacterization = {photonBeam};
-            
+                                 
             scan.beamCharacterization = handles.scanBeamCharacterization;
-            % TODO!
             
             scan.beamCharacterizationPath = handles.scanBeamCharacterizationPath;
             scan.beamCharacterizationFileName = handles.scanBeamCharacterizationFileName;
-            
-            
+                        
             scan.savePath = handles.scanSavePath;
             scan.saveFileName = handles.scanSaveFileName;
         end

@@ -11,6 +11,8 @@ else
 
     interceptPoint = linePoint + tValue .* lineDeltas;
     
+    interceptPoint(planeDim) = planeVal; % to avoid freakin' rounding issues
+    
     if ~pointWithinBounds(interceptPoint, planeBounds)
         interceptPoint = [];
     end
@@ -25,7 +27,7 @@ function bool = pointWithinBounds(point, bounds)
     bool = true;
     
     for i=1:ndims
-        if point(i) <= bounds(i,1) || point(i) >= bounds(i,1)
+        if point(i) < bounds(i,1) || point(i) > bounds(i,2)
             % out of bounds
             bool = false;
         end

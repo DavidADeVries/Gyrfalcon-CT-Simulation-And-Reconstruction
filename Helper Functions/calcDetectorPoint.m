@@ -49,7 +49,28 @@ if numDims == 1 % 1D
     detectorPoint = centreOfQuadrangle(detectorCoords);
     
 elseif numDims == 2 % 2D
+    xyDelta = clockwiseXY - counterClockwiseXY;
+    zDelta = posZ - negZ;
     
+    deltaForCounterClockwise = xyDelta .* (partialPixelSteps(1)-1) ./ partialPixelResolution;
+    deltaForClockwise = xyDelta .* (partialPixelSteps(1)) ./ partialPixelResolution;
+    
+    detectorClockwiseXY = counterClockwiseXY + deltaForClockwise;
+    detectorCounterClockwiseXY = counterClockwiseXY + deltaForCounterClockwise;
+    
+    deltaForPosZ = zDelta .* (partialPixelSteps(2)) ./ partialPixelResolution;
+    deltaForNegZ = zDelta .* (partialPixelSteps(2)-1) ./ partialPixelResolution;
+    
+    detectorPosZ = negZ + deltaForPosZ;
+    detectorNegZ = negZ + deltaForNegZ;
+        
+    detectorCoords = [...
+        [detectorClockwiseXY, detectorPosZ];...
+        [detectorClockwiseXY, detectorNegZ];...
+        [detectorCounterClockwiseXY, detectorPosZ];...
+        [detectorCounterClockwiseXY, detectorNegZ]];
+    
+    detectorPoint = centreOfQuadrangle(detectorCoords);
 else
     error('Undefined behaviour');
 end

@@ -1,10 +1,10 @@
-function detectorData = runPartialPixelBeamTraceFromPointSource(pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution)
+function detectorData = runPartialPixelBeamTraceFromPointSource(axesHandle,pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution)
 % detectorData = runPartialPixelBeamTraceFromPointSource(pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution)
 % for this beam trace, partial pixel modelling is used. This requires a
 % resolution to be given (how many ray traces to run per detector), and
 % then these will be averaged out to give the detector value
 
-detectorDimensions = dimensionalityOfObject(detectorCornerCoords);
+detectorDimensions = dimensionalityOfQuadrangle(detectorCornerCoords);
 
 switch detectorDimensions
     case 0
@@ -13,7 +13,8 @@ switch detectorDimensions
         
         detectorPoint = centreOfQuadrangle(detectorCornerCoords);
         
-        rawDetectorValue = runRayTrace(...
+        [handles,rawDetectorValue] = runRayTrace(...
+            axesHandle,...
             pointSourceCoords,...
             sourceEndBoxCoords,...
             detectorPoint,...
@@ -22,14 +23,18 @@ switch detectorDimensions
             phantomLocationInM,...
             beamCharacterization);
         
+        pause(0.0001);
+        deleteHandles(handles);
+        
         averDetectorValue = rawDetectorValue; %no averaging required, only a single point
-    case 1
+    case 1 %1D detector
         detectorValueSum = 0;
         
         for i=1:partialPixelModelingResolution
             detectorPoint = calcDetectorPoint(detectorCornerCoords, i, partialPixelModelingResolution);
             
-            rawSubDetectorValue = runRayTrace(...
+            [handles,rawSubDetectorValue] = runRayTrace(...
+                axesHandle,...
                 pointSourceCoords,...
                 sourceEndBoxCoords,...
                 detectorPoint,...
@@ -38,11 +43,15 @@ switch detectorDimensions
                 phantomLocationInM,...
                 beamCharacterization);
             
+            pause(0.0001);
+                
+            deleteHandles(handles);
+            
             detectorValueSum = detectorValueSum + rawSubDetectorValue;
         end
         
         averDetectorValue = detectorValueSum ./ partialPixelModelingResolution;
-    case 2
+    case 2 %2D detector
         detectorValueSum = 0;
         
         for i=1:partialPixelModelingResolution
@@ -51,7 +60,8 @@ switch detectorDimensions
                 
                 detectorPoint = calcDetectorPoint(detectorCornerCoords, [i,j], partialPixelModelingResolution);
                 
-                rawSubDetectorValue = runRayTrace(...
+                [handles,rawSubDetectorValue] = runRayTrace(...
+                    axesHandle,...
                     pointSourceCoords,...
                     sourceEndBoxCoords,...
                     detectorPoint,...
@@ -59,6 +69,9 @@ switch detectorDimensions
                     voxelDimsInM,...
                     phantomLocationInM,...
                     beamCharacterization);
+                
+                pause(0.0001);
+                deleteHandles(handles);
                 
                 detectorValueSum = detectorValueSum + rawSubDetectorValue;
             end

@@ -58,6 +58,8 @@ setString(handles.simulationDetectorNoiseLevelEdit, '');
 
 set(handles.simulationPartialPixelModellingCheckbox, 'Value', 1);
 
+setString(handles.simulationPartialPixelResolutionEdit, '');
+
 % DETECTOR
 setString(handles.detectorFileNameText, Constants.No_File_Name_String);
 

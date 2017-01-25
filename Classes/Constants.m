@@ -34,6 +34,9 @@ classdef Constants
         
         Save_Workplace_Simulation_Var_Name = 'simulation';
         Save_Workplace_Status_Output_Var_Name = 'statusOutput';
+        
+        Default_Beam_Characterization_File_Name = 'Photon Beam';
+        Save_Beam_Characterization_Var_Name = 'photonBeam';
     end
     
     methods

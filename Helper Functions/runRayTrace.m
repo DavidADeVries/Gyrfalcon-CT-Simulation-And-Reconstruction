@@ -1,9 +1,14 @@
-function rawDetectorValue = runRayTrace(pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization)
+function [handles,rawDetectorValue] = runRayTrace(axesHandle,pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization)
 %function rawDetectorValue = runRayTrace(pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization)
 % run a ray trave from the source point to detector point as long as the
 % detector point is within the source end box.
 % the beam described by the beam characterization passes through the
 % phantom data, being attenuated as expected.
+
+plotCoords = [pointSourceCoords', pointDetectorCoords'];
+
+handle = line(plotCoords(1,:),plotCoords(2,:),plotCoords(3,:),'Color','m','Parent',axesHandle);
+handles = {handle};
 
 if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     % describe line in 3 space
@@ -22,6 +27,14 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     dims = size(linePhantomIntersectionPoints);
     numIntersections = dims(1);
     
+    for i=1:numIntersections
+        point = linePhantomIntersectionPoints(i,:);
+        
+        handle = plot3(point(1),point(2),point(3),'*','Color','w','Parent',axesHandle);
+        
+        handles = [handles,{handle}];
+    end
+    
     if numIntersections <= 1 % no absorption
         rawDetectorValue = beamCharacterization.intensity;
     else
@@ -32,14 +45,14 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
             startPoint = linePhantomIntersectionPoints(i,:);
             endPoint = linePhantomIntersectionPoints(i+1,:);
             
-            absorptionVals(i) = phantomAbsorptionVal(startPoint, endPoint,phantomData, voxelDimsInM, phantomLocationInM);
+            absorptionVals(i) = phantomAbsorptionValue(startPoint, endPoint,phantomData, voxelDimsInM, phantomLocationInM);
             absorptionValsDistance(i) = norm(endPoint-startPoint);
         end
         
         rawDetectorValue = beamCharacterization.modelAbsorption(absorptionVals, absorptionValsDistance);
     end
 else
-    rawDetectorValue = beamCharacterization.intensity;
+    rawDetectorValue = 0; %no rays hit it
 end
 
 end

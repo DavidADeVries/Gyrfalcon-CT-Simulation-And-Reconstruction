@@ -12,11 +12,15 @@ phantDelX = phantomVoxelDims(1);
 phantDelY = phantomVoxelDims(2);
 phantDelZ = phantomVoxelDims(3);
 
-xIndex = floor((averPoint(1) - phantX) ./ phantDelX);
+xIndex = ceil((averPoint(1) - phantX) ./ phantDelX);
 yIndex = ceil((averPoint(2) - phantY) ./ -phantDelY);
 zIndex = ceil((averPoint(3) - phantZ) ./ -phantDelZ);
 
-absorptionVal = phantomData(yIndex, xIndex, zIndex); %have to flip x and y for the MATLAB (row,col,slice) convention
+if xIndex == 0 || yIndex == 0 || zIndex == 0
+    absorptionVal = 0;
+else
+    absorptionVal = phantomData(yIndex, xIndex, zIndex); %have to flip x and y for the MATLAB (row,col,slice) convention
+end
 
 end
 

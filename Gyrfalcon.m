@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 18-Nov-2016 15:55:35
+% Last Modified by GUIDE v2.5 23-Jan-2017 14:10:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -771,6 +771,7 @@ function scanBeamCharacterizationLoadButton_Callback(hObject, eventdata, handles
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+scanBeamCharacterizationLoadButtonCallback(hObject, eventdata, handles);
 
 % --- Executes on button press in detectorLoadButton.
 function detectorLoadButton_Callback(hObject, eventdata, handles)
@@ -1094,3 +1095,46 @@ if val %% if it's true, we need to make sure move with scan angle is checked on
     
     guidata(hObject, handles);
 end
+
+
+
+function simulationPartialPixelResolutionEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationPartialPixelResolutionEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of simulationPartialPixelResolutionEdit as text
+%        str2double(get(hObject,'String')) returns contents of simulationPartialPixelResolutionEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function simulationPartialPixelResolutionEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to simulationPartialPixelResolutionEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function scanSimViewDetectorValues_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewDetectorValues (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+val = get(hObject, 'Checked');
+
+switch val
+    case 'on'
+        val = 'off';
+    case 'off'
+        val = 'on';
+    otherwise
+        error('Invalid Checked Value');
+end
+
+set(hObject, 'Checked', val);
