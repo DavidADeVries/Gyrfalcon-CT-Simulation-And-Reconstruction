@@ -94,14 +94,35 @@ classdef Simulation
             simulation.source.plot(axesHandle,[],[]);
             simulation.scan.plot(simulation.source, axesHandle, 0, 0);
             
-            slicePosition = []; %plot all
+            slicePosition = [];
             
-            simulation.scan.plotSlices(simulation.source, axesHandle, slicePosition);
+            simulation.scan.plotSlices(simulation.source, axesHandle, s
                        
         end
         
         function plotHandles = plotSlice(simulation, axesHandle, slicePosition)
-            plotHandles = plotSlices(simulation.scan, simulation.source, axesHandle, slicePosition);
+            axes(axesHandle);
+            hold on
+            
+            locationInM = simulation.source.getLocationInM();
+            
+            x = 0;
+            y = 0; % at origin
+            r = norm([locationInM(1), locationInM(2)]); % found above
+            ang1 = 0;
+            ang2 = 360; % to make circle
+            
+            edgeColour = Constants.Slice_Colour;
+            faceColour = 'none';
+            lineStyle = '--';
+            lineWidth = [];
+            
+            handle = circleOrArcPatch(...
+                x, y, slicePosition,...
+                r, ang1, ang2,...
+                edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+            
+            plotHandles = {handle};
         end
         
         function plotHandles = plotAngle(simulation, axesHandle, slicePosition, angle)

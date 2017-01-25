@@ -97,9 +97,21 @@ methods
         locationInM = units.convertToM(source.location);
     end
 
-    function handles = plotSource(source, axesHandle, startBoxCoords, endBoxCoords)
-        axes(axesHandle);
-        hold on
+    function handles = plot(source, axesHandle, startBoxCoords, endBoxCoords)
+        
+        if isempty(startBoxCoords) || isempty(endBoxCoords)
+            slicePosition = 0; %default
+            angle = 0; %default
+            perAngleXY = 0; %default
+            perAngleZ = 0; %default
+            
+            [startBoxCoords, endBoxCoords, ~, ~] = ...
+                getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ);
+        end
+        
+        if isempty(endBoxCoords)
+            
+        end
         
         edgeColour = Constants.Source_Colour;
         faceColour = Constants.Source_Colour;
@@ -123,7 +135,7 @@ methods
             handle = circleOrArcPatch(...
                 startClockwisePosZ(1), startClockwisePosZ(2), startClockwisePosZ(3),...
                 Constants.Point_Source_Radius, 0, 360,...
-                edgeColour, faceColour, lineStyle, lineWidth);
+                edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
             
             handles = {handle};
         else                
@@ -133,10 +145,18 @@ methods
                 line3Coords = [startCounterClockwiseNegZ', startCounterClockwisePosZ'];
                 line4Coords = [startCounterClockwisePosZ', startClockwisePosZ'];
                 
-                line1 = line(line1Coords(1,:), line1Coords(2,:), line1Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-                line2 = line(line2Coords(1,:), line2Coords(2,:), line2Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-                line3 = line(line3Coords(1,:), line3Coords(2,:), line3Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-                line4 = line(line4Coords(1,:), line4Coords(2,:), line4Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
+                line1 = line(...
+                    line1Coords(1,:), line1Coords(2,:), line1Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+                line2 = line(...
+                    line2Coords(1,:), line2Coords(2,:), line2Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+                line3 = line(...
+                    line3Coords(1,:), line3Coords(2,:), line3Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+                line4 = line(...
+                    line4Coords(1,:), line4Coords(2,:), line4Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
                 
                 handles = {line1, line2, line3, line4};
             else                    
@@ -150,16 +170,26 @@ methods
         line3Coords = [startCounterClockwisePosZ', endCounterClockwisePosZ'];
         line4Coords = [startCounterClockwiseNegZ', endCounterClockwiseNegZ'];
         
-        beamLine1 = line(line1Coords(1,:), line1Coords(2,:), line1Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-        beamLine2 = line(line2Coords(1,:), line2Coords(2,:), line2Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-        beamLine3 = line(line3Coords(1,:), line3Coords(2,:), line3Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-        beamLine4 = line(line4Coords(1,:), line4Coords(2,:), line4Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
+        beamLine1 = line(...
+                    line1Coords(1,:), line1Coords(2,:), line1Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+        beamLine2 = line(...
+                    line2Coords(1,:), line2Coords(2,:), line2Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+        beamLine3 = line(...
+                    line3Coords(1,:), line3Coords(2,:), line3Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+        beamLine4 = line(...
+                    line4Coords(1,:), line4Coords(2,:), line4Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
         
         %plot midline coords
         endBoxCentreCoords = centreOfQuadrangle(endBoxCoords);        
         midlineCoords = [centreOfSourceCoords', endBoxCentreCoords']; 
         
-        beamLine5 = line(midlineCoords(1,:), midlineCoords(2,:), midlineCoords(3,:), 'Parent', axesHandle, 'Color',edgeColour, 'LineStyle', '--');
+        beamLine5 = line(...
+                    midlineCoords(1,:), midlineCoords(2,:), midlineCoords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour, 'LineStyle', '--');
         
         % draw end box
         line1Coords = [endClockwisePosZ', endCounterClockwisePosZ'];
@@ -171,13 +201,25 @@ methods
         crossLine2Coords = [endCounterClockwisePosZ', endClockwiseNegZ'];
                 
         % plot the lines
-        endBoxLine1 = line(line1Coords(1,:), line1Coords(2,:), line1Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-        endBoxLine2 = line(line2Coords(1,:), line2Coords(2,:), line2Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-        endBoxLine3 = line(line3Coords(1,:), line3Coords(2,:), line3Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
-        endBoxLine4 = line(line4Coords(1,:), line4Coords(2,:), line4Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour);
+        endBoxLine1 = line(...
+                    line1Coords(1,:), line1Coords(2,:), line1Coords(3,:),...
+                     'Parent', axesHandle, 'Color', edgeColour);
+        endBoxLine2 = line(...
+                    line2Coords(1,:), line2Coords(2,:), line2Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+        endBoxLine3 = line(...
+                    line3Coords(1,:), line3Coords(2,:), line3Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
+        endBoxLine4 = line(...
+                    line4Coords(1,:), line4Coords(2,:), line4Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour);
 
-        endBoxLine5 = line(crossLine1Coords(1,:), crossLine1Coords(2,:), crossLine1Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour, 'LineStyle', '--');
-        endBoxLine6 = line(crossLine2Coords(1,:), crossLine2Coords(2,:), crossLine2Coords(3,:), 'Parent', axesHandle, 'Color', edgeColour, 'LineStyle', '--');
+        endBoxLine5 = line(...
+                    crossLine1Coords(1,:), crossLine1Coords(2,:), crossLine1Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour, 'LineStyle', '--');
+        endBoxLine6 = line(...
+                    crossLine2Coords(1,:), crossLine2Coords(2,:), crossLine2Coords(3,:),...
+                    'Parent', axesHandle, 'Color', edgeColour, 'LineStyle', '--');
         
         % handles are returned, so that these lines can be deleted
         handles = [handles, {...

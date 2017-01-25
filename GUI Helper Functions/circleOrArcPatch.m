@@ -1,5 +1,5 @@
-function handle = circleOrArcPatch(x, y, z, r, ang1, ang2, edgeColour, faceColour, lineStyle, lineWidth)
-% handle = circleOrArcPatch(x,y,z,r,ang1,ang2,edgeColour, faceColour, lineStyle, lineWidth)
+function handle = circleOrArcPatch(x, y, z, r, ang1, ang2, edgeColour, faceColour, lineStyle, lineWidth, parentAxes)
+% handle = circleOrArcPatch(x,y,z,r,ang1,ang2,edgeColour, faceColour, lineStyle, lineWidth, parentAxes)
 % creates a circle or arc at the given point in 3 space
 % use ang1 = 0 and ang2 = 360 for a circle
 
@@ -22,6 +22,10 @@ if isempty(lineWidth)
     lineWidth = 0.5;
 end
 
+if isempty(parentAxes)
+    parentAxes = gca; % current axis
+end
+
 
 %(1) Define angles at which patch vertices will appear:
 step = 1;               %one vertex for every 2 degrees; adjust this parameter for smoother/coarser edges
@@ -41,14 +45,16 @@ if strcmp(faceColour, 'none')
     handle = line(vert(:,1),vert(:,2),vert(:,3),...
     'Color', edgeColour,...
     'LineStyle', lineStyle,...
-    'LineWidth', lineWidth);
+    'LineWidth', lineWidth,...
+    'Parent', parentAxes);
 else
     faces = [1:size(vert,1) 1]; 
     handle = patch('vertices',vert, 'faces',faces,...
     'EdgeColor', edgeColour,...
     'FaceColor', faceColour,...
     'LineStyle', lineStyle,...
-    'LineWidth', lineWidth);
+    'LineWidth', lineWidth,...
+    'Parent', parentAxes);
 end
 
 

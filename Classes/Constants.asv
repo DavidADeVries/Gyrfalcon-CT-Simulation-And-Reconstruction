@@ -25,7 +25,7 @@ classdef Constants
         Ray_Trace_Point_Colour = 'w';
         
         Detector_Display_Colour = [0.33, 0.33, 0.33]; % a dark grey
-        Detector_Display_Title = 'Gyrfalcon - Detector Display';
+        Detector_Display
         
         
         No_File_Name_String = 'No File Selected';

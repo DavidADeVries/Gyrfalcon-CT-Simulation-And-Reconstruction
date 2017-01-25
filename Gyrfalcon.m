@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 23-Jan-2017 14:10:29
+% Last Modified by GUIDE v2.5 25-Jan-2017 16:29:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1126,15 +1126,12 @@ function scanSimViewDetectorValues_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-val = get(hObject, 'Checked');
+checkUncheck(hObject);
 
-switch val
-    case 'on'
-        val = 'off';
-    case 'off'
-        val = 'on';
-    otherwise
-        error('Invalid Checked Value');
-end
+% --------------------------------------------------------------------
+function scanSimViewDetectorRayTraces_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewDetectorRayTraces (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
-set(hObject, 'Checked', val);
+checkUncheck(hObject);

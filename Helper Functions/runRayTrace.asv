@@ -23,7 +23,15 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     %first values are those that will be traversed first by the beam
     dims = size(linePhantomIntersectionPoints);
     numIntersections = dims(1);
+    
+    for i=1:numIntersections
+        point = linePhantomIntersectionPoints(i,:);
         
+        handle = plot3(point(1),point(2),point(3),'*','Color','w','Parent',axesHandle);
+        
+        handles = [handles,{handle}];
+    end
+    
     if numIntersections <= 1 % no absorption
         rawDetectorValue = beamCharacterization.intensity;
     else
@@ -52,7 +60,7 @@ if displayDetectorRayTrace
     handle = line(...
         lineCoords(1,:), lineCoords(2,:), lineCoords(3,:),...
         'Color', Constants.Ray_Trace_Colour,...
-        'Parent', axesHandle);
+        'Parent',axesHandle);
     
     handles = {handle};
     
@@ -62,16 +70,9 @@ if displayDetectorRayTrace
             linePhantomIntersectionPoints(:,1),...
             linePhantomIntersectionPoints(:,2),...
             linePhantomIntersectionPoints(:,3),...
-            'MarkerFaceColor', Constants.Ray_Trace_Point_Colour,...
-            'MarkerEdgeColor', Constants.Ray_Trace_Point_Colour,...
-            'Marker', '*',...
-            'Parent', axesHandle);
+            'Mark
             
-        handles = [handles, {scatterHandle}];
     end
-    
-    pause(0.000001);
-    deleteHandles(handles);
 end
 
 end

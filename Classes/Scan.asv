@@ -132,36 +132,9 @@ classdef Scan
             perAngleZInM = units.convertToM(zPos);
         end
         
-        function handles = plotSlices(scan, source, axesHandle, slicePositionInM)
-            if isempty(slicePositionInM)
-                slicePositions = scan.getSlicesInM();
-            else
-                slicePositions = slicePositionInM;
-            end
-            
-            for i=1:length(slicePositions)
-                slicePosition = slicePositions(i);
-                
-                locationInM = source.getLocationInM();
-                
-                x = 0;
-                y = 0; % at origin
-                r = norm([locationInM(1), locationInM(2)]); % found above
-                ang1 = 0;
-                ang2 = 360; % to make circle
-                
-                edgeColour = Constants.Slice_Colour;
-                faceColour = 'none';
-                lineStyle = '--';
-                lineWidth = [];
-                
-                handle = circleOrArcPatch(...
-                    x, y, slicePosition,...
-                    r, ang1, ang2,...
-                    edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                
-                handles = {handle};
-            end
+        function handles = plotSlices(scan, source, axesHandle, slicePosition)
+            if isempty(slicePosition)
+                slicePositions = scan.getSlicesInM()
         end
         
         function handles = plot(scan, source, axesHandle, slicePosition, angle)            
