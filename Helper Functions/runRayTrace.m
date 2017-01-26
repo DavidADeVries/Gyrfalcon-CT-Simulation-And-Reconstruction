@@ -23,7 +23,7 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     %first values are those that will be traversed first by the beam
     dims = size(linePhantomIntersectionPoints);
     numIntersections = dims(1);
-        
+       
     if numIntersections <= 1 % no absorption
         rawDetectorValue = beamCharacterization.intensity;
     else
