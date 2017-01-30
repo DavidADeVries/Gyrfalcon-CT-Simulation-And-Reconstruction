@@ -23,27 +23,23 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     %first values are those that will be traversed first by the beam
     dims = size(linePhantomIntersectionPoints);
     numIntersections = dims(1);
-    
-    for i=1:numIntersections
-        point = linePhantomIntersectionPoints(i,:);
-        
-        handle = plot3(point(1),point(2),point(3),'*','Color','w','Parent',axesHandle);
-        
-        handles = [handles,{handle}];
-    end
-    
+       
     if numIntersections <= 1 % no absorption
         rawDetectorValue = beamCharacterization.intensity;
     else
         absorptionVals = zeros(numIntersections-1,1);
         absorptionValsDistance = zeros(numIntersections-1,1);
+        coords = zeros(numIntersections-1,3);
         
         for i=1:numIntersections-1
             startPoint = linePhantomIntersectionPoints(i,:);
             endPoint = linePhantomIntersectionPoints(i+1,:);
             
-            absorptionVals(i) = phantomAbsorptionValue(startPoint, endPoint,phantomData, voxelDimsInM, phantomLocationInM);
+            [value, phantomCoords] = phantomAbsorptionValue(startPoint, endPoint,phantomData, voxelDimsInM, phantomLocationInM);
+            
+            absorptionVals(i) = value; 
             absorptionValsDistance(i) = norm(endPoint-startPoint);
+            coords(i
         end
         
         rawDetectorValue = beamCharacterization.modelAbsorption(absorptionVals, absorptionValsDistance);
@@ -60,7 +56,7 @@ if displayDetectorRayTrace
     handle = line(...
         lineCoords(1,:), lineCoords(2,:), lineCoords(3,:),...
         'Color', Constants.Ray_Trace_Colour,...
-        'Parent',axesHandle);
+        'Parent', axesHandle);
     
     handles = {handle};
     
@@ -70,9 +66,16 @@ if displayDetectorRayTrace
             linePhantomIntersectionPoints(:,1),...
             linePhantomIntersectionPoints(:,2),...
             linePhantomIntersectionPoints(:,3),...
-            'Mark
+            'MarkerFaceColor', Constants.Ray_Trace_Point_Colour,...
+            'MarkerEdgeColor', Constants.Ray_Trace_Point_Colour,...
+            'Marker', '*',...
+            'Parent', axesHandle);
             
+        handles = [handles, {scatterHandle}];
     end
+    
+    pause(0.000001);
+    deleteHandles(handles);
 end
 
 end

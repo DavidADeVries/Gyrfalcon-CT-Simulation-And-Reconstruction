@@ -2,6 +2,8 @@ classdef Constants
     %Constants
     
     properties (Constant)
+        version = '1.0.1';
+        
         mm_to_m = (1/1000);
         m_to_mm = (1000/1);
         
@@ -44,6 +46,8 @@ classdef Constants
         
         Default_Beam_Characterization_File_Name = 'Photon Beam';
         Save_Beam_Characterization_Var_Name = 'photonBeam';
+        
+        Processing_Run_Var_Name = 'run';
     end
     
     methods

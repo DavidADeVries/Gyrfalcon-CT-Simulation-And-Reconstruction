@@ -1,5 +1,5 @@
-function [detectorData, absorptionValsDistance, coords] = runPartialPixelBeamTraceFromPointSource(axesHandle,pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution, displayDetectorRayTrace)
-% [detectorData, absorptionValsDistance, coords] = runPartialPixelBeamTraceFromPointSource(pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution, displayDetectorRayTrace)
+function detectorData = runPartialPixelBeamTraceFromPointSource(axesHandle,pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution, displayDetectorRayTrace)
+% detectorData = runPartialPixelBeamTraceFromPointSource(pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution, displayDetectorRayTrace)
 % for this beam trace, partial pixel modelling is used. This requires a
 % resolution to be given (how many ray traces to run per detector), and
 % then these will be averaged out to give the detector value
@@ -75,27 +75,6 @@ switch detectorDimensions
     otherwise
         error('Invalid detector dimensions');
 end
-
-
-if detectorDimensions == 1 || detectorDimesnions == 2
-   % need to get the absorption val distances and phantom coords for the partial pixel modelling
-   % as if the ray was going to the detector centre
-   detectorPoint = centreOfQuadrangle(detectorCornerCoords);
-   displayDetectorRayTrace = false;
-   
-   [~, absorptionValsDistance, coords] =...
-       runRayTrace(...
-       axesHandle,...
-       pointSourceCoords,...
-       sourceEndBoxCoords,...
-       detectorPoint,...
-       phantomData,...
-       voxelDimsInM,...
-       phantomLocationInM,...
-       beamCharacterization,...
-       displayDetectorRayTrace);
-end
-
     
 detectorData = applyNoise(averDetectorValue, scatteringNoiseLevel, detectorNoiseLevel); 
 

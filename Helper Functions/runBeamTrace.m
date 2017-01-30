@@ -1,14 +1,14 @@
-function detectorData = runBeamTrace(axesHandle, sourceStartBoxCoords, sourceEndBoxCoords, sourceDirectionUnitVector, detectorCornerCoords, phantomData, voxelDimsInM,  phantomLocationInM,  beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixel, partialPixelModelingResolution, displayDetectorRayTrace)
-% detectorData = runBeamTrace(sourcePosition, sourceDimensions, sourceDirectionUnitVector, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel,  partialPixel, partialPixelModelingResolution, displayDetectorRayTrace)
+function [detectorData, absorptionValsDistance, coords] = runBeamTrace(axesHandle, sourceStartBoxCoords, sourceEndBoxCoords, sourceDirectionUnitVector, detectorCornerCoords, phantomData, voxelDimsInM,  phantomLocationInM,  beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixel, partialPixelModelingResolution, displayDetectorRayTrace)
+% [detectorData, absorptionValsDistance, coords] = runBeamTrace(sourcePosition, sourceDimensions, sourceDirectionUnitVector, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel,  partialPixel, partialPixelModelingResolution, displayDetectorRayTrace)
 % runs the beam trace for a given detector/source/phantom configuration
 
 if coordsAreFromPointSource(sourceStartBoxCoords)
     pointSourceCoords = sourceStartBoxCoords(1,:); %could choose any coords from the box, since all are the same
     
     if partialPixel
-        detectorData = runPartialPixelBeamTraceFromPointSource(axesHandle,pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution, displayDetectorRayTrace);
+        [detectorData, absorptionValsDistance, coords] = runPartialPixelBeamTraceFromPointSource(axesHandle,pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelingResolution, displayDetectorRayTrace);
     else        
-        detectorData = runNonPartialPixelBeamTraceFromPointSource(pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, displayDetectorRayTrace);
+        [detectorData, absorptionValsDistance, coords] = runNonPartialPixelBeamTraceFromPointSource(pointSourceCoords, sourceEndBoxCoords, detectorCornerCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, scatteringNoiseLevel, detectorNoiseLevel, displayDetectorRayTrace);
     end    
 else
     error('Undefined behaviour. Cannot model non-point sources');

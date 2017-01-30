@@ -256,7 +256,7 @@ classdef Simulation
                 
                 sliceData = simulation.runScanSimulationForSlice(axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle);
                 
-                data{i} = sliceData;
+                data{i} = SliceData(sliceData, slicePosition);
             end            
         end
         
@@ -278,7 +278,7 @@ classdef Simulation
                 
                 angleData = simulation.runScanSimulationForAngle(axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle);
                                 
-                sliceData{i} = angleData;
+                sliceData{i} = AngleData(angleData, angle);
             end
             
             if displaySlices
@@ -304,9 +304,17 @@ classdef Simulation
                 for xyStep=1:xyNumSteps
                     [perAngleXYInM, perAngleZInM] = simulation.scan.getPerAnglePositionInM(xyStep, zStep);
                     
-                    positionData = simulation.runScanSimulationForPerAnglePosition(axesHandle, slicePosition, angle, perAngleXYInM, perAngleZInM, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle);
+                    [positionData, positionDataDistanceAcrossVoxel, positionDataVoxelCoords, detectorCoords, sourceStartBoxCoords, sourceEndBoxCoords]...
+                        = simulation.runScanSimulationForPerAnglePosition(axesHandle, slicePosition, angle, perAngleXYInM, perAngleZInM, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle);
                     
-                    angleData{zStep, xyStep} = positionData;
+                    angleData{zStep, xyStep} = PositionData(...
+                        positionData,...
+                        positionDataDistanceAcrossVoxel,...
+                        positionDataVoxelCoords,...
+                        detectorCoords,...
+                        sourceStartBoxCoords,...
+                        sourceEndBoxCoords);
+                    
                 end
             end
             
@@ -315,7 +323,8 @@ classdef Simulation
             end
         end
         
-        function positionData = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle)
+        function [positionData, positionDataDistanceAcrossVoxel, positionDataVoxelCoords, detectorCoords, sourceStartBoxCoords, sourceEndBoxCoords]...
+                = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle)
             [...
                 sourceStartBoxCoords,...
                 sourceEndBoxCoords,...
@@ -333,6 +342,9 @@ classdef Simulation
             zNumDetectors = simulation.detector.wholeDetectorDimensions(2);
             
             positionData = zeros(zNumDetectors, xyNumDetectors);
+            positionDataDistanceAcrossVoxel = cell(zNumDetectors, xyNumDetectors);
+            positionDataVoxelCoords = cell(zNumDetectors, xyNumDetectors);
+            detectorCoords = cell(zNumDetectors, xyNumDetectors);
                         
             if displayPerAnglePosition
                 plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, perAngleXY, perAngleZ, sourceStartBoxCoords, sourceEndBoxCoords);
@@ -362,9 +374,20 @@ classdef Simulation
                         pause(0.000001);
                     end
                     
-                    detectorData = simulation.runScanSimulationForDetector(axesHandle,sourceStartBoxCoords, sourceEndBoxCoords, sourceDirectionUnitVector, detectorCornerCoords, displayDetectorRayTrace);
+                    [detectorData, absorptionValsDistance, phantomVoxelCoords]...
+                        = simulation.runScanSimulationForDetector(...
+                        axesHandle,...
+                        sourceStartBoxCoords,...
+                        sourceEndBoxCoords,...
+                        sourceDirectionUnitVector,...
+                        detectorCornerCoords,...
+                        displayDetectorRayTrace);
                                                          
                     positionData(zDetector, xyDetector) = detectorData;
+                    positionDataDistanceAcrossVoxel{zDetector, xyDetector} = absorptionValsDistance;
+                    positionDataVoxelCoords{zDetector, xyDetector} = phantomVoxelCoords;
+                    detectorCoords{zDetector, xyDetector} = detectorCornerCoords;
+                    
                     
                     if displayDetectorValues
                         % update image data
@@ -382,7 +405,7 @@ classdef Simulation
             end
         end
         
-        function detectorData = runScanSimulationForDetector(...
+        function [detectorData, absorptionValsDistance, coords] = runScanSimulationForDetector(...
                 simulation,...
                 axesHandle,...
                 sourceStartBoxCoords,...
@@ -402,7 +425,8 @@ classdef Simulation
             voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
             phantomLocationInM = simulation.phantom.getLocationInM();
             
-            detectorData = runBeamTrace(...
+            [detectorData, absorptionValsDistance, coords] = ...
+                runBeamTrace(...
                 axesHandle,...
                 sourceStartBoxCoords,...
                 sourceEndBoxCoords,...
