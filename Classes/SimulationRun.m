@@ -48,6 +48,8 @@ classdef SimulationRun < ProcessingRun
         
         function simulationRun = startRun(simulationRun)
             simulationRun = simulationRun.startProcessingRun();
+            
+            simulationRun = simulationRun.createSaveDir();
         end
         
         function simulationRun = endRun(simulationRun, data)
@@ -57,7 +59,22 @@ classdef SimulationRun < ProcessingRun
             simulationRun.data = data;
         end
         
-                
+        function run = clearBeforeSave(run)
+            for i=1:length(run.data)
+                run.data{i} = run.data{i}.clearBeforeSave();
+            end
+            
+            run.simulation = run.simulation.clearBeforeSave();
+        end
+        
+        function run = createSaveDir(run)
+            path = run.savePath;
+            dirName = removeFileExtension(run.saveFilename);
+            
+            mkdir(path,dirName);
+            
+            run.savePath = makePath(path,dirName);
+        end
     end
     
 end

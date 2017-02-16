@@ -1,11 +1,14 @@
-function [rawDetectorValue, absorptionValsDistance, coords] = runRayTrace(axesHandle,pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, displayDetectorRayTrace)
-%function [rawDetectorValue, absorptionValsDistance, coords] = runRayTrace(pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, displayDetectorRayTrace)
+function [rawDetectorValue, attenuationCoords, absorptionValsDistance] = runRayTrace(axesHandle,pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, displayDetectorRayTrace)
+%function [rawDetectorValue, attenuationCoords, absorptionValsDistance] = runRayTrace(pointSourceCoords, sourceEndBoxCoords, pointDetectorCoords, phantomData, voxelDimsInM, phantomLocationInM, beamCharacterization, displayDetectorRayTrace)
 % run a ray trave from the source point to detector point as long as the
 % detector point is within the source end box.
 % the beam described by the beam characterization passes through the
 % phantom data, being attenuated as expected.
 
 linePhantomIntersectionPoints = [];
+
+pointDetectorCoords = roundToNanoM(pointDetectorCoords);
+sourceEndBoxCoords = roundToNanoM(sourceEndBoxCoords);
 
 if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     % describe line in 3 space
@@ -25,13 +28,21 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
     numIntersections = dims(1);
        
     if numIntersections <= 1 % no absorption
-        rawDetectorValue = beamCharacterization.intensity;
+%         voxelDistanceMatrix = zeros(size(phantomData));
+        
+        rawDetectorValue = beamCharacterization.rawIntensity();
         absorptionValsDistance = [];
-        coords = [];
+        attenuationCoords = [];
     else
         absorptionVals = zeros(numIntersections-1,1);
         absorptionValsDistance = zeros(numIntersections-1,1);
         coords = zeros(numIntersections-1,3);
+        
+%         voxelDistanceMatrix = createVoxelDistanceMatrix(...
+%             phantomLocationInM,...
+%             voxelDimsInM,...
+%             linePhantomIntersectionPoints,...
+%             phantomData);
         
         for i=1:numIntersections-1
             startPoint = linePhantomIntersectionPoints(i,:);
@@ -41,15 +52,16 @@ if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
             
             absorptionVals(i) = value; 
             absorptionValsDistance(i) = norm(endPoint-startPoint);
-            coords(i,1) = phantomCoords;
+            coords(i,:) = phantomCoords;
         end
         
-        rawDetectorValue = beamCharacterization.modelAbsorption(absorptionVals, absorptionValsDistance);
+        [rawDetectorValue, attenuationCoords] = beamCharacterization.modelAbsorption(coords, absorptionValsDistance);
     end
 else
+%     voxelDistanceMatrix = zeros(size(phantomData));
     rawDetectorValue = 0; %no rays hit it
     absorptionValsDistance = [];
-    coords = [];
+    attenuationCoords = [];
 end
 
 % display ray trace if needed

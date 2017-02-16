@@ -21,6 +21,12 @@ classdef SliceData
             data.angleData = angleData;
             data.slicePosition = slicePosition;
         end
+        
+        function data = clearBeforeSave(data)
+            for i=1:length(data.angleData)
+                data.angleData{i} = data.angleData{i}.clearBeforeSave();
+            end
+        end
     end
     
 end

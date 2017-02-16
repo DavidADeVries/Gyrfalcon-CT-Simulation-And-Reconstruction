@@ -96,6 +96,12 @@ methods
 
         locationInM = units.convertToM(source.location);
     end
+    
+    function dist = getDistanceBetweenOriginAndSourceCentrePointInM(source)
+        locationInM = source.getLocationInM();
+        
+        dist = norm(locationInM(1:2));
+    end
 
     function handles = plot(source, axesHandle, startBoxCoords, endBoxCoords)
         
@@ -359,15 +365,17 @@ methods
         rotationVector = [0,0,sourceAngle];
 
         beamShift = rotateCoords(beamShift, rotationVector);
-
-        xyAngleShift = [0, diameter * tand(xyAngle), 0];
+        
+        xyShift = diameter * tand(xyAngle);
+        
+        xyAngleShift = [0, xyShift, 0];
 
         xyAngleShift = rotateCoords(xyAngleShift, rotationVector);
 
         xyAngleShiftClockwise = -xyAngleShift;
         xyAngleShiftCounterClockwise = +xyAngleShift;
 
-        zAngleShift = [0, 0, diameter * tand(zAngle)];
+        zAngleShift = [0, 0, norm([diameter xyShift]) * tand(zAngle)];
 
         zAngleShiftPos = zAngleShift;
         zAngleShiftNeg = -zAngleShift;

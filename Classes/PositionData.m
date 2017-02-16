@@ -19,21 +19,48 @@ classdef PositionData
     
     properties
         detectorData
-        distancesAcrossVoxels
-        voxelPhantomCoords
+        attenuationCoords
+        attenuationDistances
         detectorCornerCoords
         sourceStartBoxCoords
         sourceEndBoxCoords
     end
     
     methods
-        function data = PositionData(detectorData, distancesAcrossVoxels, voxelPhantomCoords, detectorCornerCoords, sourceStartBoxCoords, sourceEndBoxCoords)
+        function data = PositionData(detectorData, attenuationCoords, attenuationDistances, detectorCornerCoords, sourceStartBoxCoords, sourceEndBoxCoords)
             data.detectorData = detectorData;
-            data.distancesAcrossVoxels = distancesAcrossVoxels;
-            data.voxelPhantomCoords = voxelPhantomCoords;
+            data.attenuationCoords = attenuationCoords;
+            data.attenuationDistances = attenuationDistances;
             data.detectorCornerCoords = detectorCornerCoords;
             data.sourceStartBoxCoords = sourceStartBoxCoords;
             data.sourceEndBoxCoords = sourceEndBoxCoords;
+        end
+        
+        function data = clearBeforeSave(data)
+            data.detectorData = [];
+            data.attenuationCoords = [];
+            data.attenuationDistances = [];
+            data.detectorCornerCoords = [];
+        end
+        
+        function data = saveBigData(data, savePath)
+            detectorData = data.detectorData;
+            
+            save(makePath(savePath,'detectorData.mat'),'detectorData','-v7.3');
+            
+%             dims = size(data.distancesAcrossVoxels);
+%             
+%             for i=1:dims(1)
+%                 for j=1:dims(2)
+%                     fileSavePath = makePath(savePath, ['Detector (',num2str(i),',',num2str(j),')']);
+%                     
+%                     distancesAcrossVoxels = data.distancesAcrossVoxels{i,j};
+%                     voxelPhantomCoords = data.voxelPhantomCoords{i,j};
+%                     detectorCornerCoords = data.detectorCornerCoords{i,j};
+%                     
+%                     saveDetectorData(fileSavePath, distancesAcrossVoxels, voxelPhantomCoords, detectorCornerCoords)
+%                 end
+%             end
         end
     end
     

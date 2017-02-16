@@ -97,6 +97,20 @@ classdef Detector
             locationInM = units.convertToM(location);            
         end
         
+        function detector = setLocationInM(detector, newLocationInM)
+            toUnits = detector.locationUnits;
+            
+            newLocationInToUnits = toUnits.convertFromM(newLocationInM);
+            
+            detector.location = newLocationInToUnits;
+        end
+        
+        function dist = getDistanceBetweenOriginAndDetectorCentrePointInM(detector)
+            locationInM = detector.getLocationInM();
+            
+            dist = norm(locationInM(1:2));
+        end
+        
         function position = getDetectorPosition(detector, slicePosition, scanAngle)
             location = detector.getLocationInM();
             
@@ -121,385 +135,398 @@ classdef Detector
             axes(axesHandle);
             hold on;
             
-            perAngleXY = - perAngleXY; %need to do opposite of what source did
+            [xPlotVals, yPlotVals, zPlotVals] = getAllDetectorCoords(detector, slicePosition, angle, perAngleXY, perAngleZ);
             
-            plotHandles = {};
-            
-            locationInM = detector.locationUnits.convertToM(detector.location);
-            
-            if ~isempty(slicePosition) % set z to slicePosition
-                locationInM(3) = slicePosition;
-            end
-            
-            if detector.movesWithPerAngleTranslation
-                locationInM(3) = locationInM(3) + perAngleZ;
-            end
-            
-            if ~isempty(angle) % set x,y dependent on angle
-                [theta,radius] = cart2pol(locationInM(1), locationInM(2));
-                theta = theta * Constants.rad_to_deg;
-                
-                theta = theta - angle; %minus angle because our angles are clockwise
-                
-                theta = theta * Constants.deg_to_rad;
-                
-                [x,y] = pol2cart(theta,radius);
-                
-                locationInM(1) = x;
-                locationInM(2) = y;
-            end
-            
-            
-            singleDimensions = detector.singleDetectorDimensions;
-            wholeDimensions = detector.wholeDetectorDimensions;
-            
-            detectorLineHeight = Constants.detector_line_height;
-            
-            % graphic properities
             edgeColour = Constants.Detector_Colour;
-            backEdgeColour = Constants.Detector_Back_Colour;
             
-            faceColour = 'none';
-            lineStyle = '-';
-            lineWidth = [];
+            handle = mesh(xPlotVals,yPlotVals,zPlotVals,...
+                'EdgeColor', edgeColour,...
+                'FaceColor', 'none');
             
-            % need these axis to rotate around
-            aboutX = [1,0,0];
-            aboutY = [0,1,0];
-            aboutZ = [0,0,1];
-            
-            % xy rotation angle
-            [theta, ~] = cart2pol(locationInM(1), locationInM(2));
-            rotAngle = theta * Constants.rad_to_deg;
-            
-            % prepping angles and length
-            xyIsAngular = singleDimensions(1).units.isAngular;
-            zIsAngular = singleDimensions(2).units.isAngular;
-            
-            if xyIsAngular
-                xyAngle = singleDimensions(1).getAngleInDegrees() * wholeDimensions(1);
-            else
-                xyLength = singleDimensions(1).getLengthInM() * wholeDimensions(1);
-            end
-            
-            if zIsAngular
-                zAngle = singleDimensions(2).getAngleInDegrees() * wholeDimensions(2);
-            else
-                zLength = singleDimensions(2).getLengthInM() * wholeDimensions(2);
-            end
-            
-            radius = norm([locationInM(1), locationInM(2)]); % get x,y norm
-            
-            % *****************************************************
-            % plot xyLines as vertical line at x = radius, and then
-            % rotate into correct position
-            
-            xyLines_top_x = [radius, radius];
-            xyLines_bot_x = [radius + detectorLineHeight, radius + detectorLineHeight];
-            
-            if ~xyIsAngular
-                xyLines_y = [-xyLength/2, xyLength/2];
-            end
-            
-            if zIsAngular
-                if zAngle == 0
-                    xyLines_z_vals = locationInM(3);
-                else
-                    xyLines_z_vals =  -zAngle/2 : singleDimensions(2).getAngleInDegrees() : zAngle/2;
-                end
-            else
-                if zLength == 0
-                    xyLines_z_vals = locationInM(3);
-                else
-                    xyLines_z_vals = locationInM(3) - (zLength/2) : singleDimensions(2).getLengthInM() : locationInM(3) + (zLength/2);
-                end
-            end
-            
-            for i=1:length(xyLines_z_vals)
-                xyLines_z = xyLines_z_vals(i);
+            plotHandles = {handle};
+%             else
+%                 axes(axesHandle);
+%                 hold on;
+%                 
+%                 perAngleXY = - perAngleXY; %need to do opposite of what source did
+%                 
+%                 plotHandles = {};
+%                 
+%                 locationInM = detector.locationUnits.convertToM(detector.location);
+%                 
+%                 if ~isempty(slicePosition) % set z to slicePosition
+%                     locationInM(3) = slicePosition;
+%                 end
+%                 
+%                 if detector.movesWithPerAngleTranslation
+%                     locationInM(3) = locationInM(3) + perAngleZ;
+%                 end
+%                 
+%                 if ~isempty(angle) % set x,y dependent on angle
+%                     [theta,radius] = cart2pol(locationInM(1), locationInM(2));
+%                     theta = theta * Constants.rad_to_deg;
+%                     
+%                     theta = theta - angle; %minus angle because our angles are clockwise
+%                     
+%                     theta = theta * Constants.deg_to_rad;
+%                     
+%                     [x,y] = pol2cart(theta,radius);
+%                     
+%                     locationInM(1) = x;
+%                     locationInM(2) = y;
+%                 end
+%                 
+%                 
+%                 singleDimensions = detector.singleDetectorDimensions;
+%                 wholeDimensions = detector.wholeDetectorDimensions;
+%                 
+%                 detectorLineHeight = Constants.detector_line_height;
+%                 
+%                 % graphic properities
+%                 edgeColour = Constants.Detector_Colour;
+%                 backEdgeColour = Constants.Detector_Back_Colour;
+%                 
+%                 faceColour = 'none';
+%                 lineStyle = '-';
+%                 lineWidth = [];
+%                 
+%                 % need these axis to rotate around
+%                 aboutX = [1,0,0];
+%                 aboutY = [0,1,0];
+%                 aboutZ = [0,0,1];
+%                 
+%                 % xy rotation angle
+%                 [theta, ~] = cart2pol(locationInM(1), locationInM(2));
+%                 rotAngle = theta * Constants.rad_to_deg;
+%                 
+%                 % prepping angles and length
+%                 xyIsAngular = singleDimensions(1).units.isAngular;
+%                 zIsAngular = singleDimensions(2).units.isAngular;
+%                 
+%                 if xyIsAngular
+%                     xyAngle = singleDimensions(1).getAngleInDegrees() * wholeDimensions(1);
+%                 else
+%                     xyLength = singleDimensions(1).getLengthInM() * wholeDimensions(1);
+%                 end
+%                 
+%                 if zIsAngular
+%                     zAngle = singleDimensions(2).getAngleInDegrees() * wholeDimensions(2);
+%                 else
+%                     zLength = singleDimensions(2).getLengthInM() * wholeDimensions(2);
+%                 end
+%                 
+%                 radius = norm([locationInM(1), locationInM(2)]); % get x,y norm
+%                 
+%                 % *****************************************************
+%                 % plot xyLines as vertical line at x = radius, and then
+%                 % rotate into correct position
+%                 
+%                 xyLines_top_x = [radius, radius];
+%                 xyLines_bot_x = [radius + detectorLineHeight, radius + detectorLineHeight];
+%                 
+%                 if ~xyIsAngular
+%                     xyLines_y = [-xyLength/2, xyLength/2];
+%                 end
+%                 
+%                 if zIsAngular
+%                     if zAngle == 0
+%                         xyLines_z_vals = locationInM(3);
+%                     else
+%                         xyLines_z_vals =  -zAngle/2 : singleDimensions(2).getAngleInDegrees() : zAngle/2;
+%                     end
+%                 else
+%                     if zLength == 0
+%                         xyLines_z_vals = locationInM(3);
+%                     else
+%                         xyLines_z_vals = locationInM(3) - (zLength/2) : singleDimensions(2).getLengthInM() : locationInM(3) + (zLength/2);
+%                     end
+%                 end
+%                 
+%                 for i=1:length(xyLines_z_vals)
+%                     xyLines_z = xyLines_z_vals(i);
+%                     
+%                     if xyIsAngular
+%                         x = 0;
+%                         y = 0;
+%                         
+%                         topR = radius;
+%                         botR = radius + detectorLineHeight;
+%                         
+%                         if zIsAngular
+%                             z = locationInM(3);
+%                             
+%                             theta = xyLines_z;
+%                             psi = xyAngle/2;
+%                             arcRadius = topR;
+%                             
+%                             top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+%                             top_ang1 = -abs(top_ang1); % confirm negative
+%                             
+%                             top_ang2 = -top_ang1;
+%                             
+%                             arcRadius = botR;
+%                             
+%                             bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+%                             bot_ang1 = -abs(bot_ang1); % confirm negative
+%                             
+%                             bot_ang2 = -bot_ang1;
+%                             
+%                             if detector.movesWithPerAngleTranslation
+%                                 y = y + perAngleXY;
+%                             end
+%                             
+%                             topLineHandle = circleOrArcPatch(...
+%                                 x, y, z,...
+%                                 topR, top_ang1, top_ang2,...
+%                                 edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                             botLineHandle = circleOrArcPatch(...
+%                                 x, y, z,...
+%                                 botR, bot_ang1, bot_ang2,...
+%                                 backEdgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                             
+%                             % rotate about y to get them in position
+%                             origin = [0, 0, locationInM(3)];
+%                             
+%                             rotate(topLineHandle, aboutY, xyLines_z, origin);
+%                             rotate(botLineHandle, aboutY, xyLines_z, origin);
+%                         else
+%                             z = xyLines_z;
+%                             
+%                             top_ang1 = (-xyAngle/2);
+%                             top_ang2 = (xyAngle/2);
+%                             
+%                             bot_ang1 = (-xyAngle/2);
+%                             bot_ang2 = (xyAngle/2);
+%                             
+%                             if detector.movesWithPerAngleTranslation
+%                                 y = y + perAngleXY;
+%                             end
+%                             
+%                             topLineHandle = circleOrArcPatch(...
+%                                 x, y, z,...
+%                                 topR, top_ang1, top_ang2,...
+%                                 edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                             botLineHandle = circleOrArcPatch(...
+%                                 x, y, z,...
+%                                 botR, bot_ang1, bot_ang2,...
+%                                 backEdgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                         end
+%                         
+%                     else
+%                         topX = xyLines_top_x;
+%                         botX = xyLines_bot_x;
+%                         
+%                         y = xyLines_y;
+%                         
+%                         if zIsAngular
+%                             z = [locationInM(3), locationInM(3)];
+%                         else
+%                             z = [xyLines_z, xyLines_z];
+%                         end
+%                         
+%                         if detector.movesWithPerAngleTranslation
+%                             y = y + perAngleXY;
+%                         end
+%                         
+%                         topLineHandle = line(topX, y, z, 'Parent', axesHandle, 'Color', edgeColour);
+%                         botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
+%                         
+%                         if zIsAngular % rotate about y to get them in position
+%                             origin = [0,0,locationInM(3)];
+%                             
+%                             rotate(topLineHandle, aboutY, xyLines_z, origin);
+%                             rotate(botLineHandle, aboutY, xyLines_z, origin);
+%                         end
+%                     end
+%                     
+%                     % rotate so that middle is at start point
+%                     rotate(topLineHandle, aboutZ, rotAngle);
+%                     rotate(botLineHandle, aboutZ, rotAngle);
+%                     
+%                     % add to plot handles
+%                     handles = {topLineHandle, botLineHandle};
+%                     plotHandles = [plotHandles, handles];
+%                 end
+%                 
+%                 % *****************************************************
+%                 % plot zLines as z direction line at x = radius,
+%                 % and then rotate into correct position
+%                 
+%                 xyLines_top_x = [radius, radius];
+%                 xyLines_bot_x = [radius + detectorLineHeight, radius + detectorLineHeight];
+%                 
+%                 if xyIsAngular
+%                     if xyAngle == 0
+%                         xyLines_y_vals = 0;
+%                     else
+%                         xyLines_y_vals =  -xyAngle/2 : singleDimensions(1).getAngleInDegrees() : xyAngle/2;
+%                     end
+%                 else
+%                     if xyLength == 0
+%                         xyLines_y_vals = 0;
+%                     else
+%                         xyLines_y_vals =  -(xyLength/2) : singleDimensions(1).getLengthInM() : (xyLength/2);
+%                     end
+%                 end
+%                 
+%                 
+%                 if ~zIsAngular
+%                     xyLines_z = [locationInM(3) - zLength/2, locationInM(3) + zLength/2];
+%                 end
+%                 
+%                 for i=1:length(xyLines_y_vals)
+%                     xyLines_y = xyLines_y_vals(i);
+%                     
+%                     if zIsAngular
+%                         x = 0;
+%                         z = locationInM(3);
+%                         
+%                         topR = radius;
+%                         botR = radius + detectorLineHeight;
+%                         
+%                         if xyIsAngular
+%                             y = 0;
+%                             
+%                             theta = xyLines_y;
+%                             psi = zAngle/2;
+%                             arcRadius = topR;
+%                             
+%                             top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+%                             top_ang1 = -abs(top_ang1); % confirm negative
+%                             
+%                             top_ang2 = -top_ang1;
+%                             
+%                             arcRadius = botR;
+%                             
+%                             bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
+%                             bot_ang1 = -abs(bot_ang1); % confirm negative
+%                             
+%                             bot_ang2 = -bot_ang1;
+%                         else
+%                             y = xyLines_y;
+%                             
+%                             top_ang1 = (-zAngle/2);
+%                             top_ang2 = (zAngle/2);
+%                             
+%                             bot_ang1 = (-zAngle/2);
+%                             bot_ang2 = (zAngle/2);
+%                         end
+%                         
+%                         if detector.movesWithPerAngleTranslation
+%                             y = y + perAngleXY;
+%                             aboutZOrigin = [0,y,0];
+%                         else
+%                             aboutZOrigin = [0,0,0];
+%                         end
+%                         
+%                         topLineHandle = circleOrArcPatch(...
+%                             x, y, z,...
+%                             topR, top_ang1, top_ang2,...
+%                             edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                         botLineHandle = circleOrArcPatch(...
+%                             x, y, z,...
+%                             botR, bot_ang1, bot_ang2,...
+%                             backEdgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                         
+%                         % since angle in xy, rotate 90 about x
+%                         origin = [x,y,z];
+%                         
+%                         rotate(topLineHandle, aboutX, 90, origin);
+%                         rotate(botLineHandle, aboutX, 90, origin);
+%                         
+%                         if xyIsAngular % rotate about y to get them in position
+%                             rotate(topLineHandle, aboutZ, xyLines_y, aboutZOrigin);
+%                             rotate(botLineHandle, aboutZ, xyLines_y, aboutZOrigin);
+%                         end
+%                         
+%                         % add to plot handles
+%                         handles = {topLineHandle, botLineHandle};
+%                         plotHandles = [plotHandles, handles];
+%                     else
+%                         topX = xyLines_top_x;
+%                         botX = xyLines_bot_x;
+%                         
+%                         if xyIsAngular
+%                             y = [0,0];
+%                         else
+%                             y = [xyLines_y, xyLines_y];
+%                         end
+%                         
+%                         z = xyLines_z;
+%                         
+%                         if detector.movesWithPerAngleTranslation
+%                             y = y + perAngleXY;
+%                             
+%                             origin = [0, y, 0];
+%                         else
+%                             origin = [0,0,0];
+%                         end
+%                         
+%                         topLineHandle = line(topX, y, z, 'Parent', axesHandle, 'Color', edgeColour);
+%                         botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
+%                         
+%                         if xyIsAngular % rotate about z to get them in position
+%                             rotate(topLineHandle, aboutZ, xyLines_y, origin);
+%                             rotate(botLineHandle, aboutZ, xyLines_y, origin);
+%                         end
+%                     end
+%                     
+%                     % rotate so that middle is at start point
+%                     rotate(topLineHandle, aboutZ, rotAngle);
+%                     rotate(botLineHandle, aboutZ, rotAngle);
+%                     
+%                     % add to plot handles
+%                     handles = {topLineHandle, botLineHandle};
+%                     plotHandles = [plotHandles, handles];
+%                 end
                 
-                if xyIsAngular
-                    x = 0;
-                    y = 0;
-                    
-                    topR = radius;
-                    botR = radius + detectorLineHeight;
-                    
-                    if zIsAngular
-                        z = locationInM(3);
-                        
-                        theta = xyLines_z;
-                        psi = xyAngle/2;
-                        arcRadius = topR;
-                        
-                        top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
-                        top_ang1 = -abs(top_ang1); % confirm negative
-                        
-                        top_ang2 = -top_ang1;
-                        
-                        arcRadius = botR;
-                        
-                        bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
-                        bot_ang1 = -abs(bot_ang1); % confirm negative
-                        
-                        bot_ang2 = -bot_ang1;
-                        
-                        if detector.movesWithPerAngleTranslation
-                            y = y + perAngleXY;
-                        end
-                                 
-                        topLineHandle = circleOrArcPatch(...
-                            x, y, z,...
-                            topR, top_ang1, top_ang2,...
-                            edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                        botLineHandle = circleOrArcPatch(...
-                            x, y, z,...
-                            botR, bot_ang1, bot_ang2,...
-                            backEdgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                        
-                        % rotate about y to get them in position
-                        origin = [0, 0, locationInM(3)];
-                        
-                        rotate(topLineHandle, aboutY, xyLines_z, origin);
-                        rotate(botLineHandle, aboutY, xyLines_z, origin);
-                    else
-                        z = xyLines_z;
-                        
-                        top_ang1 = (-xyAngle/2);
-                        top_ang2 = (xyAngle/2);
-                        
-                        bot_ang1 = (-xyAngle/2);
-                        bot_ang2 = (xyAngle/2);
-                        
-                        if detector.movesWithPerAngleTranslation
-                            y = y + perAngleXY;
-                        end
-                        
-                        topLineHandle = circleOrArcPatch(...
-                            x, y, z,...
-                            topR, top_ang1, top_ang2,...
-                            edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                        botLineHandle = circleOrArcPatch(...
-                            x, y, z,...
-                            botR, bot_ang1, bot_ang2,...
-                            backEdgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                    end
-                    
-                else
-                    topX = xyLines_top_x;
-                    botX = xyLines_bot_x;
-                    
-                    y = xyLines_y;
-                    
-                    if zIsAngular
-                        z = [locationInM(3), locationInM(3)];
-                    else
-                        z = [xyLines_z, xyLines_z];
-                    end
-                    
-                    if detector.movesWithPerAngleTranslation
-                        y = y + perAngleXY;
-                    end
-                    
-                    topLineHandle = line(topX, y, z, 'Parent', axesHandle, 'Color', edgeColour);
-                    botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
-                    
-                    if zIsAngular % rotate about y to get them in position
-                        origin = [0,0,locationInM(3)];
-                        
-                        rotate(topLineHandle, aboutY, xyLines_z, origin);
-                        rotate(botLineHandle, aboutY, xyLines_z, origin);
-                    end
-                end
-                                
-                % rotate so that middle is at start point
-                rotate(topLineHandle, aboutZ, rotAngle);
-                rotate(botLineHandle, aboutZ, rotAngle);
                 
-                % add to plot handles
-                handles = {topLineHandle, botLineHandle};
-                plotHandles = [plotHandles, handles];
-            end
-            
-            % *****************************************************
-            % plot zLines as z direction line a x = radius,
-            % and then rotate into correct position
-            
-            xyLines_top_x = [radius, radius];
-            xyLines_bot_x = [radius + detectorLineHeight, radius + detectorLineHeight];
-            
-            if xyIsAngular
-                if xyAngle == 0
-                    xyLines_y_vals = 0;
-                else
-                    xyLines_y_vals =  -xyAngle/2 : singleDimensions(1).getAngleInDegrees() : xyAngle/2;
-                end
-            else
-                if xyLength == 0
-                    xyLines_y_vals = 0;
-                else
-                    xyLines_y_vals =  -(xyLength/2) : singleDimensions(1).getLengthInM() : (xyLength/2);
-                end
-            end
-            
-            
-            if ~zIsAngular
-                xyLines_z = [locationInM(3) - zLength/2, locationInM(3) + zLength/2];
-            end
-            
-            for i=1:length(xyLines_y_vals)
-                xyLines_y = xyLines_y_vals(i);
-                
-                if zIsAngular
-                    x = 0;
-                    z = locationInM(3);
-                    
-                    topR = radius;
-                    botR = radius + detectorLineHeight;
-                    
-                    if xyIsAngular
-                        y = 0;
-                        
-                        theta = xyLines_y;
-                        psi = zAngle/2;
-                        arcRadius = topR;
-                        
-                        top_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
-                        top_ang1 = -abs(top_ang1); % confirm negative
-                        
-                        top_ang2 = -top_ang1;
-                        
-                        arcRadius = botR;
-                        
-                        bot_ang1 = findAngleForPerpendicularArc(theta, psi, arcRadius);
-                        bot_ang1 = -abs(bot_ang1); % confirm negative
-                        
-                        bot_ang2 = -bot_ang1;
-                    else
-                        y = xyLines_y;
-                        
-                        top_ang1 = (-zAngle/2);
-                        top_ang2 = (zAngle/2);
-                        
-                        bot_ang1 = (-zAngle/2);
-                        bot_ang2 = (zAngle/2);
-                    end
-                    
-                    if detector.movesWithPerAngleTranslation
-                        y = y + perAngleXY;
-                        aboutZOrigin = [0,y,0];
-                    else
-                        aboutZOrigin = [0,0,0];
-                    end
-                    
-                    topLineHandle = circleOrArcPatch(...
-                        x, y, z,...
-                        topR, top_ang1, top_ang2,...
-                        edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                    botLineHandle = circleOrArcPatch(...
-                        x, y, z,...
-                        botR, bot_ang1, bot_ang2,...
-                        backEdgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                    
-                    % since angle in xy, rotate 90 about x
-                    origin = [x,y,z];
-                    
-                    rotate(topLineHandle, aboutX, 90, origin);
-                    rotate(botLineHandle, aboutX, 90, origin);
-                    
-                    if xyIsAngular % rotate about y to get them in position
-                        rotate(topLineHandle, aboutZ, xyLines_y, aboutZOrigin);
-                        rotate(botLineHandle, aboutZ, xyLines_y, aboutZOrigin);
-                    end
-                    
-                    % add to plot handles
-                    handles = {topLineHandle, botLineHandle};
-                    plotHandles = [plotHandles, handles];
-                else
-                    topX = xyLines_top_x;
-                    botX = xyLines_bot_x;
-                    
-                    if xyIsAngular
-                        y = [0,0];
-                    else
-                        y = [xyLines_y, xyLines_y];
-                    end
-                    
-                    z = xyLines_z;
-                    
-                    if detector.movesWithPerAngleTranslation
-                        y = y + perAngleXY;
-                        
-                        origin = [0, y, 0];
-                    else
-                        origin = [0,0,0];
-                    end
-                    
-                    topLineHandle = line(topX, y, z, 'Parent', axesHandle, 'Color', edgeColour);
-                    botLineHandle = line(botX, y, z, 'Parent', axesHandle, 'Color', backEdgeColour);
-                    
-                    if xyIsAngular % rotate about z to get them in position                                                
-                        rotate(topLineHandle, aboutZ, xyLines_y, origin);
-                        rotate(botLineHandle, aboutZ, xyLines_y, origin);
-                    end
-                end
-                
-                % rotate so that middle is at start point
-                rotate(topLineHandle, aboutZ, rotAngle);
-                rotate(botLineHandle, aboutZ, rotAngle);
-                
-                % add to plot handles
-                handles = {topLineHandle, botLineHandle};
-                plotHandles = [plotHandles, handles];                
-            end
-            
-            
-            if detector.movesWithScanAngle
-                % draw circle outlining the movement of the
-                % detector
-                
-                xyRadius = norm([locationInM(1), locationInM(2)]);
-                
-                if zIsAngular
-                    zAngle = singleDimensions(2).getAngleInDegrees() * wholeDimensions(2);
-                    
-                    zLength = 2 * (sind(zAngle/2) * xyRadius);
-                    
-                    radius = sqrt((xyRadius^2) - ((zLength/2)^2));
-                else
-                    zLength = singleDimensions(2).getLengthInM() * detector.wholeDetectorDimensions(2);
-                    
-                    radius = xyRadius;
-                end
-                                
-                edgeColour = Constants.Detector_Colour;
-                lineStyle = '--';
-                lineWidth = [];
-                faceColour = [];
-                
-                
-                if zLength == 0
-                    handle = circleOrArcPatch(0, 0, locationInM(3),...
-                        radius, 0, 360,...
-                        edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                    
-                    handles = {handle};
-                else
-                    handle1 = circleOrArcPatch(...
-                        0, 0, locationInM(3) - (zLength/2),...
-                        radius, 0, 360,...
-                        edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                    handle2 = circleOrArcPatch(...
-                        0, 0, locationInM(3) + (zLength/2),...
-                        radius, 0, 360,...
-                        edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
-                    
-                    handles = {handle1, handle2};                    
-                end
-                  
-                % add to plot handles
-                plotHandles = [plotHandles, handles];
-            end
+%                 if detector.movesWithScanAngle
+%                     % draw circle outlining the movement of the
+%                     % detector
+%                     
+%                     xyRadius = norm([locationInM(1), locationInM(2)]);
+%                     
+%                     if zIsAngular
+%                         zAngle = singleDimensions(2).getAngleInDegrees() * wholeDimensions(2);
+%                         
+%                         zLength = 2 * (sind(zAngle/2) * xyRadius);
+%                         
+%                         radius = sqrt((xyRadius^2) - ((zLength/2)^2));
+%                     else
+%                         zLength = singleDimensions(2).getLengthInM() * detector.wholeDetectorDimensions(2);
+%                         
+%                         radius = xyRadius;
+%                     end
+%                     
+%                     edgeColour = Constants.Detector_Colour;
+%                     lineStyle = '--';
+%                     lineWidth = [];
+%                     faceColour = [];
+%                     
+%                     
+%                     if zLength == 0
+%                         handle = circleOrArcPatch(0, 0, locationInM(3),...
+%                             radius, 0, 360,...
+%                             edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                         
+%                         handles = {handle};
+%                     else
+%                         handle1 = circleOrArcPatch(...
+%                             0, 0, locationInM(3) - (zLength/2),...
+%                             radius, 0, 360,...
+%                             edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                         handle2 = circleOrArcPatch(...
+%                             0, 0, locationInM(3) + (zLength/2),...
+%                             radius, 0, 360,...
+%                             edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+%                         
+%                         handles = {handle1, handle2};
+%                     end
+%                     
+%                     % add to plot handles
+%                     plotHandles = [plotHandles, handles];
+%                 end
         end
         
         function handles = setGUI(detector, handles)

@@ -20,6 +20,16 @@ classdef AngleData
             data.positionData = positionData;
             data.angle = angle;
         end
+        
+        function data = clearBeforeSave(data)
+            dims = size(data.positionData);
+            
+            for i=1:dims(1)
+                for j=1:dims(2)
+                    data.positionData{i,j} = data.positionData{i,j}.clearBeforeSave();
+                end
+            end
+        end
     end
     
 end

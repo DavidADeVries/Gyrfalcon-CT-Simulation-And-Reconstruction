@@ -3,35 +3,151 @@ classdef PhotonBeam
     % This class contains all the data pertaining to a beam of photons
     % 
     % FIELDS:
-    % *energy:
-    % the energy of one photon in the beam, measured in keV (electron volts)
+    % *energies:
+    % the energies of photons in the beam, measured in MeV (electron volts)
     %
-    % *intensity:
-    % the intensity of the photons at the photonEnergy, measured in W/m^2
-    
-    
+    % *intensities:
+    % the intensities of the photons at the energies, measured in W/m^2
+    %
+    % *waterLinearAttenutationCoefficients:
+    % the linear attneuation coefficients for the energies for the photon
+    % beams. Values to stored to reduce computation time when converting
+    % from Houndsfield units
+    %
+    % *airLinearAttenutationCoefficients:
+    % the linear attneuation coefficients for the energies for the photon
+    % beams. Values to stored to reduce computation time when converting
+    % from Houndsfield units
+    %
+    % *calibratedPhantomDataSet
+    % 
     
     properties
-        energy
-        intensity
+        energies
+        intensities
+        
+        waterLinearAttenuationCoefficients
+        airLinearAttenuationCoefficients
+        
+        calibratedPhantomDataSet
     end
     
     methods
-        function beam = PhotonBeam(energy, intensity)
-            beam.energy = energy;
-            beam.intensity = intensity;
+        function beam = PhotonBeam(energies, intensities)
+            beam.energies = energies;
+            beam.intensities = intensities;
+            
+            numEnergies = length(energies);
+            
+            waterCoeffs = zeros(numEnergies,1);
+            airCoeffs = zeros(numEnergies,1);
+            
+            for i=1:numEnergies
+                [waterCoeff, airCoeff] = getWaterAndAirLinearAttenuationCoefficientsForPhotonEnergy(energies(i));
+                
+                waterCoeffs(i) = waterCoeff;
+                airCoeffs(i) = airCoeff;
+            end
+            
+            beam.waterLinearAttenuationCoefficients = waterCoeffs;
+            beam.airLinearAttenuationCoefficients = airCoeffs;
         end
         
-        function finalIntensity = modelAbsorption(photonBeam, absorptionValues, absorptionValueDistances)
-            % STEP 1
-            % sum over absorption values times distance
+        function photonBeam = clearBeforeSave(photonBeam)
+            photonBeam.calibratedPhantomDataSet = {};
+        end
+        
+        function photonBeam = calibrateAndSetPhantomData(photonBeam, phantomDataInHU)
+            energies = photonBeam.energies;
             
-            absorptionSum = sum(absorptionValues .* absorptionValueDistances);
+            numEnergies = length(energies);
             
-            % STEP 2
-            % apply Lambert-Beer's Law
+            calibratedPhantomDataSet = cell(numEnergies,1);
             
-            finalIntensity = photonBeam.intensity .* exp(-absorptionSum);
+            for i=1:numEnergies
+                waterCoeff = photonBeam.waterLinearAttenuationCoefficients(i);
+                airCoeff = photonBeam.airLinearAttenuationCoefficients(i);
+                
+                calibratedPhantomDataSet{i} = convertFromHoundsfieldToLinearAttenuation(phantomDataInHU, airCoeff, waterCoeff);
+            end
+            
+            photonBeam.calibratedPhantomDataSet = calibratedPhantomDataSet;
+        end
+        
+        function [finalIntensity, attenuationCoords] = modelAbsorption(photonBeam, coords, absorptionValsDistance)
+            finalIntensity = 0;
+            
+            xCoords = coords(:,1);
+            yCoords = coords(:,2);
+            zCoords = coords(:,3);
+            
+            attenuationCoords = sub2ind(size(photonBeam.calibratedPhantomDataSet{1}),xCoords,yCoords,zCoords);
+                        
+            for i=1:length(photonBeam.energies)
+               intensity = photonBeam.intensities(i);
+                    
+               % STEP 1
+               % get phantom data from in linear attentuation units
+               
+               phantomDataInAttenuation = photonBeam.calibratedPhantomDataSet{i};
+               
+               % get relevant values
+               attenuationValues = phantomDataInAttenuation(attenuationCoords);
+                                             
+               % STEP 2
+               % sum over all voxels tranversed (including weighting)
+               
+               absorptionSum = sum(attenuationValues .* absorptionValsDistance);
+               
+               % STEP 3
+               % apply Lambert-Beer's Law
+               
+               finalIntensity = finalIntensity + (intensity .* exp(-absorptionSum));
+               
+            end
+        end
+        
+        function photonBeam = saveAs(photonBeam)
+            minEnergy = min(photonBeam.energies);
+            maxEnergy = max(photonBeam.energies);
+            
+            minIntensity = min(photonBeam.intensities);
+            maxIntensity = max(photonBeam.intensities);
+            
+            if minEnergy == maxEnergy
+                energyString = [num2str(minEnergy), ' MeV'];
+            else
+                energyString = [num2str(minEnergy), '-', num2str(maxEnergy), ' MeV'];
+            end
+            
+            if minIntensity == maxIntensity
+                intensityString = [num2str(minIntensity), ' Wm-2'];
+            else
+                intensityString = [num2str(minIntensity), '-', num2str(maxIntensity), ' Wm-2'];
+            end
+            
+            fileName = [Constants.Default_Beam_Characterization_File_Name, ' (', energyString, ', ', intensityString, ')'];
+            
+            defaultName = [fileName, Constants.Matlab_File_Extension];
+            dialogTitle = 'Save Beam Characterization As...';
+            
+            [fileName, pathName] = uiputfile(defaultName, dialogTitle);
+            
+            if ischar(fileName) && ischar(pathName) % not cancelled
+                savePath = makePath(pathName, fileName);
+                
+                save(savePath, Constants.Save_Beam_Characterization_Var_Name); %var: "photonBeam"
+            else
+                photonBeam = []; % cancelled, so we wipe it out
+            end
+        end
+        
+        function intensity = rawIntensity(photonBeam)
+            intensity = 0;
+            
+            for i=1:length(photonBeam.intensities)
+                intensity = intensity + photonBeam.intensities(i);
+            end
         end
     end
     

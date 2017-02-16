@@ -159,8 +159,3 @@ function nextPoint = findNextIntersectionPoint(lastPoint, linePoint, lineDeltas,
 end
 
 
-function roundedVal = roundToNanoM(valInM)
-   roundOff = 10^8; % within 1nm
-   
-   roundedVal = round(valInM * roundOff) / roundOff;
-end

@@ -30,12 +30,12 @@ classdef ProcessingRun
         function run = collectNotes(run)
             prompt = 'Please enter any needed notes about the processing run:';
             dlg_title = 'Notes Input';
-            num_lines = [1,250];
+            num_lines = [1,100];
             
             if isempty(run.notes)
-                defAns = '';
+                defAns = {''};
             else
-                defAns = run.notes;
+                defAns = {run.notes};
             end
             
             answer = inputdlg(prompt, dlg_title, num_lines, defAns);
@@ -71,7 +71,7 @@ classdef ProcessingRun
         
         function [] = save(run)
             % chance to set save path if needed
-            if run.isValidForSave()
+            if ~run.isValidForSave()
                 run = run.collectSavePathAndFilename();
             end
             

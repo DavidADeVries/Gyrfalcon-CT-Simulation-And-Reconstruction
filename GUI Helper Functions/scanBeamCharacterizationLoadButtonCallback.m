@@ -43,8 +43,8 @@ function [photonBeam, fileName] = createNewBeamCharacterization()
     
     title = 'Create Beam Characterization';
 
-    questions = {'Please enter beam intensity (W/m²):', 'Please enter beam energy (keV)'};
-    default = {'100','1'};
+    questions = {'Please enter beam intensities (a,b,c or start:interval:end) (W/m²):', 'Please enter matching beam energies (a,b,c or start:interval:end) (MeV)'};
+    default = {'1','1'};
     numLines = 1;
     
     answers = inputdlg(questions, title, numLines, default);
@@ -52,27 +52,12 @@ function [photonBeam, fileName] = createNewBeamCharacterization()
     if isempty(answers) % pressed cancel
         photonBeam = [];
     else
-        intensity = str2double(answers{1});
-        energy = str2double(answers{2});
+        intensities = getValuesFromIntervalString(answers{1});
+        energies = getValuesFromIntervalString(answers{2});
         
-        photonBeam = PhotonBeam(energy, intensity);
+        photonBeam = PhotonBeam(energies, intensities);
         
-        enerString = num2str(energy);
-        
-        fileName = [Constants.Default_Beam_Characterization_File_Name, ' - ', enerString, 'keV'];
-
-        defaultName = [fileName, Constants.Matlab_File_Extension];
-        dialogTitle = 'Save Beam Characterization As...';
-        
-        [fileName, pathName] = uiputfile(defaultName, dialogTitle);
-        
-        if ischar(fileName) && ischar(pathName) % not cancelled
-            savePath = makePath(pathName, fileName);
-                        
-            save(savePath, Constants.Save_Beam_Characterization_Var_Name); %var: "photonBeam"
-        else
-            photonBeam = []; % cancelled, so we wipe it out
-        end
+        photonBeam = photonBeam.saveAs();
     end
 end
 

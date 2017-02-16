@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 25-Jan-2017 16:29:26
+% Last Modified by GUIDE v2.5 16-Feb-2017 11:03:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1135,3 +1135,33 @@ function scanSimViewDetectorRayTraces_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 checkUncheck(hObject);
+
+
+% --- Executes on button press in sourceFillDetectorButton.
+function sourceFillDetectorButton_Callback(hObject, eventdata, handles)
+% hObject    handle to sourceFillDetectorButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+sourceFillDetectorButtonCallback(hObject, eventdata, handles);
+
+% --- Executes on button press in detectorMakeXYEqualZButton.
+function detectorMakeXYEqualZButton_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorMakeXYEqualZButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+changeXY = true;
+
+detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY);
+
+% --- Executes on button press in detectorMakeZEqualXYButton.
+function detectorMakeZEqualXYButton_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorMakeZEqualXYButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+changeXY = false;
+
+detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY);

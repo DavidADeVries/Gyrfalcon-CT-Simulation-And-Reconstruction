@@ -102,6 +102,10 @@ classdef Scan
             end
         end
         
+        function scan = clearBeforeSave(scan)
+            scan.beamCharacterization = scan.beamCharacterization.clearBeforeSave();
+        end
+        
         function slicesInM = getSlicesInM(scan)
             slices = scan.slices;
             units = scan.sliceUnits;
@@ -365,7 +369,7 @@ classdef Scan
             setDoubleForHandle(handles.scanPerAngleStepDimensionsXYEdit, xy);
             setDoubleForHandle(handles.scanPerAngleStepDimensionsZEdit, z);
             
-            handles.scanBeamCharacterization = scan.beamCharacterization; % TODO!
+            handles.scanBeamCharacterization = scan.beamCharacterization;
             
             if ~isempty(scan.beamCharacterizationFileName)
                 setString(handles.scanBeamCharacterizationFileNameText, scan.beamCharacterizationFileName);
