@@ -132,7 +132,8 @@ classdef Detector
         end
         
         function plotHandles = plot(detector, axesHandle, slicePosition, angle, perAngleXY, perAngleZ)
-            hold(axesHandle,'on');
+            axes(axesHandle);
+            hold on;
             
             [xPlotVals, yPlotVals, zPlotVals] = getAllDetectorCoords(detector, slicePosition, angle, perAngleXY, perAngleZ);
             
@@ -140,8 +141,7 @@ classdef Detector
             
             handle = mesh(xPlotVals,yPlotVals,zPlotVals,...
                 'EdgeColor', edgeColour,...
-                'FaceColor', 'none',...
-                'Parent', axesHandle);
+                'FaceColor', 'none');
             
             plotHandles = {handle};                
                 
@@ -158,30 +158,44 @@ classdef Detector
                 x = xPlotVals(1,halfXY);
                 y = yPlotVals(1,halfXY);
                 
-                highZ = zPlotVals(numZ,halfXY);
-                lowZ = zPlotVals(1,halfXY);
+                highZ = zPlotVals
                 
-                circRadius = norm([x y]);
-                                
+                
+                
+                xyRadius = norm([locationInM(1), locationInM(2)]);
+                
+                if zIsAngular
+                    zAngle = singleDimensions(2).getAngleInDegrees() * wholeDimensions(2);
+                    
+                    zLength = 2 * (sind(zAngle/2) * xyRadius);
+                    
+                    radius = sqrt((xyRadius^2) - ((zLength/2)^2));
+                else
+                    zLength = singleDimensions(2).getLengthInM() * detector.wholeDetectorDimensions(2);
+                    
+                    radius = xyRadius;
+                end
+                
                 edgeColour = Constants.Detector_Colour;
                 lineStyle = '--';
                 lineWidth = [];
-                faceColour = [];                
+                faceColour = [];
                 
-                if highZ == lowZ
-                    handle = circleOrArcPatch(0, 0, highZ,...
-                        circRadius, 0, 360,...
+                
+                if zLength == 0
+                    handle = circleOrArcPatch(0, 0, locationInM(3),...
+                        radius, 0, 360,...
                         edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
                     
                     handles = {handle};
                 else
                     handle1 = circleOrArcPatch(...
-                        0, 0, lowZ,...
-                        circRadius, 0, 360,...
+                        0, 0, locationInM(3) - (zLength/2),...
+                        radius, 0, 360,...
                         edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
                     handle2 = circleOrArcPatch(...
-                        0, 0, highZ,...
-                        circRadius, 0, 360,...
+                        0, 0, locationInM(3) + (zLength/2),...
+                        radius, 0, 360,...
                         edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
                     
                     handles = {handle1, handle2};

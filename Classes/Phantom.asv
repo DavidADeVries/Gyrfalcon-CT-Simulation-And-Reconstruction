@@ -99,8 +99,7 @@ classdef Phantom
         
         function [] = plot(phantom, axesHandle)
             phantomDataInHU = phantom.data;
-            phantomDimsInM = phantom.getVoxelDimensionsInM();
-            phantomLocationInM = phantom.getLocationInM();
+            phantomDimsInM 
             
             handles = getPhantomPlotCoords(phantomDataInHU, phantomDimsInM, phantomLocationInM, axesHandle);
 %             data = phantom.data;
