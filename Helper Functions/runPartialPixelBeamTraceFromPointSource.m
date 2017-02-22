@@ -43,6 +43,7 @@ switch detectorDimensions
                 beamCharacterization,...
                 displayDetectorRayTrace);
             
+            
             detectorValueSum = detectorValueSum + rawSubDetectorValue;
         end
         
@@ -66,6 +67,7 @@ switch detectorDimensions
                     phantomLocationInM,...
                     beamCharacterization,...
                     displayDetectorRayTrace);
+                
                 
                 detectorValueSum = detectorValueSum + rawSubDetectorValue;
             end

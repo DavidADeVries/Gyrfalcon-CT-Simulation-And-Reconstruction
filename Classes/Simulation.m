@@ -427,6 +427,8 @@ classdef Simulation
             
             totalNumStepStr = num2str(zNumDetectors*xyNumDetectors);
             
+            [xCoords, yCoords, zCoords] = getAllDetectorCoords(simulation.detector, slicePosition, angle, perAngleXY, perAngleZ);
+
             for zDetector=1:zNumDetectors
                 for xyDetector=1:xyNumDetectors                    
                     curNumStepStr = num2str(((zDetector-1)*zNumDetectors) + xyDetector);
@@ -436,11 +438,10 @@ classdef Simulation
                     newDir = ['Detector (', num2str(zDetector), ',', num2str(xyDetector), ')'];
                     mkdir(positionSavePath, newDir);
                     
-                    [clockwisePosZ,...
-                     clockwiseNegZ,...
-                     counterClockwisePosZ,...
-                     counterClockwiseNegZ]...
-                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector, perAngleShiftUsed);
+                    clockwisePosZ = [xCoords(zDetector,xyDetector), yCoords(zDetector,xyDetector), zCoords(zDetector,xyDetector)];
+                    clockwiseNegZ = [xCoords(zDetector+1,xyDetector), yCoords(zDetector+1,xyDetector), zCoords(zDetector+1,xyDetector)];
+                    counterClockwisePosZ = [xCoords(zDetector,xyDetector+1), yCoords(zDetector,xyDetector+1), zCoords(zDetector,xyDetector+1)];
+                    counterClockwiseNegZ = [xCoords(zDetector+1,xyDetector+1), yCoords(zDetector+1,xyDetector+1), zCoords(zDetector+1,xyDetector+1)];
                     
                     detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
                     

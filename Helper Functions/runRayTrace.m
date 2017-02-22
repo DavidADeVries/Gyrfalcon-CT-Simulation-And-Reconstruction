@@ -90,7 +90,7 @@ if displayDetectorRayTrace
         handles = [handles, {scatterHandle}];
     end
     
-    pause(0.000001);
+    pause(1);
     deleteHandles(handles);
 end
 

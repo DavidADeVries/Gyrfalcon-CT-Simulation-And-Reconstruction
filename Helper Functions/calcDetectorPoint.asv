@@ -78,7 +78,7 @@ function point = findPointAlongLineFromShift(linePoint1, linePoint2, shift)
     if shift == 0
         point = linePoint1;
     else
-        lineDeltas = linePoint2 - linePoint1;
+        lineDeltas = line2Point2 - linePoint1;
         
         deltasNorm = norm(lineDeltas);
         
@@ -95,8 +95,10 @@ function point = findPointAlongLineFromShift(linePoint1, linePoint2, shift)
         
         if isempty(nonZeroDim)
             error('Invalid line to shift along');
-        else            
-            point = linePoint1 + t*lineDeltas;
+        else
+            mult = sign(linePoint2(nonZeroDim) - linePoint1(nonZeroDim));
+            
+            point = linePoint1 + mult*t*lineDeltas;
         end
     end
 end

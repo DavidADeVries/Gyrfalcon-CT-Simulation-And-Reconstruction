@@ -23,6 +23,8 @@ classdef Constants
         Detector_Raster_Colour = [1,0.6,0.6];
         Detector_Raster_Alpha = 0.5;
         
+        Phantom_Plot_Z_Slices_Spacing = 0.15; % in m
+        
         Ray_Trace_Colour = 'b';
         Ray_Trace_Point_Colour = 'w';
         

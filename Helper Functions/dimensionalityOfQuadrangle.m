@@ -10,17 +10,19 @@ counterClockwiseNegZ = objectCoords(4,:);
 clockwiseDeltaZ = clockwisePosZ(3) - clockwiseNegZ(3);
 counterClockwiseDeltaZ = counterClockwisePosZ(3) - counterClockwiseNegZ(3);
 
+noZ = clockwiseDeltaZ == 0 && counterClockwiseDeltaZ == 0;
+
 posZDeltaXY = norm(clockwisePosZ(1:2) - counterClockwisePosZ(1:2));
 negZDeltaXY = norm(clockwiseNegZ(1:2) - counterClockwiseNegZ(1:2));
 
-if clockwiseDeltaZ ~= counterClockwiseDeltaZ || posZDeltaXY ~= negZDeltaXY
-    numDims = 3;
-elseif posZDeltaXY ~= 0 && clockwiseDeltaZ ~= 0
-    numDims = 2;
-elseif posZDeltaXY == 0 || clockwiseDeltaZ == 0
+noXY = all(posZDeltaXY == [0,0]) && all(negZDeltaXY == [0,0]);
+
+if noZ && noXY
+    numDims = 0;
+elseif noZ || noXY
     numDims = 1;
 else
-    numDims = 0;
+    numDims = 2;
 end
     
 
