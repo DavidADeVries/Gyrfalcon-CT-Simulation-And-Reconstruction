@@ -28,9 +28,9 @@ classdef Dimension
                 
                 switch dimension.units
                     case Units.radian
-                        dimLength = radiusInM * dimension.value;
+                        dimLength = sqrt((1-cos(dimension.value))*2*radiusInM^2);
                     case Units.degree
-                        dimLength = radiusInM * dimension.value * Constants.deg_to_rad;
+                        dimLength = sqrt((1-cosd(dimension.value))*2*radiusInM^2);
                     otherwise
                         error('Invalid unit!');
                 end
@@ -44,6 +44,33 @@ classdef Dimension
                         error('Invalid unit!');
                 end
             end
+        end
+        
+        function dimension = setValueFromLengthInM(dimension, lengthInM, varargin)
+            %will give length of dimensions in m, for angular dimensions,
+            % the arclength will be given, with respect to the rotation origin (second parameter)
+            % and rotation origin units (third parameter)
+            
+            if dimension.units.isAngular
+                radius = varargin{1};
+                radiusUnits = varargin{2};
+                
+                radius = Dimension(radius, radiusUnits);
+                radiusInM = radius.getLengthInM();
+                
+                switch dimension.units
+                    case Units.radian
+                        value = acos(1-((lengthInM^2)/(2*radiusInM^2)));
+                    case Units.degree
+                        value = acosd(1-((lengthInM^2)/(2*radiusInM^2)));
+                    otherwise
+                        error('Invalid unit!');
+                end
+            else
+                value = dimension.units.convertFromM(lengthInM);                
+            end
+            
+            dimension.value = value;
         end
         
         function angle = getAngleInDegrees(dimension)

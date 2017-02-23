@@ -110,9 +110,10 @@ methods
             angle = 0; %default
             perAngleXY = 0; %default
             perAngleZ = 0; %default
+            diameter = [];
             
             [startBoxCoords, endBoxCoords, ~, ~] = ...
-                getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ);
+                getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ, diameter);
         end
         
         if isempty(endBoxCoords)
@@ -301,7 +302,7 @@ methods
         source.saveFileName = handles.sourceSaveFileName;
     end
 
-    function [startBoxCoords, endBoxCoords, directionUnitVector, perAngleShift] = getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ)
+    function [startBoxCoords, endBoxCoords, directionUnitVector, perAngleShift] = getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ, diameter)
         startingLocation = source.getLocationInM();
 
         z = slicePosition + perAngleZ;
@@ -358,8 +359,10 @@ methods
 
         xyAngle = xyBeamAngle / 2;
         zAngle = zBeamAngle / 2;
-
-        diameter = 2 * radius;
+        
+        if isempty(diameter)
+            diameter = 2 * radius;
+        end            
 
         beamShift = [-diameter, 0, 0];
         rotationVector = [0,0,sourceAngle];

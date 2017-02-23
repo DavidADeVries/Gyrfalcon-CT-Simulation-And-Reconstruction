@@ -7,33 +7,32 @@ simulation = simulation.createFromGUI(handles);
 
 detector = simulation.detector;
 
-slicePosition = 0;
-angle = 0;
-perAngleXY = 0;
-perAngleZ = 0;
-
 dist = detector.getDistanceBetweenOriginAndDetectorCentrePointInM();
 
-newLocationInM = [dist,0,0]; %along x-axis, at z=0, will make the math easier
+xyDim = detector.singleDetectorDimensions(1);
+zDim = detector.singleDetectorDimensions(2);
 
-detector = detector.setLocationInM(newLocationInM);
 
-[xCoords, yCoords, zCoords] = ...
-    getAllDetectorCoords(detector, slicePosition, angle, perAngleXY, perAngleZ);
-
-dims = size(yCoords);
-
-numZ = dims(2);
-numXY = dims(1);
-
-widthY = abs(yCoords(1,round(numZ/2)));
-widthX = abs(xCoords(1,round(numZ/2)));
-
-heightZ = abs(zCoords(round(numXY/2),1));
-heightX = abs(xCoords(round(numXY/2),1));
-
-xyHalfAngle = atand(widthY/(2*widthX));
-zHalfAngle = atand(heightZ/(2*heightX));
+if xyDim.units.isAngular() && zDim.units.isAngular()
+    errorString = 'Cannot set square detector pixels for spherical detectors';
+    dlgname = 'Detector Set Error';
+    
+    errordlg(errorString, dlgname);
+else
+    if changeXY
+        setLength = zDim.getLengthInM(dist, Units.m);
+        
+        xyDim = xyDim.setValueFromLengthInM(setLength, dist, Units.m);
+        
+        setDoubleForHandle(handles.detectorSingleDetectorDimensionsXYEdit, xyDim.value);
+    else
+        setLength = xyDim.getLengthInM(dist, Units.m);
+        
+        zDim = zDim.setValueFromLengthInM(setLength, dist, Units.m);
+        
+        setDoubleForHandle(handles.detectorSingleDetectorDimensionsZEdit, zDim.value);
+    end
+end
 
 end
 

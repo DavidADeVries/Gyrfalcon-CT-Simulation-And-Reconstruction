@@ -1,0 +1,28 @@
+function [] = detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY)
+%[] = detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY)
+
+simulation = Simulation;
+
+simulation = simulation.createFromGUI(handles);
+
+detector = simulation.detector;
+
+slicePosition = 0;
+angle = 0;
+perAngleXY = 0;
+perAngleZ = 0;
+
+dist = detector.getDistanceBetweenOriginAndDetectorCentrePointInM();
+
+xyDim = detector.singleDetectorDimensions(1);
+zDim = detector.singleDetectorDimensions(2);
+
+
+if xyDim.isAngular() && zDim.isAngular()
+    
+else
+    
+end
+
+end
+

@@ -10,7 +10,7 @@ linePhantomIntersectionPoints = [];
 pointDetectorCoords = roundToNanoM(pointDetectorCoords);
 sourceEndBoxCoords = roundToNanoM(sourceEndBoxCoords);
 
-if pointIsWithinObject(pointDetectorCoords, sourceEndBoxCoords)
+if pointIsWithinSourceBeamCone(pointDetectorCoords, pointSourceCoords, sourceEndBoxCoords)
     % describe line in 3 space
     [deltas, point] = createLineEquation(pointSourceCoords, pointDetectorCoords);
         
