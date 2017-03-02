@@ -37,26 +37,26 @@ classdef Constants
         Slash = '\';
         
         Matlab_File_Extension = '.mat';
-                
+        
+        Default_Workspace_File_Name = 'Workspace';
+        
+        Default_Phantom_Data_Set_File_Name = 'Phantom Data Set';
+        Save_Phantom_Data_Set_Var_Name = 'dataSet';
+        
+        Save_Workplace_Simulation_Var_Name = 'simulation';
+        Save_Workplace_Status_Output_Var_Name = 'statusOutput';
+        
+        Default_Beam_Characterization_File_Name = 'Photon Beam';
+        Save_Beam_Characterization_Var_Name = 'photonBeam';
+        
         Processing_Run_Var_Name = 'run';
         
-        Default_Simulation_Name = 'Simulation';
         Default_Phantom_Name = 'Phantom';
         Default_Detector_Name = 'Detector';
         Default_Source_Name = 'Source';
         Default_Scan_Name = 'Scan';
         Default_Photon_Beam_Name = 'Photon Beam';
-        Default_Phantom_Data_Set_Name = 'Data Set';
-        Default_Workspace_Name = 'Workspace';
-        
-        Simulation_Display_Name = 'Simulation';
-        Phantom_Display_Name = 'Phantom';
-        Detector_Display_Name = 'Display';
-        Source_Display_Name = 'Source';
-        Scan_Display_Name = 'Scan';
-        Photon_Beam_Display_Name = 'Photon Beam';
-        Phantom_Data_Set_Display_Name = 'Phantom Data Set';
-        Workspace_Display_Name = 'Workspace';
+        Default_Phantom_Data_Set_Name = 'P';
     end
     
     methods

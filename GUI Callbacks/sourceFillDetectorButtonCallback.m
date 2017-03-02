@@ -1,11 +1,9 @@
 function []  = sourceFillDetectorButtonCallback(hObject, eventdata, handles)
 %[]  = sourceFillDetectorButtonCallback(hObject, eventdata, handles)
 
-simulation = Simulation;
+workspace = handles.workspace.createFromGUI(handles);
 
-simulation = simulation.createFromGUI(handles);
-
-detector = simulation.detector;
+detector = workspace.simulation.detector;
 
 slicePosition = 0;
 angle = 0;
@@ -13,7 +11,7 @@ perAngleXY = 0;
 perAngleZ = 0;
 
 dist = detector.getDistanceBetweenOriginAndDetectorCentrePointInM();
-sourceDist = simulation.source.getDistanceBetweenOriginAndSourceCentrePointInM();
+sourceDist = workspace.simulation.source.getDistanceBetweenOriginAndSourceCentrePointInM();
 
 newLocationInM = [dist,0,0]; %along x-axis, at z=0, will make the math easier
 
@@ -47,8 +45,16 @@ end
 
 zHalfAngle = asind(cornerCoord(3)/norm(cornerCoord));
 
-setDoubleForHandle(handles.sourceBeamAngleXYEdit, 2*xyHalfAngle);
-setDoubleForHandle(handles.sourceBeamAngleZEdit, 2*zHalfAngle);
+workspace.simulation.source.beamAngle = [2*xyHalfAngle, 2*zHalfAngle];
+
+% update handles
+
+handles = workspace.setGUI(handles);
+
+handles.workspace = workspace;
+
+guidata(hObject, handles);
+
 
 end
 

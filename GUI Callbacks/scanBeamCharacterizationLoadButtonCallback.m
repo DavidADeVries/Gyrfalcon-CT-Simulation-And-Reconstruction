@@ -13,23 +13,26 @@ default = loadBeam;
 
 choice = questdlg(question, title, createNew, loadBeam, cancel, default);
 
+workspace = handles.workspace.createFromGUI(handles);
+
 switch choice
     case createNew
-        [photonBeam, fileName] = createNewBeamCharacterization();
+        photonBeam = createNewBeamCharacterization();
     case loadBeam
-        [photonBeam, fileName] = loadExistingBeamCharacterization();
+        photonBeam = PhotonBeam;
+        
+        photonBeam = photonBeam.load();
     case cancel
         photonBeam = [];
-        fileName = '';
 end
 
-if ~isempty(photonBeam) && ~isempty(fileName)
+if ~isempty(photonBeam)
     % update handles
-    setString(handles.scanBeamCharacterizationFileNameText, fileName);
+    workspace.simulation.scan.beamCharacterization = photonBeam;
     
-    handles.scanBeamCharacterizationPath = '';
-    handles.scanBeamCharacterizationFileName = fileName;
-    handles.scanBeamCharacterization = photonBeam;
+    handles = workspace.setGUI(handles);
+    
+    handles.workspace = workspace;
     
     guidata(hObject, handles);
 end
@@ -38,9 +41,8 @@ end
 
 % HELPER FUNCTIONS
 
-function [photonBeam, fileName] = createNewBeamCharacterization()
-    fileName = '';
-    
+function photonBeam = createNewBeamCharacterization()
+        
     title = 'Create Beam Characterization';
 
     questions = {'Please enter beam intensities (a,b,c or start:interval:end) (W/m²):', 'Please enter matching beam energies (a,b,c or start:interval:end) (MeV)'};
@@ -57,24 +59,8 @@ function [photonBeam, fileName] = createNewBeamCharacterization()
         
         photonBeam = PhotonBeam(energies, intensities);
         
-        photonBeam = photonBeam.saveAs();
-    end
-end
-
-
-function [photonBeam, fileName] = loadExistingBeamCharacterization()
-    filter = ['*', Constants.Matlab_File_Extension];
-    dialogTitle = 'Load Beam Characterization...';
-
-    [fileName, pathName] = uigetfile(filter, dialogTitle);
-
-    if ischar(fileName) && ischar(pathName) % not cancelled
-        loadPath = makePath(pathName, fileName);
-
-        vars = load(loadPath);
-
-        photonBeam = vars.photonBeam;
-    else
-        photonBeam = [];
+        clearBeforeSave = false;
+        
+        [~,photonBeam] = photonBeam.saveAs(clearBeforeSave);
     end
 end

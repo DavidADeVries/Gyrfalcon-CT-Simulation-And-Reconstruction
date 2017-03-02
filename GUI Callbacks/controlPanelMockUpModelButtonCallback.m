@@ -4,7 +4,7 @@ function [] = controlPanelMockUpModelButtonCallback(hObject, eventdata, handles)
 
 % 1) Create simulation object based on where the parameters are at
 
-simulation = Simulation();
+simulation = handles.workspace.simulation;
 
 simulation = simulation.createFromGUI(handles);
 

@@ -779,6 +779,7 @@ function detectorLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Detector));
 
 % --- Executes on button press in detectorSaveButton.
 function detectorSaveButton_Callback(hObject, eventdata, handles)
@@ -786,6 +787,7 @@ function detectorSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Detector));
 
 % --- Executes on button press in phantomLoadButton.
 function phantomLoadButton_Callback(hObject, eventdata, handles)
@@ -793,6 +795,7 @@ function phantomLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Phantom));
 
 % --- Executes on button press in phantomSaveButton.
 function phantomSaveButton_Callback(hObject, eventdata, handles)
@@ -800,6 +803,7 @@ function phantomSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Phantom));
 
 % --- Executes on button press in sourceLoadButton.
 function sourceLoadButton_Callback(hObject, eventdata, handles)
@@ -807,6 +811,7 @@ function sourceLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Source));
 
 % --- Executes on button press in sourceSaveButton.
 function sourceSaveButton_Callback(hObject, eventdata, handles)
@@ -814,6 +819,7 @@ function sourceSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Source));
 
 % --- Executes on button press in scanLoadButton.
 function scanLoadButton_Callback(hObject, eventdata, handles)
@@ -821,6 +827,7 @@ function scanLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Scan));
 
 % --- Executes on button press in scanSaveButton.
 function scanSaveButton_Callback(hObject, eventdata, handles)
@@ -828,6 +835,7 @@ function scanSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Scan));
 
 % --- Executes on button press in controlPanelMockUpModelButton.
 function controlPanelMockUpModelButton_Callback(hObject, eventdata, handles)
@@ -920,6 +928,7 @@ function simulationLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Simulation));
 
 % --- Executes on button press in simulationSaveButton.
 function simulationSaveButton_Callback(hObject, eventdata, handles)
@@ -927,6 +936,7 @@ function simulationSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Simulation));
 
 % --- Executes on button press in phantomStartingLocationCentreAtOriginButton.
 function phantomStartingLocationCentreAtOriginButton_Callback(hObject, eventdata, handles)

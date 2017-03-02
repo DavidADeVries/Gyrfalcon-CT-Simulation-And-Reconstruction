@@ -16,6 +16,9 @@ checkEndPoint = endClockwisePosZ - startClockwisePosZ;
 [clockwisePointAngle, posZPointAngle, ~] = cart2sph(checkPoint(1),checkPoint(2),checkPoint(3));
 [clockwiseAngle, posZAngle, ~] = cart2sph(checkEndPoint(1),checkEndPoint(2),checkEndPoint(3));
 
+clockwisePointAngle = forceAnglePositiveInRadians(clockwisePointAngle);
+clockwiseAngle = forceAnglePositiveInRadians(clockwiseAngle);
+
 isClockwiseWithin = (clockwisePointAngle - clockwiseAngle) < 0;
 isPosZWithin = (posZPointAngle - posZAngle) < 0;
 
@@ -27,6 +30,9 @@ checkEndPoint = endCounterClockwiseNegZ - startCounterClockwiseNegZ;
 
 [counterClockwisePointAngle, negZPointAngle, ~] = cart2sph(checkPoint(1),checkPoint(2),checkPoint(3));
 [counterClockwiseAngle, negZAngle, ~] = cart2sph(checkEndPoint(1),checkEndPoint(2),checkEndPoint(3));
+
+counterClockwisePointAngle = forceAnglePositiveInRadians(counterClockwisePointAngle);
+counterClockwiseAngle = forceAnglePositiveInRadians(counterClockwiseAngle);
 
 isCounterClockwiseWithin = (counterClockwisePointAngle - counterClockwiseAngle) > 0;
 isNegZWithin = (negZPointAngle - negZAngle) > 0;

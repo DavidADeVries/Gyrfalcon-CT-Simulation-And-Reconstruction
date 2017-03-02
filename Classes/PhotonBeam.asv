@@ -189,10 +189,9 @@ classdef PhotonBeam < GyrfalconObject
         end
         
         function handles = setGUI(photonBeam, handles)
-            if photonBeam.tiedToParent
-                setString(handles.scanBeamCharacterizationFileNameText, 'Tied to Scan');
-            elseif isempty(photonBeam.saveFileName)
+            if isempty(photonBeam.saveFileName)
                 setString(handles.scanBeamCharacterizationFileNameText, 'None Selected');
+            elseif photonBeam.is
             else                
                 setString(handles.scanBeamCharacterizationFileNameText, photonBeam.saveFileName);
             end

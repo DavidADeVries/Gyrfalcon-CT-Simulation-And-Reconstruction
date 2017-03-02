@@ -3,7 +3,7 @@ function controlPanelRunScanSimButtonCallback(hObject, eventdata, handles)
 % using the current simulation parameters specified by the GUI a simulation
 % is run
 
-simulation = Simulation;
+simulation = handles.workspace.simulation;
 
 simulation = simulation.createFromGUI(handles);
 

@@ -1,4 +1,4 @@
-classdef Simulation
+classdef Simulation < GyrfalconObject
     % Simulation
     % This class contains all the data pertaining to an CT scan simulation
     % 
@@ -41,8 +41,6 @@ classdef Simulation
         partialPixelModelling
         partialPixelResolution
         
-        savePath
-        saveFileName
     end
     
     methods
@@ -76,6 +74,38 @@ classdef Simulation
                 simulation.partialPixelModelling = partialPixelModelling;
                 simulation.partialPixelResolution = partialPixelResolution;
             end
+        end
+        
+        function simulation = setDefaultValues(simulation)
+            phantom = Phantom;
+            phantom = phantom.setDefaultValues();
+            
+            detector = Detector;
+            detector = detector.setDefaultValues();
+                        
+            source = Source;
+            source = source.setDefaultValues();
+                        
+            scan = Scan;
+            scan = scan.setDefaultValues();
+            
+            simulation.phantom = phantom;
+            simulation.detector = detector;
+            simulation.source = source;
+            simulation.scan = scan;
+            
+            simulation.scatteringNoiseLevel = 0;
+            simulation.detectorNoiseLevel = 0;
+            simulation.partialPixelModelling = true;
+            simulation.partialPixelResolution = 1;
+        end
+        
+        function name = defaultName(simulation)
+            name = [Constants.Default_Simulation_Name, Constants.Matlab_File_Extension];
+        end
+                
+        function name = displayName(simulation)
+            name = 'Simulation';
         end
         
         function [] = plot(simulation, handles)
@@ -152,7 +182,7 @@ classdef Simulation
             plotHandles = {plotHandles};
         end
         
-        function handles = setGUIFromSimulation(simulation, handles)
+        function handles = setGUI(simulation, handles)
             
             % PHANTOM
             
@@ -176,36 +206,32 @@ classdef Simulation
             setDoubleForHandle(handles.simulationDetectorNoiseLevelEdit, simulation.detectorNoiseLevel);
             set(handles.simulationPartialPixelModellingCheckbox, 'Value', simulation.partialPixelModelling);
             setDoubleForHandle(handles.simulationPartialPixelResolutionEdit, simulation.partialPixelResolution);
-                       
-            % set hidden handles
-            handles.simulationSavePath = simulation.savePath;
-            handles.simulationSaveFileName = simulation.saveFileName;
+            
+            if simulation.tiedToParent
+                setString(handles.simulationFileNameText, 'Tied to Workspace');
+            elseif isempty(simulation.saveFileName)
+                setString(handles.simulationFileNameText, 'Not Saved');
+            else
+                setString(handles.simulationFileNameText, simulation.saveFileName);
+            end
         end
         
         function simulation = createFromGUI(simulation, handles)
             % PHANTOM
-            
-            phant = Phantom();
-            
-            simulation.phantom = phant.createFromGUI(handles);
+                        
+            simulation.phantom = simulation.phantom.createFromGUI(handles);
             
             % DETECTOR
-            
-            detector = Detector();
-            
-            simulation.detector = detector.createFromGUI(handles);
+                        
+            simulation.detector = simulation.detector.createFromGUI(handles);
             
             % SOURCE
-            
-            source = Source();
-            
-            simulation.source = source.createFromGUI(handles);
+                        
+            simulation.source = simulation.source.createFromGUI(handles);
             
             % SCAN
-            
-            scan = Scan();
-            
-            simulation.scan = scan.createFromGUI(handles);
+                        
+            simulation.scan = simulation.scan.createFromGUI(handles);
             
             % SIMULATION
             
@@ -214,13 +240,21 @@ classdef Simulation
             simulation.partialPixelModelling = get(handles.simulationPartialPixelModellingCheckbox, 'Value');
             simulation.partialPixelResolution = getDoubleFromHandle(handles.simulationPartialPixelResolutionEdit);
             
-            simulation.savePath = handles.simulationSavePath;
-            simulation.saveFileName = handles.simulationSaveFileName;
         end
         
-        function simulation = clearBeforeSave(simulation)
-            simulation.scan = simulation.scan.clearBeforeSave();
+        function simulation = clearBeforeSaveFields(simulation)
+            simulation.phantom = simulation.phantom.saveBeforeClearIfNeeded();
+            simulation.detector = simulation.detector.saveBeforeClearIfNeeded();
+            simulation.source = simulation.source.saveBeforeClearIfNeeded();
+            simulation.scan = simulation.scan.saveBeforeClearIfNeeded();            
         end
+        
+        function simulation = loadFields(simulation)
+            simulation.phantom = simulation.phantom.load();
+            simulation.detector = simulation.detector.load();
+            simulation.source = simulation.source.load();
+            simulation.scan = simulation.scan.load();
+        end    
         
         function simulation = calibrateAndSetPhantomData(simulation)
             phantomDataInHU = simulation.phantom.data;

@@ -1,9 +1,8 @@
 function [] = detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY)
 %[] = detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY)
 
-simulation = Simulation;
 
-simulation = simulation.createFromGUI(handles);
+simulation = handles.workspace.simulation.createFromGUI(handles);
 
 detector = simulation.detector;
 

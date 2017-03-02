@@ -13,6 +13,13 @@ classdef Dimension
             dimension.value = value;
             dimension.units = units;
         end
+
+        function bool = equal(dim1, dim2)
+            b1 = dim1.value == dim2.value;
+            b2 = dim1.units == dim2.value;
+
+            bool = b1 && b2;
+        end
                 
         function dimLength = getLengthInM(dimension, varargin)
             %will give length of dimensions in m, for angular dimensions,

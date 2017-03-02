@@ -1,4 +1,4 @@
-classdef Detector < GyrfalconObject
+classdef Detector < SimulationObject
     % Detector
     % This class contains all the data pertaining to an x-ray detector for the CT
     % simulator.
@@ -91,31 +91,18 @@ classdef Detector < GyrfalconObject
             object = Detector;
         end
         
-        function name = displayName(detector)
-            name = 'Detector';
-        end
-        
         function object = clearBeforeSaveFields(object)
         end
-        
-        function detector = loadFields(detector)
-        end 
                 
         function detector = setDefaultValues(detector)
-            detector.location = [0,-1,0];
+            detector.location = [];
             
-            detector.wholeDetectorDimensions = [10,10];
+            detector.voxelDimensions = [1,1,1];
             
-            dim = Dimension(50, Units.mm);
+            detector.location = [0,0,0];
             
-            detector.singleDetectorDimensions = [dim,dim];
-            
-            detector.movesWithScanAngle = true;
-            detector.movesWithPerAngleTranslation = false;
-        end  
-        
-        function name = defaultName(detector)
-            name = [Constants.Default_Detector_Name, Constants.Matlab_File_Extension]; 
+            detector.dataPath = '';
+            detector.dataFileName = '';
         end
               
         function bool = equal(detector1, detector2)
@@ -264,9 +251,7 @@ classdef Detector < GyrfalconObject
             set(handles.detectorMovesWithScanAngleCheckbox, 'Value', detector.movesWithScanAngle);
             set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', detector.movesWithPerAngleTranslation);
             
-            if detector.tiedToParent
-                setString(handles.detectorFileNameText, 'Tied to Simulation');
-            elseif isempty(detector.saveFileName)
+            if isempty(detector.saveFileName)
                 setString(handles.detectorFileNameText, 'Not Saved');
             else
                 setString(handles.detectorFileNameText, detector.saveFileName);

@@ -177,10 +177,10 @@ classdef Phantom < GyrfalconObject
             setDoubleForHandle(handles.phantomVoxelDimensionsYEdit, y);
             setDoubleForHandle(handles.phantomVoxelDimensionsZEdit, z);
                         
-            if phantom.tiedToParent
-                setString(handles.phantomFileNameText, 'Tied to Simulation');
             elseif isempty(phantom.saveFileName)
                 setString(handles.phantomFileNameText, 'Not Saved');
+            if phantom.tiedToParent
+                setString(handles.phantomFileNameText, 'Tied to Simulation');
             else
                 setString(handles.phantomFileNameText, phantom.saveFileName);
             end

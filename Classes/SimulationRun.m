@@ -29,7 +29,7 @@ classdef SimulationRun < ProcessingRun
         
         displayFreeRun
         
-        data
+        sliceData
     end
     
     methods
@@ -43,7 +43,7 @@ classdef SimulationRun < ProcessingRun
             simulationRun = simulationRun.collectSavePathAndFilename();
             
             % set by startRun and endRun functions:            
-            simulationRun.data = [];
+            simulationRun.sliceData = [];
         end
         
         function simulationRun = startRun(simulationRun)
@@ -56,15 +56,18 @@ classdef SimulationRun < ProcessingRun
             simulationRun = simulationRun.endProcessingRun();
             
             % SimulationRun specific
-            simulationRun.data = data;
+            simulationRun.sliceData = data;
         end
         
         function run = clearBeforeSave(run)
-            for i=1:length(run.data)
-                run.data{i} = run.data{i}.clearBeforeSave();
+            for i=1:length(run.sliceData)
+                run.sliceData{i} = run.sliceData{i}.clearBeforeSave();
             end
             
-            run.simulation = run.simulation.clearBeforeSave();
+            % clear out big chunks of data in simulation data structure,
+            % everything else archived.
+            run.simulation.phantom.dataSet.data = [];
+            run.simulation.scan.beamCharacterization.calibratedPhantomDataSet = [];
         end
         
         function run = createSaveDir(run)
