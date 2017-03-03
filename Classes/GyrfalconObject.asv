@@ -4,6 +4,7 @@ classdef GyrfalconObject
     properties
         savePath
         saveFileName
+        saveInSeparateFile = true
     end
     
     methods
@@ -73,38 +74,27 @@ classdef GyrfalconObject
             end
         end
         
-        function object = saveBeforeClearIfNeeded(object)
-            string = ['Should ', object.displayName(), ' be saved separately (will be auto-retrieved by file path)?'];
-            title = 'Save Separately';
+        function [object, objectForSaving, cancelled] = saveBeforeClearIfNeeded(object)
+            objectForSaving = object;
+            cancelled = false;
             
-            opt1 = 'Yes';
-            opt2 = 'No';
-            
-            default = opt1;
-            
-            choice = questdlg(string, title, opt1, opt2, default);
-            
-            if strcmp(choice, opt1)
-                clearedObject = object.clearBeforeSaveFields();
+            if object.saveInSeparateFile
+                [object, objectForSaving] = object.clearBeforeSaveFields();
                     
                 if object.hasChanges()
-                    clearBeforeSave = true;
+                    clearBeforeSave = false;
                     
                     [saved, object] = object.saveAs(clearBeforeSave);
                     
-                else
-                    saved = true;
+                    if saved
+                        objectForSaving = clearedObject;
+                    else
+                         cancelled = true;
+                    end
                 end
-                    
-                if saved %clear out, except path
-                    blankObject = object.createBlankObject();
-                    
-                    blankObject.savePath = object.savePath;
-                    blankObject.saveFileName = object.saveFileName;
-                    
-                    object = blankObject;
-                end
-            elseif str
+            else
+                objectForSaving.savePath = '';
+                objectForSaving.saveFileName = '';
             end
         end
         
@@ -139,7 +129,7 @@ classdef GyrfalconObject
             path = object.getPath();
             
             if isempty(path)
-                [~,object] = object.saveAs();
+                [~,object] = object.saveAs(clearBeforeSave);
             else
                 if clearBeforeSave
                     object = object.clearBeforeSaveFields();
@@ -193,7 +183,14 @@ classdef GyrfalconObject
                     error = true;
                 end
             else
-                error = true;
+                if object.tiedToParent
+                    % no error, just linked up with parent object
+                    object = object.loadFields();
+                    
+                    error = false;
+                else
+                    error = true;
+                end
             end
             
             if error
@@ -227,8 +224,9 @@ classdef GyrfalconObject
             if ~all(fileName == 0)
                 object.savePath = pathName;
                 object.saveFileName = fileName;
+                object.saveInSeparateFile = true;
                                 
-                object.save(clearBeforeSave);
+                object = object.save(clearBeforeSave);
                 
                 saved = true;
             else

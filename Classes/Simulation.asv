@@ -103,6 +103,10 @@ classdef Simulation < GyrfalconObject
         function name = defaultName(simulation)
             name = [Constants.Default_Simulation_Name, Constants.Matlab_File_Extension];
         end
+                
+        function name = displayName(simulation)
+            name = 'Simulation';
+        end
         
         function [] = plot(simulation, handles)
             axesHandle = handles.axesHandle;
@@ -202,8 +206,12 @@ classdef Simulation < GyrfalconObject
             setDoubleForHandle(handles.simulationDetectorNoiseLevelEdit, simulation.detectorNoiseLevel);
             set(handles.simulationPartialPixelModellingCheckbox, 'Value', simulation.partialPixelModelling);
             setDoubleForHandle(handles.simulationPartialPixelResolutionEdit, simulation.partialPixelResolution);
+                        
+            set(handles.simulationSaveInSeparateFileCheckbox, 'Value', simulation.saveInSeparateFile);
             
-            if isempty(simulation.saveFileName)
+            if ~simulation.saveInSeparateFile
+                setString(handles.simulationFileNameText, 'Tied to Workspace');
+            elseif isempty(simulation.saveFileName)
                 setString(handles.simulationFileNameText, 'Not Saved');
             else
                 setString(handles.simulationFileNameText, simulation.saveFileName);
@@ -234,22 +242,43 @@ classdef Simulation < GyrfalconObject
             simulation.partialPixelModelling = get(handles.simulationPartialPixelModellingCheckbox, 'Value');
             simulation.partialPixelResolution = getDoubleFromHandle(handles.simulationPartialPixelResolutionEdit);
             
+            simulation.saveInSeparateFile = get(handles.simulationSaveInSeparateFileCheckbox,'Value');
         end
         
-        function simulation = clearBeforeSaveFields(simulation)
-            simulation.phantom = simulation.phantom.saveBeforeClearIfNeeded();
-            simulation.detector = simulation.detector.saveBeforeClearIfNeeded();
-            simulation.source = simulation.source.saveBeforeClearIfNeeded();
-            simulation.scan = simulation.scan.saveBeforeClearIfNeeded();
+        function [simulation, simulationForSaving] = clearBeforeSaveFields(simulation)
+            simulationForSaving = simualtion;
             
-            phantom = phantom.clearBeforeSaveFields();
+            [phantom, phantomForSaving] = simulation.phantom.saveBeforeClearIfNeeded();
             
             simulation.phantom = phantom;
+            simulationForSaving.phantom = phantomForSaving;
             
-            simulation.detector = simulation.detector.clearBeforeSave();
-            simulation.source = simulation.source.clearBeforeSave();
-            simulation.scan = simulation.scan.clearBeforeSave();
+            [detector, detectorForSaving] = simulation.detector.saveBeforeClearIfNeeded();
+            
+            simulation.detector = detector;
+            simulationForSaving.detector = detectorForSaving;
+            
+            [source, sourceForSaving] = simulation.source.saveBeforeClearIfNeeded();
+            
+            simulation.source = source;
+            simulationForSaving.source = sourceForSaving;
+            
+            [phantom, phantomForSaving] = simulation.phantom.saveBeforeClearIfNeeded();
+            
+            simulation.phantom = phantom;
+            simulationForSaving.phantom = phantomForSaving;
+            
+            simulation.detector = simulation.detector.saveBeforeClearIfNeeded();
+            simulation.source = simulation.source.saveBeforeClearIfNeeded();
+            simulation.scan = simulation.scan.saveBeforeClearIfNeeded();            
         end
+        
+        function simulation = loadFields(simulation)
+            simulation.phantom = simulation.phantom.load();
+            simulation.detector = simulation.detector.load();
+            simulation.source = simulation.source.load();
+            simulation.scan = simulation.scan.load();
+        end    
         
         function simulation = calibrateAndSetPhantomData(simulation)
             phantomDataInHU = simulation.phantom.data;

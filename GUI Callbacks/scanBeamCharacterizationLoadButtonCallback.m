@@ -61,6 +61,10 @@ function photonBeam = createNewBeamCharacterization()
         
         clearBeforeSave = false;
         
-        [~,photonBeam] = photonBeam.saveAs(clearBeforeSave);
+        [saved,photonBeam] = photonBeam.saveAs(clearBeforeSave);
+        
+        if ~saved
+            photonBeam.saveInSeparateFile = false;
+        end
     end
 end

@@ -33,7 +33,9 @@ classdef GyrfalconWorkspace < GyrfalconObject
             workspace.simulation = sim;
         end
         
-        function workspace = clearBeforeSaveFields(workspace)
+        function [workspace, workspaceForSaving] = clearBeforeSaveFields(workspace)
+            workspaceForSaving = 
+
             workspace.simulation = workspace.simulation.clearBeforeSaveFields();
         end
         
@@ -42,7 +44,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
         end        
         
         function name = defaultName(workspace)            
-            name = [Constants.Default_Workspace_Name, string, Constants.Matlab_File_Extension]; 
+            name = [Constants.Default_Workspace_Name, Constants.Matlab_File_Extension]; 
         end
          
         function bool = equal(workspace1, workspace2)
@@ -61,7 +63,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
                 path = 'Unsaved Workspace';
             end
             
-            set(handles.gyrofalconMain, 'Name', ['Gyrfalcon - ,
+            set(handles.gyrofalconMain, 'Name', ['Gyrfalcon - ', path]);
             
             workspace.simulation.setGUI(handles);
         end

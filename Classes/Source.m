@@ -9,7 +9,7 @@ classdef Source < GyrfalconObject
 % *location:
 % the location where the centre of the source will begin for a
 % simulated scan. The source is assumed to be symmetrical around its
-% centre
+% centre. Only x,y coordinates set, z set by slice
 % units are in m
 %
 % *dimensions: 
@@ -42,12 +42,8 @@ methods
             % validate location
             locationNumDims = length(location);
 
-            if locationNumDims < 2 || locationNumDims > 3
-                error('Location of source not given in 2 or 3 space');
-            elseif locationNumDims == 2
-                % tack on z = 0 for completeness
-
-                location = [location, 0];
+            if locationNumDims ~= 2
+                error('Location of source not given in 2 space');
             end
 
             % validate dimensions
@@ -90,14 +86,15 @@ methods
         name = 'Source';
     end
     
-    function source = clearBeforeSaveFields(source)
+    function [source, sourceForSaving] = clearBeforeSaveFields(source)
+        sourceForSaving = source;
     end
         
     function source = loadFields(source)
     end
            
     function source = setDefaultValues(source)
-        source.location = [0,1,0];
+        source.location = [0,1];
         
         dim = Dimension(0, Units.mm);
         
@@ -111,13 +108,13 @@ methods
     end
     
     function bool = equal(source1, source2)
-        b1 = all(source1.location == source2.location);
+        b1 = matricesEqual(source1.location, source2.location);
         b2 = source1.locationUnits == source2.locationUnits;
         b3 = source1.dimensions(1).value == source2.dimensions(1).value;        
         b4 = source1.dimensions(2).value == source2.dimensions(2).value;
         b5 = source1.dimensions(1).units == source2.dimensions(1).units;        
         b6 = source1.dimensions(2).units == source2.dimensions(2).units;
-        b7 = all(source1.beamAngle == source2.beamAngle);
+        b7 = matricesEqual(source1.beamAngle, source2.beamAngle);
         b8 = source1.beamAngleUnits == source2.beamAngleUnits;
         b9 = strcmp(source1.savePath, source2.savePath);
         b10 = strcmp(source1.saveFileName, source2.saveFileName);
@@ -140,7 +137,7 @@ methods
     function dist = getDistanceBetweenOriginAndSourceCentrePointInM(source)
         locationInM = source.getLocationInM();
         
-        dist = norm(locationInM(1:2));
+        dist = norm(locationInM);
     end
 
     function handles = plot(source, axesHandle, startBoxCoords, endBoxCoords)
@@ -279,11 +276,9 @@ methods
     function handles = setGUI(source, handles)
         x = source.location(1);
         y = source.location(2);
-        z = source.location(3);
 
         setDoubleForHandle(handles.sourceStartingLocationXEdit, x);
         setDoubleForHandle(handles.sourceStartingLocationYEdit, y);
-        setDoubleForHandle(handles.sourceStartingLocationZEdit, z);
 
         xy = source.dimensions(1).value;
         z = source.dimensions(2).value;
@@ -302,8 +297,10 @@ methods
 
         setDoubleForHandle(handles.sourceBeamAngleXYEdit, xy);
         setDoubleForHandle(handles.sourceBeamAngleZEdit, z);
+            
+        set(handles.sourceSaveInSeparateFileCheckbox, 'Value', source.saveInSeparateFile);
 
-        if source.tiedToParent
+        if ~source.saveInSeparateFile
             setString(handles.sourceFileNameText, 'Tied to Simulation');
         elseif isempty(source.saveFileName)
             setString(handles.sourceFileNameText, 'Not Saved');
@@ -315,9 +312,8 @@ methods
     function source = createFromGUI(source, handles)
         x = getDoubleFromHandle(handles.sourceStartingLocationXEdit);
         y = getDoubleFromHandle(handles.sourceStartingLocationYEdit);
-        z = getDoubleFromHandle(handles.sourceStartingLocationZEdit);
 
-        source.location = [x,y,z];
+        source.location = [x,y];
 
         xy = getDoubleFromHandle(handles.sourceDimensionsXYEdit);
         z = getDoubleFromHandle(handles.sourceDimensionsZEdit);
@@ -334,6 +330,8 @@ methods
         z = getDoubleFromHandle(handles.sourceBeamAngleZEdit);
 
         source.beamAngle = [xy, z];
+        
+        source.saveInSeparateFile = get(handles.sourceSaveInSeparateFileCheckbox,'Value');
     end
 
     function [startBoxCoords, endBoxCoords, directionUnitVector, perAngleShift] = getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ, diameter)

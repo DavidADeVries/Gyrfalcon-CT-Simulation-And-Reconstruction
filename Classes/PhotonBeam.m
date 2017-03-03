@@ -73,8 +73,10 @@ classdef PhotonBeam < GyrfalconObject
             photonBeam.calibratedPhantomDataSet = {};
         end
         
-        function photonBeam = clearBeforeSaveFields(photonBeam)
-            photonBeam.calibratedPhantomDataSet = {};
+        function [photonBeam, photonBeamForSaving] = clearBeforeSaveFields(photonBeam)            
+            photonBeamForSaving = photonBeam;
+            
+            photonBeamForSaving.calibratedPhantomDataSet = {};
         end
         
         function photonBeam = loadFields(photonBeam)
@@ -188,8 +190,10 @@ classdef PhotonBeam < GyrfalconObject
             end
         end
         
-        function handles = setGUI(photonBeam, handles)
-            if photonBeam.tiedToParent
+        function handles = setGUI(photonBeam, handles)            
+            set(handles.photonBeamSaveInSeparateFileCheckbox, 'Value', photonBeam.saveInSeparateFile);
+        
+            if ~photonBeam.saveInSeparateFile
                 setString(handles.scanBeamCharacterizationFileNameText, 'Tied to Scan');
             elseif isempty(photonBeam.saveFileName)
                 setString(handles.scanBeamCharacterizationFileNameText, 'None Selected');
@@ -199,7 +203,7 @@ classdef PhotonBeam < GyrfalconObject
         end
         
         function photonBeam = createFromGUI(photonBeam, handles)
-            
+            photonBeam.saveInSeparateFile = get(handles.photonBeamSaveInSeparateFileCheckbox,'Value');
         end
     end
     

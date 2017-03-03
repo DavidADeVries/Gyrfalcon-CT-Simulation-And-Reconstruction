@@ -4,7 +4,7 @@ classdef GyrfalconObject
     properties
         savePath
         saveFileName
-        tiedToParent = false
+        saveInSeparateFile = true
     end
     
     methods
@@ -74,36 +74,25 @@ classdef GyrfalconObject
             end
         end
         
-        function object = saveBeforeClearIfNeeded(object)
-            string = ['Should ', object.displayName(), ' be saved separately (will be auto-retrieved by file path)?'];
-            title = 'Save Separately';
+        function [object, objectForSaving, cancelled] = saveBeforeClearIfNeeded(object)
+            objectForSaving = object;
+            cancelled = false;
             
-            opt1 = 'Yes';
-            opt2 = 'No';
-            
-            default = opt1;
-            
-            choice = questdlg(string, title, opt1, opt2, default);
-            
-            if strcmp(choice, opt1)
-                clearedObject = object.clearBeforeSaveFields();
+            if object.saveInSeparateFile
+                [object, objectForSaving] = object.clearBeforeSaveFields();
                     
                 if object.hasChanges()
                     clearBeforeSave = false;
-                    object.tiedToParent = false;
                     
-                    [~, object] = object.saveAs(clearBeforeSave);
+                    [saved, object, objectForSaving] = object.saveAs(clearBeforeSave);
                     
+                    if ~saved
+                        cancelled = true;
+                    end
                 end
-                    
-            elseif strcmp(choice, opt2)
-                % not saving field separately, so the fields stay intact,
-                % though the save path must be cleared out, since it will
-                % no longer be tied to that path, but rather the parent
-                % object
-                object.savePath = '';
-                object.saveFileName = '';
-                object.tiedToParent = true;
+            else
+                objectForSaving.savePath = '';
+                objectForSaving.saveFileName = '';
             end
         end
         
@@ -134,14 +123,16 @@ classdef GyrfalconObject
               
         end
         
-        function object = save(object, clearBeforeSave)
+        function [object, objectForSaving] = save(object, clearBeforeSave)
             path = object.getPath();
             
             if isempty(path)
-                [~,object] = object.saveAs(clearBeforeSave);
+                [~,object,objectForSaving] = object.saveAs(clearBeforeSave);
             else
                 if clearBeforeSave
-                    object = object.clearBeforeSaveFields();
+                    [object,objectForSaving] = object.clearBeforeSaveFields();
+                else
+                    objectForSaving = object;
                 end
                 
                 save(object.getPath(), 'object');
@@ -192,7 +183,7 @@ classdef GyrfalconObject
                     error = true;
                 end
             else
-                if object.tiedToParent
+                if object.saveInSeparateFile
                     % no error, just linked up with parent object
                     object = object.loadFields();
                     
@@ -221,7 +212,7 @@ classdef GyrfalconObject
             end
         end
         
-        function [saved, object] = saveAs(object, clearBeforeSave)
+        function [saved, object, objectForSaving] = saveAs(object, clearBeforeSave)
             className = class(object);
             
             filterSpec = '*.mat';
@@ -233,11 +224,14 @@ classdef GyrfalconObject
             if ~all(fileName == 0)
                 object.savePath = pathName;
                 object.saveFileName = fileName;
+                object.saveInSeparateFile = true;
                                 
-                object = object.save(clearBeforeSave);
+                [object, objectForSaving] = object.save(clearBeforeSave);
                 
                 saved = true;
             else
+                objectForSaving = [];
+                
                 saved = false;
             end
         end

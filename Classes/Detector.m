@@ -7,7 +7,7 @@ classdef Detector < GyrfalconObject
     % *location:
     % the location where the centre of the detector will begin for a
     % simulated scan. The detector is assumed to be symmetrical around its
-    % centre
+    % centre. Only x,y coordinates given, z coordinates given by slice
     % units are in m
     %
     % *wholeDetectorDimensions:
@@ -45,12 +45,8 @@ classdef Detector < GyrfalconObject
                 % validate location
                 locationNumDims = length(location);
                 
-                if locationNumDims < 2 || locationNumDims > 3
-                    error('Location of detector not given in 2 or 3 space');
-                elseif locationNumDims == 2
-                    % tack on z = 0 for completeness
-                    
-                    location = [location, 0];
+                if locationNumDims ~= 2
+                    error('Location of detector not given in 2 space');
                 end
                 
                 % validate wholeDetectorDimensions
@@ -95,14 +91,15 @@ classdef Detector < GyrfalconObject
             name = 'Detector';
         end
         
-        function object = clearBeforeSaveFields(object)
+        function [detector, detectorForSaving] = clearBeforeSaveFields(detector)
+            detectorForSaving = detector;
         end
         
         function detector = loadFields(detector)
         end 
                 
         function detector = setDefaultValues(detector)
-            detector.location = [0,-1,0];
+            detector.location = [0,-1];
             
             detector.wholeDetectorDimensions = [10,10];
             
@@ -119,9 +116,9 @@ classdef Detector < GyrfalconObject
         end
               
         function bool = equal(detector1, detector2)
-            b1 = all(detector1.location == detector2.location);
+            b1 = matricesEqual(detector1.location, detector2.location);
             b2 = detector1.locationUnits == detector2.locationUnits;
-            b3 = all(detector1.wholeDetectorDimensions == detector2.wholeDetectorDimensions);
+            b3 = matricesEqual(detector1.wholeDetectorDimensions, detector2.wholeDetectorDimensions);
             b4 = equal(detector1.singleDetectorDimensions(1), detector2.singleDetectorDimensions(1));
             b5 = equal(detector1.singleDetectorDimensions(2), detector2.singleDetectorDimensions(2));
             b6 = detector1.movesWithScanAngle == detector2.movesWithScanAngle;
@@ -150,7 +147,7 @@ classdef Detector < GyrfalconObject
         function dist = getDistanceBetweenOriginAndDetectorCentrePointInM(detector)
             locationInM = detector.getLocationInM();
             
-            dist = norm(locationInM(1:2));
+            dist = norm(locationInM);
         end
         
         function position = getDetectorPosition(detector, slicePosition, scanAngle)
@@ -237,11 +234,9 @@ classdef Detector < GyrfalconObject
         function handles = setGUI(detector, handles)
             x = detector.location(1);
             y = detector.location(2);
-            z = detector.location(3);
             
             setDoubleForHandle(handles.detectorStartingLocationXEdit, x);
             setDoubleForHandle(handles.detectorStartingLocationYEdit, y);
-            setDoubleForHandle(handles.detectorStartingLocationZEdit, z);
             
             xy = detector.wholeDetectorDimensions(1);
             z = detector.wholeDetectorDimensions(2);
@@ -264,7 +259,9 @@ classdef Detector < GyrfalconObject
             set(handles.detectorMovesWithScanAngleCheckbox, 'Value', detector.movesWithScanAngle);
             set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', detector.movesWithPerAngleTranslation);
             
-            if detector.tiedToParent
+            set(handles.detectorSaveInSeparateFileCheckbox, 'Value', detector.saveInSeparateFile);
+            
+            if ~detector.saveInSeparateFile
                 setString(handles.detectorFileNameText, 'Tied to Simulation');
             elseif isempty(detector.saveFileName)
                 setString(handles.detectorFileNameText, 'Not Saved');
@@ -276,9 +273,8 @@ classdef Detector < GyrfalconObject
         function detector = createFromGUI(detector, handles)
             x = getDoubleFromHandle(handles.detectorStartingLocationXEdit);
             y = getDoubleFromHandle(handles.detectorStartingLocationYEdit);
-            z = getDoubleFromHandle(handles.detectorStartingLocationZEdit);
             
-            detector.location = [x,y,z];
+            detector.location = [x,y];
             
             xy = getDoubleFromHandle(handles.detectorWholeDetectorDimensionsXYEdit);
             z = getDoubleFromHandle(handles.detectorWholeDetectorDimensionsZEdit);
@@ -299,80 +295,10 @@ classdef Detector < GyrfalconObject
             detector.movesWithScanAngle = get(handles.detectorMovesWithScanAngleCheckbox, 'Value');
             detector.movesWithPerAngleTranslation = get(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value');
             
+            detector.saveInSeparateFile = get(handles.detectorSaveInSeparateFileCheckbox,'Value');
         end
         
     end
     
 end
 
-
-function detectorLineHeight = getDetectorLineHeight(detector)
-singleDims = detector.singleDetectorDimensions;
-
-len = length(singleDims);
-
-dimensionLengths = zeros(len,1);
-
-for i=1:len
-    dim = singleDims(i);
-    
-    if dim.units.isAngular
-        dimensionLengths(i) = dim.getLengthInM(norm(detector.location), detector.locationUnits);
-    else
-        dimensionLengths(i) = dim.getLengthInM();
-    end
-end
-
-maxLen = max(dimensionLengths);
-scaleFactor = 1;
-
-detectorLineHeight = scaleFactor * maxLen;
-end
-
-
-function angle = findAngleForPerpendicularArc(theta, psi, radius)
-% theta is the angle that the perpendicular arc is rotated (aka 0 is
-% centre)
-% psi is the max angle of the arcs that this arc will be perpendicular to
-% radius is the radius of these arcs
-
-% STEP 1: If we project a circle tilted from a plane at psi, it becomes an
-% ellipse
-% we'll assume that the ellipse is oriented such that the x-axis radius is
-% unchanged, and y-axes is changed
-% aka circle was titled about x-axis
-
-a = radius; % x axis
-b = radius*cosd(psi); % y axis
-
-[x, y] = getEllipseXAndY(a, b, theta);
-
-% STEP 2: If we then look down the x-axis, the titled circle will appear to
-% be a straight line (of length radius) at angle psi
-% we can then use the y value we just found, and use this as a horizontal
-% point in this view. The height of our perpendiular arc can then be found
-
-height = y * tand(psi);
-
-% STEP 3: Then knowing the height and radius, the angle can easily be
-% figured out
-% Angle MUST be negative!
-
-angle = asind(height / radius);
-
-end
-
-
-function  [x, y] = getEllipseXAndY(a, b, theta)
-
-theta = theta + 90; %flip into proper axis (x unstretched, y scaled)
-
-if mod(theta, 90) == 0 && mod(theta, 180) ~= 0
-    x = 0;
-else
-    x = (((tand(theta)^2)/(b^2)) + (1/(a^2))) ^ -0.5;
-end
-
-y = b * sqrt(1 - ((x^2)/(a^2)));
-
-end

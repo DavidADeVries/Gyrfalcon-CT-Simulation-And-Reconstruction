@@ -93,7 +93,7 @@ classdef Phantom < GyrfalconObject
             phantom.location = [0,0,0];
         end
         
-        function phantom = clearBeforeSaveFields(phantom)
+        function [phantom = clearBeforeSaveFields(phantom)
             phantom.dataSet = phantom.dataSet.saveBeforeClearIfNeeded();           
         end
         
@@ -176,11 +176,13 @@ classdef Phantom < GyrfalconObject
             setDoubleForHandle(handles.phantomVoxelDimensionsXEdit, x);
             setDoubleForHandle(handles.phantomVoxelDimensionsYEdit, y);
             setDoubleForHandle(handles.phantomVoxelDimensionsZEdit, z);
-                        
+            
+            set(handles.phantomSaveInSeparateFileCheckbox, 'Value', phantom.saveInSeparateFile);
+            
+            if ~phantom.saveInSeparateFile
+                setString(handles.phantomFileNameText, 'Tied to Simulation');
             elseif isempty(phantom.saveFileName)
                 setString(handles.phantomFileNameText, 'Not Saved');
-            if phantom.tiedToParent
-                setString(handles.phantomFileNameText, 'Tied to Simulation');
             else
                 setString(handles.phantomFileNameText, phantom.saveFileName);
             end
@@ -204,6 +206,8 @@ classdef Phantom < GyrfalconObject
             phant.voxelDimensions = [x,y,z];
             
             phant.dataSet = phant.dataSet.createFromGUI(handles);
+            
+            phant.saveInSeparateFile = get(handles.phantomSaveInSeparateFileCheckbox,'Value');
         end
     end
     

@@ -106,7 +106,12 @@ classdef Scan < GyrfalconObject
         end
         
         function scan = clearBeforeSaveFields(scan)
-            scan.beamCharacterization = scan.beamCharacterization.saveBeforeClearIfNeeded();      
+            scanForSaving = scan;
+            
+            [beam, beamForSaving] = scan.beamCharacterization.saveBeforeClearIfNeeded();    
+            
+            scan.beamCharacterization = beam;
+            scanForSaving.beamCharacterization = beamForSaving;
         end
         
         function scan = loadFields(scan)
@@ -331,8 +336,10 @@ classdef Scan < GyrfalconObject
             
             setDoubleForHandle(handles.scanPerAngleStepDimensionsXYEdit, xy);
             setDoubleForHandle(handles.scanPerAngleStepDimensionsZEdit, z);
+            
+            set(handles.scanSaveInSeparateFileCheckbox, 'Value', scan.saveInSeparateFile);
                                     
-            if scan.tiedToParent
+            if ~scan.saveInSeparateFile
                 setString(handles.scanFileNameText, 'Tied to Simulation');
             elseif isempty(scan.saveFileName)
                 setString(handles.scanFileNameText, 'Not Saved');
@@ -358,6 +365,8 @@ classdef Scan < GyrfalconObject
             scan.perAngleTranslationResolution = [xy, z];
             
             scan.beamCharacterization = scan.beamCharacterization.createFromGUI(handles);
+            
+            scan.saveInSeparateFile = get(handles.scanSaveInSeparateFileCheckbox,'Value');
         end
         
     end

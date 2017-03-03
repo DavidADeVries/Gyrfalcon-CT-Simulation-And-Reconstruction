@@ -24,8 +24,10 @@ classdef PhantomDataSet < GyrfalconObject
             dataSet.data = [];
         end
         
-        function dataSet = clearBeforeSaveFields(dataSet)
-            dataSet.data = [];
+        function [dataSet, dataSetForSaving] = clearBeforeSaveFields(dataSet)
+            dataSetForSaving = dataSet;
+            
+            dataSetForSaving.data = [];
         end
         
         function dataSet = loadFields(dataSet)
@@ -55,8 +57,10 @@ classdef PhantomDataSet < GyrfalconObject
             bool = b1;
         end
         
-        function handles = setGUI(dataSet, handles)            
-            if dataSet.tiedToParent
+        function handles = setGUI(dataSet, handles) 
+            set(handles.phantomDataSetSaveInSeparateFileCheckbox, 'Value', dataSet.saveInSeparateFile);            
+        
+            if ~dataSet.saveInSeparateFile
                 setString(handles.phantomDataSetFileNameText, 'Tied to Phantom');
             elseif isempty(dataSet.saveFileName)
                 setString(handles.phantomDataSetFileNameText, 'None Selected');
@@ -66,7 +70,7 @@ classdef PhantomDataSet < GyrfalconObject
         end
         
         function dataSet = createFromGUI(dataSet, handles)
-            
+            dataSet.saveInSeparateFile = get(handles.phantomDataSetSaveInSeparateFileCheckbox,'Value');
         end
     end
     

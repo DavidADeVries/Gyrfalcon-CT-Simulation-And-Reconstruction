@@ -55,13 +55,25 @@ function dataSet = createNewDataSet()
     else
         xyDim = str2double(answers{1});
         zDim = str2double(answers{2});
-        
-        data = zeros(xyDim, xyDim, zDim);
-        
-        slice = phantom(xyDim); %use Matlab Shepp-Logan phantom
-        
-        for i=1:zDim
-            data(:,:,i) = slice;
+                
+        radius = zDim/2;
+
+        data = zeros(xyDim,xyDim,zDim);
+
+        for i=1:zDim %through slices
+            height = abs(radius-i);
+
+            radiusForSlice = sqrt(radius^2 - height^2);
+
+            dimForSlice = round(radiusForSlice/radius * xyDim);
+
+            sliceData = phantomInHU('Modified Shepp-Logan',dimForSlice,xyDim);
+            
+            data(...
+                :,...
+                :,...
+                i) = sliceData ;
+
         end
         
         dataSet = PhantomDataSet(data);
@@ -71,7 +83,7 @@ function dataSet = createNewDataSet()
         [saved,dataSet] = dataSet.saveAs(clearBeforeSave);
         
         if ~saved
-            dataSet = [];
+            dataSet.saveInSeparateFile = false;
         end
     end
     

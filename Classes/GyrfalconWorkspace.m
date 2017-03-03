@@ -33,8 +33,13 @@ classdef GyrfalconWorkspace < GyrfalconObject
             workspace.simulation = sim;
         end
         
-        function workspace = clearBeforeSaveFields(workspace)
-            workspace.simulation = workspace.simulation.clearBeforeSaveFields();
+        function [workspace, workspaceForSaving] = clearBeforeSaveFields(workspace)
+            workspaceForSaving = workspace;
+
+            [sim, simForSaving] = workspace.simulation.clearBeforeSaveFields();
+
+            workspace.simulation = sim;
+            workspaceForSaving.simulation = simForSaving;
         end
         
         function workspace = loadFields(workspace)

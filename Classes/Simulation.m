@@ -206,8 +206,10 @@ classdef Simulation < GyrfalconObject
             setDoubleForHandle(handles.simulationDetectorNoiseLevelEdit, simulation.detectorNoiseLevel);
             set(handles.simulationPartialPixelModellingCheckbox, 'Value', simulation.partialPixelModelling);
             setDoubleForHandle(handles.simulationPartialPixelResolutionEdit, simulation.partialPixelResolution);
+                        
+            set(handles.simulationSaveInSeparateFileCheckbox, 'Value', simulation.saveInSeparateFile);
             
-            if simulation.tiedToParent
+            if ~simulation.saveInSeparateFile
                 setString(handles.simulationFileNameText, 'Tied to Workspace');
             elseif isempty(simulation.saveFileName)
                 setString(handles.simulationFileNameText, 'Not Saved');
@@ -240,13 +242,31 @@ classdef Simulation < GyrfalconObject
             simulation.partialPixelModelling = get(handles.simulationPartialPixelModellingCheckbox, 'Value');
             simulation.partialPixelResolution = getDoubleFromHandle(handles.simulationPartialPixelResolutionEdit);
             
+            simulation.saveInSeparateFile = get(handles.simulationSaveInSeparateFileCheckbox,'Value');
         end
         
-        function simulation = clearBeforeSaveFields(simulation)
-            simulation.phantom = simulation.phantom.saveBeforeClearIfNeeded();
-            simulation.detector = simulation.detector.saveBeforeClearIfNeeded();
-            simulation.source = simulation.source.saveBeforeClearIfNeeded();
-            simulation.scan = simulation.scan.saveBeforeClearIfNeeded();            
+        function [simulation, simulationForSaving] = clearBeforeSaveFields(simulation)
+            simulationForSaving = simualtion;
+            
+            [phantom, phantomForSaving] = simulation.phantom.saveBeforeClearIfNeeded();
+            
+            simulation.phantom = phantom;
+            simulationForSaving.phantom = phantomForSaving;
+            
+            [detector, detectorForSaving] = simulation.detector.saveBeforeClearIfNeeded();
+            
+            simulation.detector = detector;
+            simulationForSaving.detector = detectorForSaving;
+            
+            [source, sourceForSaving] = simulation.source.saveBeforeClearIfNeeded();
+            
+            simulation.source = source;
+            simulationForSaving.source = sourceForSaving;
+            
+            [scan, scanForSaving] = simulation.scan.saveBeforeClearIfNeeded();
+            
+            simulation.scan = scan;
+            simulationForSaving.scan = scanForSaving;         
         end
         
         function simulation = loadFields(simulation)

@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 16-Feb-2017 11:03:59
+% Last Modified by GUIDE v2.5 03-Mar-2017 12:22:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1175,3 +1175,66 @@ function detectorMakeZEqualXYButton_Callback(hObject, eventdata, handles)
 changeXY = false;
 
 detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY);
+
+
+% --- Executes on button press in sourceSaveInSeparateFileCheckbox.
+function sourceSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to sourceSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of sourceSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in phantomDataSetSaveInSeparateFileCheckbox.
+function phantomDataSetSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to phantomDataSetSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of phantomDataSetSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in simulationSaveInSeparateFileCheckbox.
+function simulationSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of simulationSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in phantomSaveInSeparateFileCheckbox.
+function phantomSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to phantomSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of phantomSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in photonBeamSaveInSeparateFileCheckbox.
+function photonBeamSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to photonBeamSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of photonBeamSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in scanSaveInSeparateFileCheckbox.
+function scanSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of scanSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in detectorSaveInSeparateFileCheckbox.
+function detectorSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of detectorSaveInSeparateFileCheckbox
