@@ -6,15 +6,19 @@ function [] = toolbarSaveWorkspaceButtonCallback(hObject, eventdata, handles)
 
 workspace = handles.workspace;
 
-clearBeforeSave = true;
+workspace = workspace.createFromGUI(handles);
 
-workspace = workspace.save(clearBeforeSave);
+workspace.saveInSeparateFile = true;
 
-handles.workspace = workspace;
+[saved, workspace, ~,~] = workspace.saveAs();
 
-handles = handles.workspace.setGUI(handles);
-
-guidata(hObject, handles);
+if saved
+    handles.workspace = workspace;
+    
+    handles = handles.workspace.setGUI(handles);
+    
+    guidata(hObject, handles);
+end
 
 end
 

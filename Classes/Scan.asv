@@ -111,12 +111,12 @@ classdef Scan < GyrfalconObject
             scanForSaving = scan;
             
             if ~isempty(scan.beamCharacterization)
-                [saved, beamForGUI, beamForParent, ~] = scan.beamCharacterization.saveAsIfChanged();
+                [saved, beamForGUI, beamForParent, dataSetForSaving] = scan.beamCharacterization.saveAs();
                 
                 if saved
                     scanForGUI.beamCharacterization = beamForGUI;
                     scanForParent.beamCharacterization = beamForParent;
-                    scanForSaving.beamCharacterization = beamForParent;
+                    scanForSaving.beamCharacterization = dataSetForSaving;
                 end
             else
                 saved = true;
@@ -145,16 +145,14 @@ classdef Scan < GyrfalconObject
         end
         
         function bool = equal(scan1, scan2)
-            b1 = matricesEqual(scan1.scanAngles, scan2.scanAngles);
+            b1 = all(scan1.scanAngles == scan2.scanAngles);
             b2 = scan1.scanAngleUnits == scan2.scanAngleUnits;
-            b3 = matricesEqual(scan1.slices, scan2.slices);
+            b3 = all(scan1.slices == scan2.slices);
             b4 = scan1.sliceUnits == scan2.sliceUnits;
-            b5 = matricesEqual(scan1.perAngleTranslationDimensions, scan2.perAngleTranslationDimensions);
-            b6 = matricesEqual(scan1.perAngleTranslationResolution, scan2.perAngleTranslationResolution);
+            b5 = all(scan1.perAngleTranslationDimensions == scan2.perAngleTranslationDimensions);
+            b6 = all(scan1.perAngleTranslationResolution == scan2.perAngleTranslationResolution);
             b7 = scan1.perAngleTranslationUnits == scan2.perAngleTranslationUnits;
-            
-            b8 = gyrfalconObjectsEqual(scan1.beamCharacterization, scan2.beamCharacterization);
-            
+            b8 = scan1.beamCharacterization.equal(scan2.beamCharacterization);
             b9 = strcmp(scan1.savePath, scan2.savePath);
             b10 = strcmp(scan1.saveFileName, scan2.saveFileName);
         

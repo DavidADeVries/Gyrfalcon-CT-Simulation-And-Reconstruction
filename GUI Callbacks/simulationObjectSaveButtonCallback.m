@@ -6,40 +6,40 @@ workspace = handles.workspace;
 workspace = workspace.createFromGUI(handles);
 
 if strcmp(className, 'Simulation')
-    object = workspace.simulation;
+    objectForGUI = workspace.simulation;
 elseif strcmp(className, 'Phantom');
-    object = workspace.simulation.phantom;
+    objectForGUI = workspace.simulation.phantom;
 elseif strcmp(className, 'Detector');
-    object = workspace.simulation.detector;
+    objectForGUI = workspace.simulation.detector;
 elseif strcmp(className, 'Source');
-    object = workspace.simulation.source;
+    objectForGUI = workspace.simulation.source;
 elseif strcmp(className, 'Scan');
-    object = workspace.simulation.scan;
+    objectForGUI = workspace.simulation.scan;
 elseif strcmp(className, 'PhotonBeam');
-    object = workspace.simulation.scan.beamCharacterization;    
+    objectForGUI = workspace.simulation.scan.beamCharacterization;    
 elseif strcmp(className, 'PhantomDataSet');
-    object = workspace.simulation.phantom.dataSet;
+    objectForGUI = workspace.simulation.phantom.dataSet;
 end
 
-clearBeforeSave = true;
+objectForGUI.saveInSeparateFile = true;
 
-[saved,object] = object.saveAs(clearBeforeSave);
+[saved,objectForGUI,~] = objectForGUI.saveAs();
 
-if saved && ~isempty(object)        
+if saved && ~isempty(objectForGUI)        
     if strcmp(className, 'Simulation')
-        workspace.simulation = object;
+        workspace.simulation = objectForGUI;
     elseif strcmp(className, 'Phantom');
-        workspace.simulation.phantom = object;
+        workspace.simulation.phantom = objectForGUI;
     elseif strcmp(className, 'Detector');
-        workspace.simulation.detector = object;
+        workspace.simulation.detector = objectForGUI;
     elseif strcmp(className, 'Source');
-        workspace.simulation.source = object;
+        workspace.simulation.source = objectForGUI;
     elseif strcmp(className, 'Scan');
-        workspace.simulation.scan = object;
+        workspace.simulation.scan = objectForGUI;
     elseif strcmp(className, 'PhotonBeam');
-        workspace.simulation.scan.beamCharacterization = object;
+        workspace.simulation.scan.beamCharacterization = objectForGUI;
     elseif strcmp(className, 'PhantomDataSet');
-        workspace.simulation.phantom.dataSet = object;
+        workspace.simulation.phantom.dataSet = objectForGUI;
     end
     
     % update handles

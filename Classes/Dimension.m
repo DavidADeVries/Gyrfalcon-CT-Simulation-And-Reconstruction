@@ -16,7 +16,7 @@ classdef Dimension
 
         function bool = equal(dim1, dim2)
             b1 = dim1.value == dim2.value;
-            b2 = dim1.units == dim2.value;
+            b2 = dim1.units == dim2.units;
 
             bool = b1 && b2;
         end

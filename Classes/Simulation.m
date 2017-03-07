@@ -76,6 +76,10 @@ classdef Simulation < GyrfalconObject
             end
         end
         
+        function object = createBlankObject(object)
+            object = Simulation;
+        end
+        
         function simulation = setDefaultValues(simulation)
             phantom = Phantom;
             phantom = phantom.setDefaultValues();
@@ -245,8 +249,82 @@ classdef Simulation < GyrfalconObject
             simulation.saveInSeparateFile = get(handles.simulationSaveInSeparateFileCheckbox,'Value');
         end
         
-        function [simulation, simulationForSaving] = clearBeforeSaveFields(simulation)
-            simulationForSaving = simualtion;
+        function bool = equal(sim1, sim2)
+            b1 = gyrfalconObjectsEqual(sim1.phantom, sim2.phantom);
+            b2 = gyrfalconObjectsEqual(sim1.detector, sim2.detector);
+            b3 = gyrfalconObjectsEqual(sim1.source, sim2.source);
+            b4 = gyrfalconObjectsEqual(sim1.scan, sim2.scan);
+            
+            b5 = matricesEqual(sim1.scatteringNoiseLevel, sim2.scatteringNoiseLevel);
+            b6 = matricesEqual(sim1.detectorNoiseLevel, sim2.detectorNoiseLevel);
+            b7 = matricesEqual(sim1.partialPixelModelling, sim2.partialPixelModelling);
+            b8 = matricesEqual(sim1.partialPixelResolution, sim2.partialPixelResolution);
+            
+            bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
+        end
+        
+        function [saved, simulationForGUI, simulationForParent, simulationForSaving] = saveChildrenObjects(simulation)
+            simulationForGUI = simulation;
+            simulationForParent = simulation;
+            simulationForSaving = simulation;
+            
+            if ~isempty(simulation.phantom)
+                [saved, phantomForGUI, phantomForParent, ~] = simulation.phantom.saveAsIfChanged();
+                
+                if saved
+                    simulationForGUI.phantom = phantomForGUI;
+                    simulationForParent.phantom = phantomForParent;
+                    simulationForSaving.phantom = phantomForParent;
+                end
+            else
+                saved = true;
+            end
+            
+            if saved
+                if ~isempty(simulation.source)
+                    [saved, sourceForGUI, sourceForParent, ~] = simulation.source.saveAsIfChanged();
+                    
+                    if saved
+                        simulationForGUI.source = sourceForGUI;
+                        simulationForParent.source = sourceForParent;
+                        simulationForSaving.source = sourceForParent;
+                    end
+                else
+                    saved = true;
+                end
+            end
+            
+            if saved
+                if ~isempty(simulation.detector)
+                    [saved, detectorForGUI, detectorForParent, ~] = simulation.detector.saveAsIfChanged();
+                    
+                    if saved
+                        simulationForGUI.detector = detectorForGUI;
+                        simulationForParent.detector = detectorForParent;
+                        simulationForSaving.detector = detectorForParent;
+                    end
+                else
+                    saved = true;
+                end
+            end
+            
+            if saved
+                if ~isempty(simulation.scan)
+                    [saved, scanForGUI, scanForParent, ~] = simulation.scan.saveAsIfChanged();
+                    
+                    if saved
+                        simulationForGUI.scan = scanForGUI;
+                        simulationForParent.scan = scanForParent;
+                        simulationForSaving.scan = scanForParent;
+                    end
+                else
+                    saved = true;
+                end
+            end
+        end
+        
+        function [simulation, simulationForSaving] = clearBeforeSaveFields(simulation, clearBeforeSave)
+            simulationForSaving = simulation;
             
             [phantom, phantomForSaving] = simulation.phantom.saveBeforeClearIfNeeded();
             
@@ -266,7 +344,21 @@ classdef Simulation < GyrfalconObject
             [scan, scanForSaving] = simulation.scan.saveBeforeClearIfNeeded();
             
             simulation.scan = scan;
-            simulationForSaving.scan = scanForSaving;         
+            simulationForSaving.scan = scanForSaving;
+            
+            if clearBeforeSave
+                if simulationForSaving.saveInSeparateFile
+                    cache = simulationForSaving;
+                    
+                    simulationForSaving = Simulation;
+                    
+                    simulationForSaving.savePath = cache.savePath;
+                    simulationForSaving.saveFileName = cache.saveFileName;
+                else
+                    simulationForSaving.savePath = '';
+                    simulationForSaving.saveFileName = '';
+                end
+            end
         end
         
         function simulation = loadFields(simulation)

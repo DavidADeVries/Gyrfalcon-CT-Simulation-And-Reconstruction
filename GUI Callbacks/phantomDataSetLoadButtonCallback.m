@@ -21,6 +21,8 @@ switch choice
     case loadDataSet
         dataSet = PhantomDataSet;
         
+        dataSet.saveInSeparateFile = true;
+        
         dataSet = dataSet.load();
     case cancel
         dataSet = [];
@@ -78,9 +80,9 @@ function dataSet = createNewDataSet()
         
         dataSet = PhantomDataSet(data);
         
-        clearBeforeSave = false;
+        dataSet.saveInSeparateFile = true;
         
-        [saved,dataSet] = dataSet.saveAs(clearBeforeSave);
+        [saved,dataSet,~,~] = dataSet.saveAs();
         
         if ~saved
             dataSet.saveInSeparateFile = false;

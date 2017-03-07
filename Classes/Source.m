@@ -86,8 +86,12 @@ methods
         name = 'Source';
     end
     
-    function [source, sourceForSaving] = clearBeforeSaveFields(source)
+    function [saved, sourceForGUI, sourceForParent, sourceForSaving] = saveChildrenObjects(source)
+        sourceForGUI = source;
+        sourceForParent = source;
         sourceForSaving = source;
+        
+        saved = true;
     end
         
     function source = loadFields(source)
@@ -110,16 +114,13 @@ methods
     function bool = equal(source1, source2)
         b1 = matricesEqual(source1.location, source2.location);
         b2 = source1.locationUnits == source2.locationUnits;
-        b3 = source1.dimensions(1).value == source2.dimensions(1).value;        
-        b4 = source1.dimensions(2).value == source2.dimensions(2).value;
-        b5 = source1.dimensions(1).units == source2.dimensions(1).units;        
-        b6 = source1.dimensions(2).units == source2.dimensions(2).units;
-        b7 = matricesEqual(source1.beamAngle, source2.beamAngle);
-        b8 = source1.beamAngleUnits == source2.beamAngleUnits;
-        b9 = strcmp(source1.savePath, source2.savePath);
-        b10 = strcmp(source1.saveFileName, source2.saveFileName);
+        b3 = dimensionMatricesEqual(source1.dimensions, source2.dimensions);  
+        b4 = matricesEqual(source1.beamAngle, source2.beamAngle);
+        b5 = source1.beamAngleUnits == source2.beamAngleUnits;
+        b6 = strcmp(source1.savePath, source2.savePath);
+        b7 = strcmp(source1.saveFileName, source2.saveFileName);
         
-        bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8 && b9 && b10;
+        bool = b1 && b2 && b3 && b4 && b5 && b6 && b7;
     end
     
     function bool = isPointSource(source)

@@ -73,10 +73,12 @@ classdef PhotonBeam < GyrfalconObject
             photonBeam.calibratedPhantomDataSet = {};
         end
         
-        function [photonBeam, photonBeamForSaving] = clearBeforeSaveFields(photonBeam)            
-            photonBeamForSaving = photonBeam;
+        function [saved, beamForGUI, beamForParent, beamForSaving] = saveChildrenObjects(beam)
+            beamForGUI = beam;
+            beamForParent = beam;
+            beamForSaving = beam;
             
-            photonBeamForSaving.calibratedPhantomDataSet = {};
+            saved = true;
         end
         
         function photonBeam = loadFields(photonBeam)
@@ -109,10 +111,10 @@ classdef PhotonBeam < GyrfalconObject
         end
         
         function bool = equal(beam1, beam2)
-            b1 = all(beam1.energies == beam2.energies);
-            b2 = all(beam1.intensities == beam2.intensities);
-            b3 = all(beam1.waterLinearAttenuationCoefficients == beam2.waterLinearAttenuationCoefficients);
-            b4 = all(beam1.airLinearAttenuationCoefficients == beam2.airLinearAttenuationCoefficients);
+            b1 = matricesEqual(beam1.energies, beam2.energies);
+            b2 = matricesEqual(beam1.intensities, beam2.intensities);
+            b3 = matricesEqual(beam1.waterLinearAttenuationCoefficients, beam2.waterLinearAttenuationCoefficients);
+            b4 = matricesEqual(beam1.airLinearAttenuationCoefficients, beam2.airLinearAttenuationCoefficients);
             
             b5 = true;
             
@@ -121,7 +123,7 @@ classdef PhotonBeam < GyrfalconObject
             
             if numBeam1 == numBeam2
                 for i=1:numBeam1
-                    b5 = b5 && all(beam1.calibratedPhantomDataSet{i} == beam2.calibratedPhantomDatSet{i});
+                    b5 = b5 && matricesEqual(beam1.calibratedPhantomDataSet{i}, beam2.calibratedPhantomDatSet{i});
                 end
             else
                 b5 = false;

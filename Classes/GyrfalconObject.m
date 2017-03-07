@@ -79,7 +79,8 @@ classdef GyrfalconObject
             cancelled = false;
             
             if object.saveInSeparateFile
-                [object, objectForSaving] = object.clearBeforeSaveFields();
+                clearBeforeSave = true;
+                [object, objectForSaving] = object.clearBeforeSaveFields(clearBeforeSave);
                     
                 if object.hasChanges()
                     clearBeforeSave = false;
@@ -123,19 +124,38 @@ classdef GyrfalconObject
               
         end
         
-        function [object, objectForSaving] = save(object, clearBeforeSave)
-            path = object.getPath();
-            
-            if isempty(path)
-                [~,object,objectForSaving] = object.saveAs(clearBeforeSave);
-            else
-                if clearBeforeSave
-                    [object,objectForSaving] = object.clearBeforeSaveFields();
+        function [saved, objectForGUI, objectForParent, objectForSaving] = save(object)            
+            if object.saveInSeparateFile
+                if isempty(object.getPath())
+                    [saved, objectForGUI, objectForParent] = saveAs(object);
                 else
-                    objectForSaving = object;
+                    [saved, objectForGUI, objectForParent, objectForSaving] = object.saveChildrenObjects();
+                    
+                    if saved
+                        % set objectForParent
+                        objectForParent = object.createBlankObject();
+                        
+                        objectForParent.savePath = objectForGUI.savePath;
+                        objectForParent.saveFileName = objectForGUI.saveFileName;
+                        objectForParent.saveInSeparateFile = true;
+                        
+                        % save object
+                        object = objectForSaving;
+                        save(object.getPath(), 'object');
+                    end
                 end
+            else
+                [saved, objectForGUI, objectForParent, objectForSaving] = object.saveChildrenObjects();
                 
-                save(object.getPath(), 'object');
+                if saved
+                    % set objectForParent
+                    objectForParent.savePath = '';
+                    objectForParent.saveFileName = '';
+                    
+                    % set objectForGUI
+                    objectForGUI.savePath = '';
+                    objectForGUI.saveFileName = '';
+                end
             end
         end
         
@@ -183,7 +203,7 @@ classdef GyrfalconObject
                     error = true;
                 end
             else
-                if object.saveInSeparateFile
+                if ~object.saveInSeparateFile
                     % no error, just linked up with parent object
                     object = object.loadFields();
                     
@@ -198,8 +218,9 @@ classdef GyrfalconObject
                 
                 className = class(object);
                 dialogTitle = ['Find ', className, ' File'];
+                defaultName = Constants.object_save_directory;
                 
-                [fileName, pathName, ~] = uigetfile(filterSpec, dialogTitle);
+                [fileName, pathName, ~] = uigetfile(filterSpec, dialogTitle, defaultName);
                 
                 if ~all(fileName == 0)
                     object.savePath = pathName;
@@ -212,27 +233,39 @@ classdef GyrfalconObject
             end
         end
         
-        function [saved, object, objectForSaving] = saveAs(object, clearBeforeSave)
-            className = class(object);
-            
-            filterSpec = '*.mat';
-            dialogTitle = ['Save ', className, '...'];
-            defaultName = object.defaultName();
-            
-            [fileName, pathName] = uiputfile(filterSpec, dialogTitle, defaultName);
-            
-            if ~all(fileName == 0)
-                object.savePath = pathName;
-                object.saveFileName = fileName;
-                object.saveInSeparateFile = true;
-                                
-                [object, objectForSaving] = object.save(clearBeforeSave);
+        function [saved, objectForGUI, objectForSaving, objectForParent] = saveAs(object)
+            if object.saveInSeparateFile()
+                className = class(object);
                 
-                saved = true;
+                filterSpec = '*.mat';
+                dialogTitle = ['Save ', className, '...'];
+                defaultName = makePath(Constants.object_save_directory, object.defaultName());
+                
+                [fileName, pathName] = uiputfile(filterSpec, dialogTitle, defaultName);
+                
+                if ~all(fileName == 0)
+                    object.savePath = pathName;
+                    object.saveFileName = fileName;
+                    object.saveInSeparateFile = true;
+                    
+                    [saved, objectForGUI, objectForSaving, objectForParent] = object.save();
+                else
+                    objectForGUI = object;
+                    objectForSaving = [];
+                    objectForParent = [];
+                    
+                    saved = false;
+                end
             else
-                objectForSaving = [];
-                
-                saved = false;
+                [saved, objectForGUI, objectForSaving, objectForParent] = object.save();
+            end
+        end
+        
+        function [saved, objectForGUI, objectForSaving, objectForParent] = saveAsIfChanged(object)
+            if object.hasChanges()
+                [saved, objectForGUI, objectForSaving, objectForParent] = saveAs(object);
+            else
+                [saved, objectForGUI, objectForSaving, objectForParent] = save(object);
             end
         end
     end

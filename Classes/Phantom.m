@@ -93,13 +93,22 @@ classdef Phantom < GyrfalconObject
             phantom.location = [0,0,0];
         end
         
-        function [phantom, phantomForSaving] = clearBeforeSaveFields(phantom)
+        function [saved, phantomForGUI, phantomForParent, phantomForSaving] = saveChildrenObjects(phantom)
+            phantomForGUI = phantom;
+            phantomForParent = phantom;
             phantomForSaving = phantom;
             
-            [dataSet, dataSetForSaving] = phantom.dataSet.saveBeforeClearIfNeeded(); 
-            
-            phantom.dataSet = dataSet;
-            phantomForSaving.dataSet = dataSetForSaving;
+            if ~isempty(phantom.dataSet)
+                [saved, dataSetForGUI, dataSetForParent, ~] = phantom.dataSet.saveAsIfChanged();
+                
+                if saved
+                    phantomForGUI.dataSet = dataSetForGUI;
+                    phantomForParent.dataSet = dataSetForParent;
+                    phantomForSaving.dataSet = dataSetForParent;
+                end
+            else
+                saved = true;
+            end
         end
         
         function phantom = loadFields(phantom)
@@ -123,10 +132,11 @@ classdef Phantom < GyrfalconObject
         end
          
         function bool = equal(phantom1, phantom2)
-            b1 = phantom1.dataSet.equal(phantom2.dataSet);
-            b2 = all(phantom1.voxelDimensions == phantom2.voxelDimensions);
+            b1 = gyrfalconObjectsEqual(phantom1.dataSet, phantom2.dataSet);
+            
+            b2 = matricesEqual(phantom1.voxelDimensions, phantom2.voxelDimensions);
             b3 = phantom1.voxelDimensionUnits == phantom2.voxelDimensionUnits;
-            b4 = all(phantom1.location == phantom2.location);
+            b4 = matricesEqual(phantom1.location, phantom2.location);
             b5 = phantom1.locationUnits == phantom2.locationUnits;
             b6 = strcmp(phantom1.savePath, phantom2.savePath);
             b7 = strcmp(phantom1.saveFileName, phantom2.saveFileName);

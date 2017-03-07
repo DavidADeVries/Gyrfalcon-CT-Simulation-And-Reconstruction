@@ -21,7 +21,7 @@ switch choice
     case loadBeam
         photonBeam = PhotonBeam;
         
-        photonBeam.saveInSeparateFile = true;
+        photonBeam.saveInSeparateFile = 
         
         photonBeam = photonBeam.load();
     case cancel

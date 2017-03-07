@@ -8,13 +8,15 @@ workspace = GyrfalconWorkspace; %empty workspace
 
 workspace = workspace.load();
 
-% update handles
-handles = workspace.setGUI(handles);
+if ~isempty(workspace)
 
-handles.workspace = workspace;
-
-guidata(hObject, handles);
-
+    % update handles
+    handles = workspace.setGUI(handles);
+    
+    handles.workspace = workspace;
+    
+    guidata(hObject, handles);
+end
 
 end
 

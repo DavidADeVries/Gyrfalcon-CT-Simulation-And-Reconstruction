@@ -91,8 +91,12 @@ classdef Detector < GyrfalconObject
             name = 'Detector';
         end
         
-        function [detector, detectorForSaving] = clearBeforeSaveFields(detector)
+        function [saved, detectorForGUI, detectorForParent, detectorForSaving] = saveChildrenObjects(detector)
+            detectorForGUI = detector;
+            detectorForParent = detector;
             detectorForSaving = detector;
+            
+            saved = true;
         end
         
         function detector = loadFields(detector)
@@ -119,14 +123,14 @@ classdef Detector < GyrfalconObject
             b1 = matricesEqual(detector1.location, detector2.location);
             b2 = detector1.locationUnits == detector2.locationUnits;
             b3 = matricesEqual(detector1.wholeDetectorDimensions, detector2.wholeDetectorDimensions);
-            b4 = equal(detector1.singleDetectorDimensions(1), detector2.singleDetectorDimensions(1));
-            b5 = equal(detector1.singleDetectorDimensions(2), detector2.singleDetectorDimensions(2));
-            b6 = detector1.movesWithScanAngle == detector2.movesWithScanAngle;
-            b7 = detector1.movesWithPerAngleTranslation == detector2.movesWithPerAngleTranslation;
-            b8 = strcmp(detector1.savePath, detector2.savePath);
-            b9 = strcmp(detector1.saveFileName, detector2.saveFileName);
+            b4 = dimensionMatricesEqual(detector1.singleDetectorDimensions, detector2.singleDetectorDimensions);
             
-            bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8 && b9;
+            b5 = matricesEqual(detector1.movesWithScanAngle, detector2.movesWithScanAngle);
+            b6 = matricesEqual(detector1.movesWithPerAngleTranslation, detector2.movesWithPerAngleTranslation);
+            b7 = strcmp(detector1.savePath, detector2.savePath);
+            b8 = strcmp(detector1.saveFileName, detector2.saveFileName);
+            
+            bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
         end
         
         function locationInM = getLocationInM(detector)

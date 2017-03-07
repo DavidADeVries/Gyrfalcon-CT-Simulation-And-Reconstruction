@@ -33,13 +33,22 @@ classdef GyrfalconWorkspace < GyrfalconObject
             workspace.simulation = sim;
         end
         
-        function [workspace, workspaceForSaving] = clearBeforeSaveFields(workspace)
+        function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace)
+            workspaceForGUI = workspace;
+            workspaceForParent = workspace;
             workspaceForSaving = workspace;
-
-            [sim, simForSaving] = workspace.simulation.clearBeforeSaveFields();
-
-            workspace.simulation = sim;
-            workspaceForSaving.simulation = simForSaving;
+            
+            if ~isempty(workspace.simulation)
+                [saved, simulationForGUI, simulationForParent, ~] = workspace.simulation.saveAsIfChanged();
+                
+                if saved
+                    workspaceForGUI.simulation = simulationForGUI;
+                    workspaceForParent.simulation = simulationForParent;
+                    workspaceForSaving.simulation = simulationForParent;
+                end
+            else
+                saved = true;
+            end
         end
         
         function workspace = loadFields(workspace)
@@ -52,7 +61,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
          
         function bool = equal(workspace1, workspace2)
             b1 = strcmp(workspace1.statusOutput, workspace2.statusOutput);
-            b2 = workspace1.simulation.equal(workspace2.simulation);
+            b2 = gyrfalconObjectsEqual(workspace1.simulation, workspace2.simulation);
             
             bool = b1 && b2;
         end
