@@ -75,9 +75,7 @@ classdef ComputerInfo
                 
                 string = [string, {str16}];
             else
-                str16 = ['Compute Capability: ', info.gpuDevice.computeCapability];
-                
-                string = [string, {str16}];
+                str17 = ['Compute Capability: ', info.gpuDevice.computeCapability
             end
         end
     end

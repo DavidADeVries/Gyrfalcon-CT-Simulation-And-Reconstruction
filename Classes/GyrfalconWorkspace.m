@@ -5,14 +5,17 @@ classdef GyrfalconWorkspace < GyrfalconObject
         statusOutput
         
         simulation
+        
+        simulationRun
     end
     
     methods
-        function workspace = GyrfalconWorkspace(statusOutput, simulation)
+        function workspace = GyrfalconWorkspace(statusOutput, simulation, simulationRun)
             if nargin > 0
                 workspace.statusOutput = statusOutput;
             
                 workspace.simulation = simulation;
+                workspace.simulationRun = simulationRun;
             end
         end
         
@@ -31,6 +34,11 @@ classdef GyrfalconWorkspace < GyrfalconObject
             sim = sim.setDefaultValues();
             
             workspace.simulation = sim;
+            
+            simRun = SimulationRun;
+            simRun = simRun.setDefaultValues();
+            
+            workspace.simulationRun = simRun;
         end
         
         function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace)
@@ -78,6 +86,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
             set(handles.gyrofalconMain, 'Name', ['Gyrfalcon - ', path]);
             
             workspace.simulation.setGUI(handles);
+            workspace.simulationRun.setGUI(handles);
         end
         
         function workspace = createFromGUI(workspace, handles)

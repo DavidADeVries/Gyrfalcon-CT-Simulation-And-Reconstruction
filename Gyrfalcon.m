@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 03-Mar-2017 12:22:55
+% Last Modified by GUIDE v2.5 08-Mar-2017 10:01:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1238,3 +1238,127 @@ function detectorSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of detectorSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in simulationRunLoadButton.
+function simulationRunLoadButton_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationRunLoadButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in simulationRunDisplayFreeRunCheckbox.
+function simulationRunDisplayFreeRunCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationRunDisplayFreeRunCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of simulationRunDisplayFreeRunCheckbox
+
+
+
+function simulationRunComputerInfoText_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationRunComputerInfoText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of simulationRunComputerInfoText as text
+%        str2double(get(hObject,'String')) returns contents of simulationRunComputerInfoText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function simulationRunComputerInfoText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to simulationRunComputerInfoText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function simulationRunNotesText_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationRunNotesText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of simulationRunNotesText as text
+%        str2double(get(hObject,'String')) returns contents of simulationRunNotesText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function simulationRunNotesText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to simulationRunNotesText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in simulationRunShowSimulationInControlPanelToggleButton.
+function simulationRunShowSimulationInControlPanelToggleButton_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationRunShowSimulationInControlPanelToggleButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of simulationRunShowSimulationInControlPanelToggleButton
+
+
+% --- Executes on selection change in reconstructionAlgorithmSelectionPopupMenu.
+function reconstructionAlgorithmSelectionPopupMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to reconstructionAlgorithmSelectionPopupMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns reconstructionAlgorithmSelectionPopupMenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from reconstructionAlgorithmSelectionPopupMenu
+
+
+% --- Executes during object creation, after setting all properties.
+function reconstructionAlgorithmSelectionPopupMenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconstructionAlgorithmSelectionPopupMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconstructionAlgorithmSettingsText_Callback(hObject, eventdata, handles)
+% hObject    handle to reconstructionAlgorithmSettingsText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconstructionAlgorithmSettingsText as text
+%        str2double(get(hObject,'String')) returns contents of reconstructionAlgorithmSettingsText as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconstructionAlgorithmSettingsText_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconstructionAlgorithmSettingsText (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in reconstructionAlgorithmSettingsEditButton.
+function reconstructionAlgorithmSettingsEditButton_Callback(hObject, eventdata, handles)
+% hObject    handle to reconstructionAlgorithmSettingsEditButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

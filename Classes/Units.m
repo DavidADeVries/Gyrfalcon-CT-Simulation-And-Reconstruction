@@ -7,6 +7,14 @@ classdef Units
         isAngular
     end
     
+    enumeration
+        mm ('mm', false)
+        m ('m', false)
+        
+        degree ('°', true)
+        radian ('rad', true)
+    end
+    
     methods
         function obj = Units(displayString, isAngular)
             obj.displayString = displayString;
@@ -57,14 +65,6 @@ classdef Units
                 end
             end
         end
-    end
-    
-    enumeration
-        mm ('mm', false)
-        m ('m', false)
-        
-        degree ('°', true)
-        radian ('rad', true)
     end
     
 end

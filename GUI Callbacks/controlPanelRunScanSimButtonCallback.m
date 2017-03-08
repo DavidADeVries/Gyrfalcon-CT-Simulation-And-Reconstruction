@@ -19,7 +19,7 @@ displayFreeRun = ~(displaySlices || displayAngles || displayPerAnglePosition || 
 
 simulationRun = SimulationRun(simulation, displayFreeRun);
 
-if simulationRun.isValidForSave()
+if ~isempty(simulationRun) && simulationRun.isValidForSave()
     simulationRun = simulationRun.startRun();
     
     simulation = simulation.calibrateAndSetPhantomData();

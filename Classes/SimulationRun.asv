@@ -110,7 +110,7 @@ classdef SimulationRun < ProcessingRun
                 setString(handles.simulationRunComputerInfoText, run.computerInfo.getSummaryString());
             end
             
-            setString(handles.simulationRunNotesText, run.notes);
+            set(handles.simulationRunNotesText, run.notes);
             
             if ~isempty(run.simulation)
                 scanGeometry = run.simulation.findScanGeometry();
@@ -122,28 +122,24 @@ classdef SimulationRun < ProcessingRun
             if ~hasScanGeometry
                 setString(handles.simulationRunScanGeometryText, '');
                 set(handles.reconstructionAlgorithmSelectionPopupMenu,...
-                    'Enable','inactive',...
-                    'String',{'None'});
+                    'Enable','off',...
+                    'String','');
                 setString(handles.reconstructionAlgorithmSettingsText, '');
                 set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'off');
             else
-                numSlices = num2str(length(run.simulation.scan.slices));
-                numAngles = num2str(length(run.simulation.scan.scanAngles));
+                numSlices = length(run.simulation.scan.slices);
+                numAngles = length(run.simulation.scan.scanAngles);
                 
                 geometryString = {...
                     scanGeometry.displayName,...
                     scanGeometry.shortDescriptionString,...
-                    [numAngles, ' Angles, ', numSlices, ' Slices']};
                 
-                setString(handles.simulationRunScanGeometryText, geometryString);
-                
-                [algorithmChoiceStrings, ~] = scanGeometry.getReconAlgorithmChoices();
-                
+                setString(handles.simulationRunScanGeometryText, '');
                 set(handles.reconstructionAlgorithmSelectionPopupMenu,...
-                    'Enable','on',...
-                    'String',algorithmChoiceStrings);
-                setString(handles.reconstructionAlgorithmSettingsText, 'Press "Edit" to Set');
-                set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'on');
+                    'Enable','off',...
+                    'String','');
+                setString(handles.reconstructionAlgorithmSettingsText, '');
+                set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'off');
             end
         end
         

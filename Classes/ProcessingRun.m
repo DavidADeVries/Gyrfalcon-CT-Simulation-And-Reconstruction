@@ -11,7 +11,7 @@ classdef ProcessingRun
         
         notes
         savePath
-        saveFilename
+        saveFileName
     end
     
     methods
@@ -24,28 +24,10 @@ classdef ProcessingRun
             run.endTimestamp = [];
             run.notes = [];
             run.savePath = [];
-            run.saveFilename = [];
-        end
-                
-        function run = collectNotes(run)
-            prompt = 'Please enter any needed notes about the processing run:';
-            dlg_title = 'Notes Input';
-            num_lines = [1,100];
-            
-            if isempty(run.notes)
-                defAns = {''};
-            else
-                defAns = {run.notes};
-            end
-            
-            answer = inputdlg(prompt, dlg_title, num_lines, defAns);
-            
-            if ~isempty(answer)
-                run.notes = answer;
-            end            
+            run.saveFileName = [];
         end
         
-        function run = collectSavePathAndFilename(run)
+        function [cancel, run] = collectSavePathAndFilename(run)
             filterspec = '*.mat';
             dialogTitle = 'Save As';
             
@@ -53,12 +35,16 @@ classdef ProcessingRun
             
             if ~isa(filename,'double') % didn't click cancel
                 run.savePath = pathname;
-                run.saveFilename = filename;
+                run.saveFileName = filename;
+                
+                cancel = false;
+            else
+                cancel = true;
             end
         end
         
         function bool = isValidForSave(run)
-            bool = ~isempty(run.savePath) && ~isempty(run.saveFilename);
+            bool = ~isempty(run.savePath) && ~isempty(run.saveFileName);
         end
         
         function run = startProcessingRun(run)
@@ -69,6 +55,34 @@ classdef ProcessingRun
             run.endTimestamp = now;
         end
         
+        function path = getPath(run)
+            path = makePath(run.savePath, run.saveFileName);
+        end
+        
+        function [hours, minutes, seconds] = getRunTime(run)
+            numHours = (run.endTimestamp - run.startTimestamp) * 24;
+            
+            hours = floor(numHours);
+            
+            numMinutes = (numHours - hours) * 60;
+            
+            minutes = floor(numMinutes);
+            
+            numSeconds = (numMinutes - minutes) * 60;
+            
+            seconds = floor(numSeconds);
+        end
+        
+        function string = getRunTimeString(run)
+            [hours, minutes, seconds] = run.getRunTime();
+            
+            hourStr = convertToTimeString(hours);
+            minStr = convertToTimeString(minutes);
+            secStr = convertToTimeString(seconds);
+            
+            string = [hourStr, ':', minStr, ':', secStr];
+        end
+        
         function [] = save(run)
             % chance to set save path if needed
             if ~run.isValidForSave()
@@ -77,10 +91,17 @@ classdef ProcessingRun
             
             % now save
             if run.isValidForSave()
-                save(makePath(run.savePath, run.saveFilename), Constants.Processing_Run_Var_Name);
+                save(makePath(run.savePath, run.saveFileName), Constants.Processing_Run_Var_Name);
             end
         end
     end
     
 end
 
+function str = convertToTimeString(time)
+    str = num2str(time);
+    
+    if length(str) == 1
+        str = ['0', str];
+    end
+end

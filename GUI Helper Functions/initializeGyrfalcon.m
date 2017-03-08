@@ -26,7 +26,6 @@ handles = initializeDisplayFigure(handles);
 
 set(handles.controlPanelRunScanSimButton, 'Enable', 'on');
 set(handles.controlPanelRunReconstructionButton, 'Enable', 'off');
-set(handles.controlPanelUnassignedTaskButton, 'Enable', 'off');
 
 % *** SCAN SIMULATION PARAMETERS ***
 
