@@ -1,4 +1,4 @@
-classdef Scan
+classdef Scan < GyrfalconObject
     % Scan
     % This class contains all the data pertaining to an CT scan
     % 
@@ -46,11 +46,6 @@ classdef Scan
         
         beamCharacterization
         
-        beamCharacterizationPath
-        beamCharacterizationFileName
-        
-        savePath
-        saveFileName
     end
     
     methods
@@ -101,6 +96,70 @@ classdef Scan
                 scan.beamCharacterization = beamCharacterization;
             end
         end
+                
+        function object = createBlankObject(object)
+            object = Scan;
+        end
+        
+        function name = displayName(scan)
+            name = 'Scan';
+        end
+        
+        function [saved, scanForGUI, scanForParent, scanForSaving] = saveChildrenObjects(scan)
+            scanForGUI = scan;
+            scanForParent = scan;
+            scanForSaving = scan;
+            
+            if ~isempty(scan.beamCharacterization)
+                [saved, beamForGUI, beamForParent, ~] = scan.beamCharacterization.saveAsIfChanged();
+                
+                if saved
+                    scanForGUI.beamCharacterization = beamForGUI;
+                    scanForParent.beamCharacterization = beamForParent;
+                    scanForSaving.beamCharacterization = beamForParent;
+                end
+            else
+                saved = true;
+            end
+        end
+        
+        function scan = loadFields(scan)
+            scan.beamCharacterization = scan.beamCharacterization.load();
+        end   
+                       
+        function source = setDefaultValues(source)
+            source.scanAngles = 0;
+            source.slices = 0;
+            
+            source.perAngleTranslationDimensions = [1,1];
+            source.perAngleTranslationResolution = [0,0];
+            
+            beam = PhotonBeam;
+            beam.setDefaultValues();
+            
+            source.beamCharacterization = beam;
+        end
+        
+        function name = defaultName(scan)
+            name = [Constants.Default_Scan_Name, Constants.Matlab_File_Extension]; 
+        end
+        
+        function bool = equal(scan1, scan2)
+            b1 = matricesEqual(scan1.scanAngles, scan2.scanAngles);
+            b2 = scan1.scanAngleUnits == scan2.scanAngleUnits;
+            b3 = matricesEqual(scan1.slices, scan2.slices);
+            b4 = scan1.sliceUnits == scan2.sliceUnits;
+            b5 = matricesEqual(scan1.perAngleTranslationDimensions, scan2.perAngleTranslationDimensions);
+            b6 = matricesEqual(scan1.perAngleTranslationResolution, scan2.perAngleTranslationResolution);
+            b7 = scan1.perAngleTranslationUnits == scan2.perAngleTranslationUnits;
+            
+            b8 = gyrfalconObjectsEqual(scan1.beamCharacterization, scan2.beamCharacterization);
+            
+            b9 = strcmp(scan1.savePath, scan2.savePath);
+            b10 = strcmp(scan1.saveFileName, scan2.saveFileName);
+        
+            bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8 && b9 && b10;
+        end
         
         function slicesInM = getSlicesInM(scan)
             slices = scan.slices;
@@ -132,10 +191,39 @@ classdef Scan
             perAngleZInM = units.convertToM(zPos);
         end
         
-        function handles = plotPerAngle(scan, source, axesHandle, slicePosition, angle)
-            axes(axesHandle);
-            hold on
+        function handles = plotSlices(scan, source, axesHandle, slicePositionInM)
+            if isempty(slicePositionInM)
+                slicePositions = scan.getSlicesInM();
+            else
+                slicePositions = slicePositionInM;
+            end
             
+            for i=1:length(slicePositions)
+                slicePosition = slicePositions(i);
+                
+                locationInM = source.getLocationInM();
+                
+                x = 0;
+                y = 0; % at origin
+                r = norm([locationInM(1), locationInM(2)]); % found above
+                ang1 = 0;
+                ang2 = 360; % to make circle
+                
+                edgeColour = Constants.Slice_Colour;
+                faceColour = 'none';
+                lineStyle = '--';
+                lineWidth = [];
+                
+                handle = circleOrArcPatch(...
+                    x, y, slicePosition,...
+                    r, ang1, ang2,...
+                    edgeColour, faceColour, lineStyle, lineWidth, axesHandle);
+                
+                handles = {handle};
+            end
+        end
+        
+        function handles = plot(scan, source, axesHandle, slicePosition, angle)            
             handles = {};
             
             locationInM = source.locationUnits.convertToM(source.location);
@@ -193,7 +281,9 @@ classdef Scan
             
             if xyStart == xyEnd % draw line along z
                 
-                handle = line([x,x],[y,y],[zStart,zEnd],'Color',lineColour);
+                handle = line(...
+                    [x,x], [y,y], [zStart,zEnd],...
+                    'Color', lineColour, 'Parent', axesHandle);
                                 
                 % add handle
                 handles = [handles, {handle}];
@@ -202,7 +292,9 @@ classdef Scan
                     y1 = y - Constants.Per_Angle_Translation_Tick_Length;
                     y2 = y + Constants.Per_Angle_Translation_Tick_Length;
                     
-                    lineHandle = line([x,x],[y1,y2],[zVal,zVal],'Color',lineColour);
+                    lineHandle = line(...
+                        [x,x], [y1,y2], [zVal,zVal],...
+                        'Color', lineColour, 'Parent', axesHandle);
                     
                     origin = [x, y, zVal];
                     
@@ -213,7 +305,9 @@ classdef Scan
                 end
             else
                 for zVal=zStart:zResolution:zEnd
-                    lineHandle = line([radius,radius],[xyStart,xyEnd],[zVal,zVal],'Color',lineColour);
+                    lineHandle = line(...
+                        [radius,radius], [xyStart,xyEnd], [zVal,zVal],...
+                        'Color', lineColour, 'Parent', axesHandle);
                     
                     % add handle
                     handles = [handles, {lineHandle}];
@@ -224,7 +318,9 @@ classdef Scan
                         z1 = zVal - Constants.Per_Angle_Translation_Tick_Length;
                         z2 = zVal + Constants.Per_Angle_Translation_Tick_Length;
                         
-                        lineHandle = line([radius,radius],[xyVal,xyVal],[z1,z2],'Color',lineColour);
+                        lineHandle = line(...
+                            [radius,radius], [xyVal,xyVal], [z1,z2],...
+                            'Color', lineColour, 'Parent', axesHandle);
                                                 
                         rotate(lineHandle, aboutZ, theta);
                         
@@ -235,83 +331,7 @@ classdef Scan
             end
             
         end
-        
-        function [] = plot(scan, source, axesHandle)
-            locationInM = source.locationUnits.convertToM(source.location);
-                        
-            x = locationInM(1);
-            y = locationInM(2);
-            z = locationInM(3);
-            
-            [theta,radius] = cart2pol(x,y);                
-            theta = theta * Constants.rad_to_deg; % this angle is base angle to rotate to, and then add more for scan angles
-                        
-            scanAngles = scan.scanAngleUnits.convertToDegrees(scan.scanAngles);
-            
-            numAngles = length(scanAngles);
-            
-            for i=1:numAngles
-                angle = scanAngles(i);
-                
-                if mod(angle, 360) ~= 0 %make sure not a starting location
-                    % get (x,y) for source at this point
-                    thetaRad = (theta - angle) * Constants.deg_to_rad; % NOTE: use -, because we define + angle as clockwise, polar coords are opposite
-                    
-                    [x1,y1] = pol2cart(thetaRad, radius);
-                    
-                    % plot where source will be
-                    edgeColour = Constants.Source_Colour;
-                    faceColour = []; % hollow it out
-                    lineStyle = [];
-                    lineWidth = [];
-                    
-                    circleOrArcPatch(...
-                        x1,y1,z,Constants.Point_Source_Radius, 0, 360,...
-                        edgeColour, faceColour, lineStyle, lineWidth);
-                    
-                    x2 = -x1; %line goes across circle
-                    y2 = -y1;
-                    
-                    x = [x1,x2];
-                    y = [y1,y2];
-                    
-                    line(x,y,'Parent', axesHandle, 'Color', Constants.Source_Colour, 'LineStyle', '--');
-                end
-            end
-            
-            % plot slices
-            slicesInM = scan.sliceUnits.convertToM(scan.slices);
-            
-            numSlices = length(slicesInM);
-            
-            % slice vars
-            x = 0;
-            y = 0; % at origin
-            r = radius; % found above
-            ang1 = 0;
-            ang2 = 360; % to make circle
-            
-            edgeColour = Constants.Slice_Colour;
-            faceColour = 'none';
-            lineStyle = '--';
-            lineWidth = [];
-            
-            for i=1:numSlices
-                z = slicesInM(i);
-                    
-                if z ~= locationInM(3) % don't draw circle where the detector starts                    
-                    circleOrArcPatch(x, y, z, r, ang1, ang2, edgeColour, faceColour, lineStyle, lineWidth);
-                end
-            end
-            
-            % per angle translation plotting
-            
-            slicePosition = []; % set these to empy so that source location will be used
-            angle = [];
-            
-            scan.plotPerAngle(source, axesHandle, slicePosition, angle);             
-        end
-        
+               
         function handles = setGUI(scan, handles)
             setMultipleDoublesForHandle(handles.scanAnglesEdit, scan.scanAngles);
             setMultipleDoublesForHandle(handles.scanSlicePositionsEdit, scan.slices);
@@ -328,24 +348,17 @@ classdef Scan
             setDoubleForHandle(handles.scanPerAngleStepDimensionsXYEdit, xy);
             setDoubleForHandle(handles.scanPerAngleStepDimensionsZEdit, z);
             
-            handles.scanBeamCharacterization = scan.beamCharacterization; % TODO!
-            
-            if ~isempty(scan.beamCharacterizationFileName)
-                setString(handles.scanBeamCharacterizationFileNameText, scan.beamCharacterizationFileName);
-            end
-                        
-            if isempty(scan.saveFileName)
+            set(handles.scanSaveInSeparateFileCheckbox, 'Value', scan.saveInSeparateFile);
+                                    
+            if ~scan.saveInSeparateFile
+                setString(handles.scanFileNameText, 'Tied to Simulation');
+            elseif isempty(scan.saveFileName)
                 setString(handles.scanFileNameText, 'Not Saved');
             else
                 setString(handles.scanFileNameText, scan.saveFileName);
             end
             
-            % set hidden handles
-            handles.scanSavePath = scan.savePath;
-            handles.scanSaveFileName = scan.saveFileName;
-            
-            handles.scanBeamCharacterizationPath = scan.beamCharacterizationPath;
-            handles.scanBeamCharacterizationFileName = scan.beamCharacterizationFileName;
+            handles = scan.beamCharacterization.setGUI(handles);
         end
         
         function scan = createFromGUI(scan, handles)
@@ -362,23 +375,9 @@ classdef Scan
             
             scan.perAngleTranslationResolution = [xy, z];
             
-            % TODO!
-            beamEnergy = 175; %in kEv
-            beamIntensity = 30; %in w/m^2
+            scan.beamCharacterization = scan.beamCharacterization.createFromGUI(handles);
             
-            photonBeam = PhotonBeam(beamEnergy, beamIntensity);
-            
-            handles.scanBeamCharacterization = {photonBeam};
-            
-            scan.beamCharacterization = handles.scanBeamCharacterization;
-            % TODO!
-            
-            scan.beamCharacterizationPath = handles.scanBeamCharacterizationPath;
-            scan.beamCharacterizationFileName = handles.scanBeamCharacterizationFileName;
-            
-            
-            scan.savePath = handles.scanSavePath;
-            scan.saveFileName = handles.scanSaveFileName;
+            scan.saveInSeparateFile = get(handles.scanSaveInSeparateFileCheckbox,'Value');
         end
         
     end

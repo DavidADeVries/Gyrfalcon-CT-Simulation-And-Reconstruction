@@ -28,6 +28,21 @@ classdef Units
             end
         end
         
+        function valueInToUnits = convertFromM(toUnits, valueInM)
+            if toUnits.isAngular
+                error('Invalid units!');
+            else
+                switch toUnits
+                    case Units.m
+                        valueInToUnits = valueInM;
+                    case Units.mm
+                        valueInToUnits = valueInM / Constants.mm_to_m;
+                    otherwise
+                        error('Invalid units!');
+                end
+            end
+        end
+        
         function valueInDegrees = convertToDegrees(units, value)
             if ~units.isAngular
                 error('Invalid Units');

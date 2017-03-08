@@ -2,6 +2,10 @@ classdef Constants
     %Constants
     
     properties (Constant)
+        version = '1.0.1';
+        
+        object_save_directory = 'C:\Github Code Repos\Gyrfalcon Saved Objects'
+        
         mm_to_m = (1/1000);
         m_to_mm = (1000/1);
         
@@ -13,7 +17,7 @@ classdef Constants
         detector_line_height = 0.05; % in M
         
         Source_Colour = 'g';
-        Slice_Colour = 'b';
+        Slice_Colour = 'c';
         Per_Angle_Translation_Colour = 'm';
         Per_Angle_Translation_Tick_Length = 1/100; %in m
         Point_Source_Radius = 1/100; %in m's, 10mm
@@ -21,19 +25,40 @@ classdef Constants
         Detector_Raster_Colour = [1,0.6,0.6];
         Detector_Raster_Alpha = 0.5;
         
+        Phantom_Plot_Z_Slices_Spacing = 0.15; % in m
+        
+        Ray_Trace_Colour = 'b';
+        Ray_Trace_Point_Colour = 'w';
+        
+        Detector_Display_Colour = [0.33, 0.33, 0.33]; % a dark grey
+        Detector_Display_Title = 'Gyrfalcon - Detector Display';
+        
+        
         No_File_Name_String = 'No File Selected';
         
         Slash = '\';
         
         Matlab_File_Extension = '.mat';
+                
+        Processing_Run_Var_Name = 'run';
         
-        Default_Workspace_File_Name = 'Workspace';
+        Default_Simulation_Name = 'Simulation';
+        Default_Phantom_Name = 'Phantom';
+        Default_Detector_Name = 'Detector';
+        Default_Source_Name = 'Source';
+        Default_Scan_Name = 'Scan';
+        Default_Photon_Beam_Name = 'Photon Beam';
+        Default_Phantom_Data_Set_Name = 'Data Set';
+        Default_Workspace_Name = 'Workspace';
         
-        Default_Phantom_Data_Set_File_Name = 'Phantom Data Set';
-        Save_Phantom_Data_Set_Var_Name = 'dataSet';
-        
-        Save_Workplace_Simulation_Var_Name = 'simulation';
-        Save_Workplace_Status_Output_Var_Name = 'statusOutput';
+        Simulation_Display_Name = 'Simulation';
+        Phantom_Display_Name = 'Phantom';
+        Detector_Display_Name = 'Display';
+        Source_Display_Name = 'Source';
+        Scan_Display_Name = 'Scan';
+        Photon_Beam_Display_Name = 'Photon Beam';
+        Phantom_Data_Set_Display_Name = 'Phantom Data Set';
+        Workspace_Display_Name = 'Workspace';
     end
     
     methods

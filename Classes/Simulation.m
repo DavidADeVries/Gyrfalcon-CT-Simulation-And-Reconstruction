@@ -1,4 +1,4 @@
-classdef Simulation
+classdef Simulation < GyrfalconObject
     % Simulation
     % This class contains all the data pertaining to an CT scan simulation
     % 
@@ -39,13 +39,12 @@ classdef Simulation
         scatteringNoiseLevel
         detectorNoiseLevel
         partialPixelModelling
+        partialPixelResolution
         
-        savePath
-        saveFileName
     end
     
     methods
-        function simulation = Simulation(phantom, detector, source, scan, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelling)
+        function simulation = Simulation(phantom, detector, source, scan, scatteringNoiseLevel, detectorNoiseLevel, partialPixelModelling, partialPixelResolution)
             if nargin > 0
                 % validate simulation parameters and fill in blanks if needed
                 
@@ -73,7 +72,44 @@ classdef Simulation
                 simulation.scatteringNoiseLevel = scatteringNoiseLevel;
                 simulation.detectorNoiseLevel = detectorNoiseLevel;
                 simulation.partialPixelModelling = partialPixelModelling;
+                simulation.partialPixelResolution = partialPixelResolution;
             end
+        end
+        
+        function object = createBlankObject(object)
+            object = Simulation;
+        end
+        
+        function simulation = setDefaultValues(simulation)
+            phantom = Phantom;
+            phantom = phantom.setDefaultValues();
+            
+            detector = Detector;
+            detector = detector.setDefaultValues();
+                        
+            source = Source;
+            source = source.setDefaultValues();
+                        
+            scan = Scan;
+            scan = scan.setDefaultValues();
+            
+            simulation.phantom = phantom;
+            simulation.detector = detector;
+            simulation.source = source;
+            simulation.scan = scan;
+            
+            simulation.scatteringNoiseLevel = 0;
+            simulation.detectorNoiseLevel = 0;
+            simulation.partialPixelModelling = true;
+            simulation.partialPixelResolution = 1;
+        end
+        
+        function name = defaultName(simulation)
+            name = [Constants.Default_Simulation_Name, Constants.Matlab_File_Extension];
+        end
+                
+        function name = displayName(simulation)
+            name = 'Simulation';
         end
         
         function [] = plot(simulation, handles)
@@ -89,31 +125,17 @@ classdef Simulation
             angle = [];
             
             simulation.detector.plot(axesHandle, slicePosition, angle, 0, 0);
-            simulation.source.plot(axesHandle);
-            simulation.scan.plot(simulation.source, axesHandle);
+            simulation.source.plot(axesHandle,[],[]);
+            simulation.scan.plot(simulation.source, axesHandle, 0, 0);
+            
+            slicePosition = []; %plot all
+            
+            simulation.scan.plotSlices(simulation.source, axesHandle, slicePosition);
                        
         end
         
         function plotHandles = plotSlice(simulation, axesHandle, slicePosition)
-            axes(axesHandle);
-            hold on
-            
-            locationInM = simulation.source.getLocationInM();
-            
-            x = 0;
-            y = 0; % at origin
-            r = norm([locationInM(1), locationInM(2)]); % found above
-            ang1 = 0;
-            ang2 = 360; % to make circle
-            
-            edgeColour = Constants.Slice_Colour;
-            faceColour = 'none';
-            lineStyle = '--';
-            lineWidth = [];
-            
-            handle = circleOrArcPatch(x, y, slicePosition, r, ang1, ang2, edgeColour, faceColour, lineStyle, lineWidth);
-            
-            plotHandles = {handle};
+            plotHandles = plotSlices(simulation.scan, simulation.source, axesHandle, slicePosition);
         end
         
         function plotHandles = plotAngle(simulation, axesHandle, slicePosition, angle)
@@ -123,19 +145,19 @@ classdef Simulation
                 detectorHandles = {};
             end
             
-            scanHandles = simulation.scan.plotPerAngle(simulation.source, axesHandle, slicePosition, angle);
+            scanHandles = simulation.scan.plot(simulation.source, axesHandle, slicePosition, angle);
             
             plotHandles = [detectorHandles, scanHandles];
         end
         
-        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ)
+        function plotHandles = plotPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, startBoxCoords, endBoxCoords)
             if simulation.detector.movesWithPerAngleTranslation
                 detectorHandles = simulation.detector.plot(axesHandle, slicePosition, angle, perAngleXY, perAngleZ);
             else
                 detectorHandles = {};
             end
             
-            sourceHandles = simulation.source.plotSource(axesHandle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed);
+            sourceHandles = simulation.source.plot(axesHandle, startBoxCoords, endBoxCoords);
             
             plotHandles = [detectorHandles, sourceHandles];
         end
@@ -154,16 +176,17 @@ classdef Simulation
             z = detectorCornerCoords(:,3);
             
             plotHandles = patch(...
-                'XData',x,'YData',y,'ZData',z,...
-                'FaceColor',Constants.Detector_Raster_Colour,...
-                'FaceAlpha',Constants.Detector_Raster_Alpha,...
-                'EdgeColor','none',...
-                'LineStyle','none');
+                'XData', x, 'YData', y, 'ZData', z,...
+                'FaceColor', Constants.Detector_Raster_Colour,...
+                'FaceAlpha', Constants.Detector_Raster_Alpha,...
+                'EdgeColor', 'none',...
+                'LineStyle', 'none',...
+                'Parent', axesHandle);
             
             plotHandles = {plotHandles};
         end
         
-        function handles = setGUIFromSimulation(simulation, handles)
+        function handles = setGUI(simulation, handles)
             
             % PHANTOM
             
@@ -186,49 +209,176 @@ classdef Simulation
             setDoubleForHandle(handles.simulationScatteringNoiseLevelEdit, simulation.scatteringNoiseLevel);
             setDoubleForHandle(handles.simulationDetectorNoiseLevelEdit, simulation.detectorNoiseLevel);
             set(handles.simulationPartialPixelModellingCheckbox, 'Value', simulation.partialPixelModelling);
-                       
-            % set hidden handles
-            handles.simulationSavePath = simulation.savePath;
-            handles.simulationSaveFileName = simulation.saveFileName;
+            setDoubleForHandle(handles.simulationPartialPixelResolutionEdit, simulation.partialPixelResolution);
+                        
+            set(handles.simulationSaveInSeparateFileCheckbox, 'Value', simulation.saveInSeparateFile);
+            
+            if ~simulation.saveInSeparateFile
+                setString(handles.simulationFileNameText, 'Tied to Workspace');
+            elseif isempty(simulation.saveFileName)
+                setString(handles.simulationFileNameText, 'Not Saved');
+            else
+                setString(handles.simulationFileNameText, simulation.saveFileName);
+            end
         end
         
         function simulation = createFromGUI(simulation, handles)
             % PHANTOM
-            
-            phant = Phantom();
-            
-            simulation.phantom = phant.createFromGUI(handles);
+                        
+            simulation.phantom = simulation.phantom.createFromGUI(handles);
             
             % DETECTOR
-            
-            detector = Detector();
-            
-            simulation.detector = detector.createFromGUI(handles);
+                        
+            simulation.detector = simulation.detector.createFromGUI(handles);
             
             % SOURCE
-            
-            source = Source();
-            
-            simulation.source = source.createFromGUI(handles);
+                        
+            simulation.source = simulation.source.createFromGUI(handles);
             
             % SCAN
-            
-            scan = Scan();
-            
-            simulation.scan = scan.createFromGUI(handles);
+                        
+            simulation.scan = simulation.scan.createFromGUI(handles);
             
             % SIMULATION
             
             simulation.scatteringNoiseLevel = getDoubleFromHandle(handles.simulationScatteringNoiseLevelEdit);
             simulation.detectorNoiseLevel = getDoubleFromHandle(handles.simulationDetectorNoiseLevelEdit);
             simulation.partialPixelModelling = get(handles.simulationPartialPixelModellingCheckbox, 'Value');
+            simulation.partialPixelResolution = getDoubleFromHandle(handles.simulationPartialPixelResolutionEdit);
             
-            
-            simulation.savePath = handles.simulationSavePath;
-            simulation.saveFileName = handles.simulationSaveFileName;
+            simulation.saveInSeparateFile = get(handles.simulationSaveInSeparateFileCheckbox,'Value');
         end
         
-        function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster)
+        function bool = equal(sim1, sim2)
+            b1 = gyrfalconObjectsEqual(sim1.phantom, sim2.phantom);
+            b2 = gyrfalconObjectsEqual(sim1.detector, sim2.detector);
+            b3 = gyrfalconObjectsEqual(sim1.source, sim2.source);
+            b4 = gyrfalconObjectsEqual(sim1.scan, sim2.scan);
+            
+            b5 = matricesEqual(sim1.scatteringNoiseLevel, sim2.scatteringNoiseLevel);
+            b6 = matricesEqual(sim1.detectorNoiseLevel, sim2.detectorNoiseLevel);
+            b7 = matricesEqual(sim1.partialPixelModelling, sim2.partialPixelModelling);
+            b8 = matricesEqual(sim1.partialPixelResolution, sim2.partialPixelResolution);
+            
+            bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
+        end
+        
+        function [saved, simulationForGUI, simulationForParent, simulationForSaving] = saveChildrenObjects(simulation)
+            simulationForGUI = simulation;
+            simulationForParent = simulation;
+            simulationForSaving = simulation;
+            
+            if ~isempty(simulation.phantom)
+                [saved, phantomForGUI, phantomForParent, ~] = simulation.phantom.saveAsIfChanged();
+                
+                if saved
+                    simulationForGUI.phantom = phantomForGUI;
+                    simulationForParent.phantom = phantomForParent;
+                    simulationForSaving.phantom = phantomForParent;
+                end
+            else
+                saved = true;
+            end
+            
+            if saved
+                if ~isempty(simulation.source)
+                    [saved, sourceForGUI, sourceForParent, ~] = simulation.source.saveAsIfChanged();
+                    
+                    if saved
+                        simulationForGUI.source = sourceForGUI;
+                        simulationForParent.source = sourceForParent;
+                        simulationForSaving.source = sourceForParent;
+                    end
+                else
+                    saved = true;
+                end
+            end
+            
+            if saved
+                if ~isempty(simulation.detector)
+                    [saved, detectorForGUI, detectorForParent, ~] = simulation.detector.saveAsIfChanged();
+                    
+                    if saved
+                        simulationForGUI.detector = detectorForGUI;
+                        simulationForParent.detector = detectorForParent;
+                        simulationForSaving.detector = detectorForParent;
+                    end
+                else
+                    saved = true;
+                end
+            end
+            
+            if saved
+                if ~isempty(simulation.scan)
+                    [saved, scanForGUI, scanForParent, ~] = simulation.scan.saveAsIfChanged();
+                    
+                    if saved
+                        simulationForGUI.scan = scanForGUI;
+                        simulationForParent.scan = scanForParent;
+                        simulationForSaving.scan = scanForParent;
+                    end
+                else
+                    saved = true;
+                end
+            end
+        end
+        
+        function [simulation, simulationForSaving] = clearBeforeSaveFields(simulation, clearBeforeSave)
+            simulationForSaving = simulation;
+            
+            [phantom, phantomForSaving] = simulation.phantom.saveBeforeClearIfNeeded();
+            
+            simulation.phantom = phantom;
+            simulationForSaving.phantom = phantomForSaving;
+            
+            [detector, detectorForSaving] = simulation.detector.saveBeforeClearIfNeeded();
+            
+            simulation.detector = detector;
+            simulationForSaving.detector = detectorForSaving;
+            
+            [source, sourceForSaving] = simulation.source.saveBeforeClearIfNeeded();
+            
+            simulation.source = source;
+            simulationForSaving.source = sourceForSaving;
+            
+            [scan, scanForSaving] = simulation.scan.saveBeforeClearIfNeeded();
+            
+            simulation.scan = scan;
+            simulationForSaving.scan = scanForSaving;
+            
+            if clearBeforeSave
+                if simulationForSaving.saveInSeparateFile
+                    cache = simulationForSaving;
+                    
+                    simulationForSaving = Simulation;
+                    
+                    simulationForSaving.savePath = cache.savePath;
+                    simulationForSaving.saveFileName = cache.saveFileName;
+                else
+                    simulationForSaving.savePath = '';
+                    simulationForSaving.saveFileName = '';
+                end
+            end
+        end
+        
+        function simulation = loadFields(simulation)
+            simulation.phantom = simulation.phantom.load();
+            simulation.detector = simulation.detector.load();
+            simulation.source = simulation.source.load();
+            simulation.scan = simulation.scan.load();
+        end    
+        
+        function simulation = calibrateAndSetPhantomData(simulation)
+            phantomDataInHU = simulation.phantom.data;
+            
+            beam = simulation.scan.beamCharacterization;
+            
+            beam = beam.calibrateAndSetPhantomData(phantomDataInHU);
+            
+            simulation.scan.beamCharacterization = beam;
+        end
+        
+        function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, statusOutputTextHandle, savePath)
             slices = simulation.scan.getSlicesInM();
             
             numSlices = length(slices);
@@ -249,16 +399,44 @@ classdef Simulation
                 simulation.phantom.plot(axesHandle);
             end
             
+            if displayDetectorValues
+                figure(...
+                    'Color', Constants.Detector_Display_Colour,...
+                    'Name', Constants.Detector_Display_Title);
+                
+                displayRange = [0, simulation.scan.beamCharacterization.rawIntensity()];
+                
+                detectorImageHandle = imshow([], displayRange, 'InitialMagnification', 'fit');
+            else
+                detectorImageHandle = [];
+            end
+            
+            baseString = getString(statusOutputTextHandle);
+            
+            baseString = [baseString; {['Simulation Run Start (', convertTimestampToString(now), ')']}];
+                        
+            setString(statusOutputTextHandle, baseString);
+            
             for i=1:numSlices
+                setString(statusOutputTextHandle, [baseString; {['  Slice ', num2str(i), '/', num2str(numSlices)]}]);
+                drawnow;
+                
+                newDir = ['Slice ', num2str(i)];
+                mkdir(savePath, newDir);
+                sliceSavePath = makePath(savePath, newDir);
+                
                 slicePosition = slices(i);
                 
-                sliceData = simulation.runScanSimulationForSlice(axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster);
+                sliceData = simulation.runScanSimulationForSlice(axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, sliceSavePath);
                 
-                data{i} = sliceData;
-            end            
+                data{i} = SliceData(sliceData, slicePosition);
+                
+            end   
+            
+            setString(statusOutputTextHandle, [baseString; {['Simulation Run Complete (', convertTimestampToString(now), ')']}]);
         end
         
-        function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster)
+        function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, sliceSavePath)
             angles = simulation.scan.getScanAnglesInDegrees();
             
             numAngles = length(angles);
@@ -271,12 +449,22 @@ classdef Simulation
                 pause(0.000001);
             end
             
+            baseString = getString(statusOutputTextHandle);
+            
             for i=1:numAngles
-                angle = angles(i);                
+                setString(statusOutputTextHandle, [baseString; {['  Angle ', num2str(i), '/', num2str(numAngles)]}]);
+                drawnow;
                 
-                angleData = simulation.runScanSimulationForAngle(axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster);
+                angle = angles(i); 
+                
+                newDir = ['Angle ', num2str(angle)];
+                mkdir(sliceSavePath, newDir);
+                angleSavePath = makePath(sliceSavePath, newDir);
+                               
+                
+                angleData = simulation.runScanSimulationForAngle(axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, angleSavePath);
                                 
-                sliceData{i} = angleData;
+                sliceData{i} = AngleData(angleData, angle);
             end
             
             if displaySlices
@@ -284,7 +472,7 @@ classdef Simulation
             end
         end
         
-        function angleData = runScanSimulationForAngle(simulation, axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster)
+        function angleData = runScanSimulationForAngle(simulation, axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, angleSavePath)
             perAngleTranslationDimensions = simulation.scan.perAngleTranslationDimensions;
             
             xyNumSteps = perAngleTranslationDimensions(1);
@@ -298,13 +486,48 @@ classdef Simulation
                 pause(0.000001);
             end
             
+            baseString = getString(statusOutputTextHandle);
+            
+            totalNumStepStr = num2str(zNumSteps*xyNumSteps);
+            
             for zStep=1:zNumSteps
                 for xyStep=1:xyNumSteps
+                    curNumStepStr = num2str(((zStep-1)*zNumSteps) + xyStep);
+                    setString(statusOutputTextHandle, [baseString; {['  Position ', curNumStepStr, '/', totalNumStepStr]}]);
+                    drawnow;
+                    
+                    newDir = ['Position (', num2str(zStep), ',', num2str(xyStep), ')'];
+                    mkdir(angleSavePath, newDir);
+                    positionSavePath = makePath(angleSavePath, newDir);
+                    
                     [perAngleXYInM, perAngleZInM] = simulation.scan.getPerAnglePositionInM(xyStep, zStep);
                     
-                    positionData = simulation.runScanSimulationForPerAnglePosition(axesHandle, slicePosition, angle, perAngleXYInM, perAngleZInM, displayPerAnglePosition, displayDetectorRaster);
+                    [positionData, attenuationCoords, attenuationDistances, detectorCoords, sourceStartBoxCoords, sourceEndBoxCoords]...
+                        = simulation.runScanSimulationForPerAnglePosition(...
+                        axesHandle,...
+                        slicePosition,...
+                        angle,...
+                        perAngleXYInM,...
+                        perAngleZInM,...
+                        displayPerAnglePosition,...
+                        displayDetectorRaster,...
+                        displayDetectorValues,...
+                        displayDetectorRayTrace,...
+                        detectorImageHandle,...
+                        statusOutputTextHandle,...
+                        positionSavePath);
                     
-                    angleData{zStep, xyStep} = positionData;
+                    positionDataType = PositionData(...
+                        positionData,...
+                        attenuationCoords,...
+                        attenuationDistances,...
+                        detectorCoords,...
+                        sourceStartBoxCoords,...
+                        sourceEndBoxCoords);
+                                           
+                    positionDataType.saveBigData(positionSavePath);
+                    
+                    angleData{zStep, xyStep} = positionDataType.clearBeforeSave();                    
                 end
             end
             
@@ -313,8 +536,21 @@ classdef Simulation
             end
         end
         
-        function positionData = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster)
-            [sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed] = simulation.source.getSourcePosition(slicePosition, angle, perAngleXY, perAngleZ);
+        function [positionData, attenuationCoords, attenuationDistances, detectorCoords, sourceStartBoxCoords, sourceEndBoxCoords]...
+                = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, positionSavePath)
+            diameter = [];
+            
+            [...
+                sourceStartBoxCoords,...
+                sourceEndBoxCoords,...
+                sourceDirectionUnitVector,...
+                perAngleShiftUsed] = ...
+                    simulation.source.getSourcePosition(...
+                slicePosition,...
+                angle,...
+                perAngleXY,...
+                perAngleZ,...
+                diameter);
             
             detectorPosition = simulation.detector.getDetectorPosition(slicePosition, angle);
             
@@ -322,9 +558,12 @@ classdef Simulation
             zNumDetectors = simulation.detector.wholeDetectorDimensions(2);
             
             positionData = zeros(zNumDetectors, xyNumDetectors);
+            attenuationCoords = cell(zNumDetectors, xyNumDetectors);
+            attenuationDistances = cell(zNumDetectors, xyNumDetectors);
+            detectorCoords = cell(zNumDetectors, xyNumDetectors);
                         
-            if displayPerAnglePosition
-                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, sourcePosition, sourceDirectionUnitVector, perAngleShiftUsed, perAngleXY, perAngleZ);
+            if displayPerAnglePosition 
+                plotHandles = simulation.plotPerAnglePosition(axesHandle, slicePosition, angle, perAngleXY, perAngleZ, sourceStartBoxCoords, sourceEndBoxCoords);
                 
                 pause(0.000001);
             end
@@ -333,13 +572,25 @@ classdef Simulation
                 rasterPlotHandles = {};
             end
             
+            baseString = getString(statusOutputTextHandle);
+            
+            totalNumStepStr = num2str(zNumDetectors*xyNumDetectors);
+            
+            [xCoords, yCoords, zCoords] = getAllDetectorCoords(simulation.detector, slicePosition, angle, perAngleXY, perAngleZ);
+
             for zDetector=1:zNumDetectors
-                for xyDetector=1:xyNumDetectors
-                    [clockwisePosZ,...
-                     clockwiseNegZ,...
-                     counterClockwisePosZ,...
-                     counterClockwiseNegZ]...
-                     = simulation.detector.getDetectorCoords(detectorPosition, xyDetector, zDetector, perAngleShiftUsed);
+                for xyDetector=1:xyNumDetectors                    
+                    curNumStepStr = num2str(((zDetector-1)*zNumDetectors) + xyDetector);
+                    setString(statusOutputTextHandle, [baseString; {['  Detector ', curNumStepStr, '/', totalNumStepStr]}]);
+                    drawnow;
+                    
+                    newDir = ['Detector (', num2str(zDetector), ',', num2str(xyDetector), ')'];
+                    mkdir(positionSavePath, newDir);
+                    
+                    clockwisePosZ = [xCoords(zDetector,xyDetector), yCoords(zDetector,xyDetector), zCoords(zDetector,xyDetector)];
+                    clockwiseNegZ = [xCoords(zDetector+1,xyDetector), yCoords(zDetector+1,xyDetector), zCoords(zDetector+1,xyDetector)];
+                    counterClockwisePosZ = [xCoords(zDetector,xyDetector+1), yCoords(zDetector,xyDetector+1), zCoords(zDetector,xyDetector+1)];
+                    counterClockwiseNegZ = [xCoords(zDetector+1,xyDetector+1), yCoords(zDetector+1,xyDetector+1), zCoords(zDetector+1,xyDetector+1)];
                     
                     detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
                     
@@ -351,9 +602,25 @@ classdef Simulation
                         pause(0.000001);
                     end
                     
-                    detectorData = simulation.runScanSimulationForDetector(sourcePosition, sourceDirectionUnitVector, detectorCornerCoords);
+                    [detectorData, attenuationCoordsForDetector, attenuationDistancesForDetector]...
+                        = simulation.runScanSimulationForDetector(...
+                        axesHandle,...
+                        sourceStartBoxCoords,...
+                        sourceEndBoxCoords,...
+                        sourceDirectionUnitVector,...
+                        detectorCornerCoords,...
+                        displayDetectorRayTrace,...
+                        statusOutputTextHandle);
                                                          
-                    positionData(zDetector, xyDetector) = detectorData;
+                    positionData(zDetector, xyDetector) = detectorData;                    
+                    attenuationCoords{zDetector, xyDetector} = attenuationCoordsForDetector;
+                    attenuationDistances{zDetector, xyDetector} = attenuationDistancesForDetector;
+                    detectorCoords{zDetector, xyDetector} = detectorCornerCoords;
+                    
+                    if displayDetectorValues
+                        % update image data
+                        set(detectorImageHandle, 'CData', positionData);
+                    end
                 end
             end
             
@@ -366,10 +633,20 @@ classdef Simulation
             end
         end
         
-        function detectorData = runScanSimulationForDetector(simulation, sourcePosition, sourceDirectionUnitVector, detectorCornerCoords)
+        function [detectorData, attenuationCoords, attenuationDistances] = runScanSimulationForDetector(...
+                simulation,...
+                axesHandle,...
+                sourceStartBoxCoords,...
+                sourceEndBoxCoords,...
+                sourceDirectionUnitVector,...
+                detectorCornerCoords,...
+                displayDetectorRayTrace,...
+                statusOutputTextHandle)
+            
             scatteringNoiseLevel = simulation.scatteringNoiseLevel;
             detectorNoiseLevel = simulation.detectorNoiseLevel;
             partialPixel = simulation.partialPixelModelling;
+            partialPixelResolution = simulation.partialPixelResolution;
             
             beamCharacterization = simulation.scan.beamCharacterization;
             
@@ -377,8 +654,11 @@ classdef Simulation
             voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
             phantomLocationInM = simulation.phantom.getLocationInM();
             
-            detectorData = runBeamTrace(...
-                sourcePosition,...
+            [detectorData, attenuationCoords, attenuationDistances] = ...
+                runBeamTrace(...
+                axesHandle,...
+                sourceStartBoxCoords,...
+                sourceEndBoxCoords,...
                 sourceDirectionUnitVector,...
                 detectorCornerCoords,...
                 phantomData,...
@@ -387,7 +667,9 @@ classdef Simulation
                 beamCharacterization,...
                 scatteringNoiseLevel,...
                 detectorNoiseLevel,...
-                partialPixel);
+                partialPixel,...
+                partialPixelResolution,...
+                displayDetectorRayTrace);
         end
         
     end

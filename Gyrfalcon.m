@@ -22,7 +22,7 @@ function varargout = Gyrfalcon(varargin)
 
 % Edit the above text to modify the response to help Gyrfalcon
 
-% Last Modified by GUIDE v2.5 18-Nov-2016 15:55:35
+% Last Modified by GUIDE v2.5 03-Mar-2017 12:22:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -771,6 +771,7 @@ function scanBeamCharacterizationLoadButton_Callback(hObject, eventdata, handles
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+scanBeamCharacterizationLoadButtonCallback(hObject, eventdata, handles);
 
 % --- Executes on button press in detectorLoadButton.
 function detectorLoadButton_Callback(hObject, eventdata, handles)
@@ -778,6 +779,7 @@ function detectorLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Detector));
 
 % --- Executes on button press in detectorSaveButton.
 function detectorSaveButton_Callback(hObject, eventdata, handles)
@@ -785,6 +787,7 @@ function detectorSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Detector));
 
 % --- Executes on button press in phantomLoadButton.
 function phantomLoadButton_Callback(hObject, eventdata, handles)
@@ -792,6 +795,7 @@ function phantomLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Phantom));
 
 % --- Executes on button press in phantomSaveButton.
 function phantomSaveButton_Callback(hObject, eventdata, handles)
@@ -799,6 +803,7 @@ function phantomSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Phantom));
 
 % --- Executes on button press in sourceLoadButton.
 function sourceLoadButton_Callback(hObject, eventdata, handles)
@@ -806,6 +811,7 @@ function sourceLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Source));
 
 % --- Executes on button press in sourceSaveButton.
 function sourceSaveButton_Callback(hObject, eventdata, handles)
@@ -813,6 +819,7 @@ function sourceSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Source));
 
 % --- Executes on button press in scanLoadButton.
 function scanLoadButton_Callback(hObject, eventdata, handles)
@@ -820,6 +827,7 @@ function scanLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Scan));
 
 % --- Executes on button press in scanSaveButton.
 function scanSaveButton_Callback(hObject, eventdata, handles)
@@ -827,6 +835,7 @@ function scanSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Scan));
 
 % --- Executes on button press in controlPanelMockUpModelButton.
 function controlPanelMockUpModelButton_Callback(hObject, eventdata, handles)
@@ -919,6 +928,7 @@ function simulationLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectLoadButtonCallback(hObject, eventdata, handles, class(Simulation));
 
 % --- Executes on button press in simulationSaveButton.
 function simulationSaveButton_Callback(hObject, eventdata, handles)
@@ -926,6 +936,7 @@ function simulationSaveButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationObjectSaveButtonCallback(hObject, eventdata, handles, class(Simulation));
 
 % --- Executes on button press in phantomStartingLocationCentreAtOriginButton.
 function phantomStartingLocationCentreAtOriginButton_Callback(hObject, eventdata, handles)
@@ -1094,3 +1105,136 @@ if val %% if it's true, we need to make sure move with scan angle is checked on
     
     guidata(hObject, handles);
 end
+
+
+
+function simulationPartialPixelResolutionEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationPartialPixelResolutionEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of simulationPartialPixelResolutionEdit as text
+%        str2double(get(hObject,'String')) returns contents of simulationPartialPixelResolutionEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function simulationPartialPixelResolutionEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to simulationPartialPixelResolutionEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function scanSimViewDetectorValues_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewDetectorValues (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+checkUncheck(hObject);
+
+% --------------------------------------------------------------------
+function scanSimViewDetectorRayTraces_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSimViewDetectorRayTraces (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+checkUncheck(hObject);
+
+
+% --- Executes on button press in sourceFillDetectorButton.
+function sourceFillDetectorButton_Callback(hObject, eventdata, handles)
+% hObject    handle to sourceFillDetectorButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+sourceFillDetectorButtonCallback(hObject, eventdata, handles);
+
+% --- Executes on button press in detectorMakeXYEqualZButton.
+function detectorMakeXYEqualZButton_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorMakeXYEqualZButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+changeXY = true;
+
+detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY);
+
+% --- Executes on button press in detectorMakeZEqualXYButton.
+function detectorMakeZEqualXYButton_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorMakeZEqualXYButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+changeXY = false;
+
+detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY);
+
+
+% --- Executes on button press in sourceSaveInSeparateFileCheckbox.
+function sourceSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to sourceSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of sourceSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in phantomDataSetSaveInSeparateFileCheckbox.
+function phantomDataSetSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to phantomDataSetSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of phantomDataSetSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in simulationSaveInSeparateFileCheckbox.
+function simulationSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to simulationSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of simulationSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in phantomSaveInSeparateFileCheckbox.
+function phantomSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to phantomSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of phantomSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in photonBeamSaveInSeparateFileCheckbox.
+function photonBeamSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to photonBeamSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of photonBeamSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in scanSaveInSeparateFileCheckbox.
+function scanSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to scanSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of scanSaveInSeparateFileCheckbox
+
+
+% --- Executes on button press in detectorSaveInSeparateFileCheckbox.
+function detectorSaveInSeparateFileCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to detectorSaveInSeparateFileCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of detectorSaveInSeparateFileCheckbox

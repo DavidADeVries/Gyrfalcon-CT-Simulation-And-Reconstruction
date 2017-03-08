@@ -11,5 +11,7 @@ handles.axesHandle = axesHandle;
 
 redrawAxes(axesHandle);
 
+hold(axesHandle, 'on');
+
 end
 
