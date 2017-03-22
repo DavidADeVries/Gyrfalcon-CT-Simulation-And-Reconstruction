@@ -1,7 +1,6 @@
-classdef ScanGeometries
-    % ScanGeometries
-    % contains the types of scan geometries for which reconstructions can
-    % be performed
+classdef FirstGenFilterTypes
+    % FirstGenFilterTypes
+    % types of filter for first generation reconstruction
     
     properties
         displayString
@@ -52,14 +51,35 @@ classdef ScanGeometries
         function [algorithmChoiceStrings, choices] = getReconAlgorithmChoices(geometry)
             switch geometry
                 case firstGenCT
-                    choic
+                    choices = {...
+                        FirstGenFilteredBackprojectionReconstruction,...
+                        FirstGenPAIRReconstruction...
+                        };
                 case secondGenCT
-                    
+                    choices = {...
+                        SecondGenFilteredBackprojectionReconstruction,...
+                        };
                 case thirdGenCT
-                    
-                case fourthGenCT
-                    
-                case coneBeamCT
+                    choices = {...
+                        ThirdGenFilteredBackprojectionReconstruction,...
+                        };                    
+                case fourthGenCT                    
+                    choices = {...
+                        FourthGenFilteredBackprojectionReconstruction,...
+                        };                    
+                case coneBeamCT                    
+                    choices = {...
+                        ConeBeamFDKReconstruction,...
+                        };
+            end
+            
+            numChoices = length(choices);
+            
+            algorithmChoiceStrings = cell(numChoices,1);
+            
+            for i=1:numChoices
+                algorithmChoiceStrings{i} = choices{i}.displayName;
+            end
         end
     end
     

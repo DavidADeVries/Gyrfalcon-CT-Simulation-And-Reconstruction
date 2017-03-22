@@ -14,9 +14,7 @@ classdef FirstGenFilteredBackprojectionReconstruction < ProcessingRun
             strings = {'No Settings'};            
         end
         
-        function [filterTypes, filterTypeStrings] = getFilterTypes(recon)
-            [filterTypes, filterTypeStrings] = enumeration(FirstGenFilterTypes);
-        end
+        function [filterTypes, filterTypeStrings] = getFilterTypes
         
     end
     

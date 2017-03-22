@@ -1,4 +1,4 @@
-classdef ThirdGenFilteredBackprojectionReconstruction
+classdef ThirdGenFilteredBackprojectionReconstruction < ProcessingRun
     % ThirdGenFilteredBackprojectionReconstruction
     
     properties
@@ -7,6 +7,15 @@ classdef ThirdGenFilteredBackprojectionReconstruction
     end
     
     methods
+        
+        function strings = getSettingsString(recon)
+            strings = {'No Settings'};          
+        end
+        
+        function [filterTypes, filterTypeStrings] = getFilterTypes(recon)
+            [filterTypes, filterTypeStrings] = enumeration(ThirdGenFilterTypes);
+        end
+        
     end
     
 end

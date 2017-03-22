@@ -1,4 +1,4 @@
-classdef FirstGenPAIRReconstruction
+classdef FirstGenPAIRReconstruction < ProcessingRun
     % FirstGenPAIRReconstruction
     
     properties
@@ -7,6 +7,11 @@ classdef FirstGenPAIRReconstruction
     end
     
     methods
+        
+        function strings = getSettingsString(recon)            
+            strings = {'No Settings'};           
+        end
+        
     end
     
 end

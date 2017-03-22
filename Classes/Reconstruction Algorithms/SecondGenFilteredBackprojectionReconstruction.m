@@ -1,4 +1,4 @@
-classdef SecondGenFilteredBackprojectionReconstruction
+classdef SecondGenFilteredBackprojectionReconstruction < ProcessingRun
     % SecondGenFilteredBackprojectionReconstruction
     
     properties
@@ -7,6 +7,15 @@ classdef SecondGenFilteredBackprojectionReconstruction
     end
     
     methods
+        
+        function strings = getSettingsString(recon)
+            strings = {'No Settings'};            
+        end
+        
+        function [filterTypes, filterTypeStrings] = getFilterTypes(recon)
+            [filterTypes, filterTypeStrings] = enumeration(SecondGenFilterTypes);
+        end
+        
     end
     
 end

@@ -1,4 +1,4 @@
-classdef ConeBeamFDKReconstruction
+classdef ConeBeamFDKReconstruction < ProcessingRun
     % ConeBeamFDKReconstruction
     
     properties
@@ -7,6 +7,11 @@ classdef ConeBeamFDKReconstruction
     end
     
     methods
+        
+        function strings = getSettingsString(recon)
+            strings = {'No Settings'};          
+        end
+        
     end
     
 end

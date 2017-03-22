@@ -1,4 +1,4 @@
-classdef FourthGenFilteredBackprojectionReconstruction
+classdef FourthGenFilteredBackprojectionReconstruction < ProcessingRun
     % FourthGenFilteredBackprojectionReconstruction
     
     properties
@@ -7,6 +7,11 @@ classdef FourthGenFilteredBackprojectionReconstruction
     end
     
     methods
+        
+        function strings = getSettingsString(recon)
+            strings = {'No Settings'};           
+        end
+        
     end
     
 end
