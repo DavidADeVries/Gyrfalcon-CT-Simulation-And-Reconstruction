@@ -1,4 +1,4 @@
-phantSize = 501;
+phantSize = 51;
 
 I = phantom(phantSize);
 
@@ -6,12 +6,12 @@ I = phantom(phantSize);
 figure(1);
 imshow(I,[]);
 
-theta = 0:1:359;
+theta = 0:1:179;
 
 R = radon(I,theta);
-tic
-iRad = iradon(R,theta,'ram-lak','linear');
-toc
+% tic
+% iRad = iradon(R,theta,'ram-lak','linear');
+% toc
 P = zeros(size(R));
 
 dims = size(R);
@@ -41,8 +41,6 @@ display = false;
 recon = zeros(phantSize,phantSize,K);
 
 % compute
-ang = theta(k);
-projValues = P(:,k)';
 
 d = (-phantSize/2 + 0.5):1:(phantSize/2 - 0.5);
 
@@ -72,7 +70,10 @@ lowHighEq = iLow == iHigh;
 dims = size(validCoord);
 len = dims(1)*dims(2);
 
-lowVals = reshape(projValues(reshape(siLow,1,len,K)),dims(1),dims(2),K);
+linearIndexShift = projLength * repmat(1:K,len,1);
+linearIndexShift = reshape(linearIndexShift,1,len*dims(3),1);
+
+lowVals = reshape(projValues(reshape(iLow,1,len*dims(3),1)+linearIndexShift),dims(1),dims(2),dims(3));
 highVals = reshape(projValues(reshape(iHigh,1,len,K)),dims(1),dims(2),K);
 yVals = reshape(projValues(reshape(iX,1,len,K)),dims(1),dims(2),K);
 xVals = reshape(projValues(reshape(iY,1,len,K)),dims(1),dims(2),K);

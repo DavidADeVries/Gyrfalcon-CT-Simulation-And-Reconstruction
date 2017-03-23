@@ -6,7 +6,7 @@ I = phantom(phantSize);
 figure(1);
 imshow(I,[]);
 
-theta = 0:1:359;
+theta = 0:1:179;
 
 R = radon(I,theta);
 tic
@@ -20,7 +20,7 @@ for i=1:dims(2)
     projectValues = R(:,i);
     projectValues = projectValues';
     
-    filteredProjectionValues = filterProjectionValues(projectValues, 'ram-lak', true, 0.01);
+    filteredProjectionValues = filterProjectionValuesRedo(projectValues, 'ram-lak', true, 0.01);
     
     P(:,i) = filteredProjectionValues';
 end
@@ -41,8 +41,6 @@ display = false;
 recon = zeros(phantSize,phantSize,K);
 
 % compute
-ang = theta(k);
-projValues = P(:,k)';
 
 d = (-phantSize/2 + 0.5):1:(phantSize/2 - 0.5);
 
@@ -62,33 +60,40 @@ validCoord = ...
     iLow > 0 & iHigh > 0 & iX > 0 &...
     iX <= phantSize & iY > 0 & iY <= phantSize;
 
+clear iX;
+clear iY;
+
 iLow(~validCoord) = 1;
 iHigh(~validCoord) = 1;
-iX(~validCoord) = 1;
-iY(~validCoord) = 1;
-
-lowHighEq = iLow == iHigh;
 
 dims = size(validCoord);
 len = dims(1)*dims(2);
 
-lowVals = reshape(projValues(sub2ind(iLow)),dims(1),dims(2),K);
-highVals = reshape(projValues(reshape(iHigh,1,len,K)),dims(1),dims(2),K);
-yVals = reshape(projValues(reshape(iX,1,len,K)),dims(1),dims(2),K);
-xVals = reshape(projValues(reshape(iY,1,len,K)),dims(1),dims(2),K);
+linearIndexShift = projLength * repmat(0:K-1,len,1);
+linearIndexShift = reshape(linearIndexShift,1,len*dims(3),1);
 
+lowVals = reshape(P(reshape(iLow,1,len*dims(3),1)+linearIndexShift),dims(1),dims(2),dims(3));
+highVals = reshape(P(reshape(iHigh,1,len*dims(3),1)+linearIndexShift),dims(1),dims(2),dims(3));
+
+clear linearIndexShift;
 % get vals not requiring interpolation
-eqVals = iHigh == iLow;
 
-recon(validCoord & eqVals) = lowVals;
+recon(validCoord & (iHigh == iLow)) = lowVals(validCoord & (iHigh == iLow));
 
 % get vals requiring interpolation
-riseVals = highVals - lowVals;
-runVals = iHigh - iLow;
 
-recon(validCoord & ~eqVals) = lowVals + (i - iLow).*(riseVals./runVals);
+temp = lowVals + (i - iLow).*((highVals - lowVals)./(iHigh - iLow));
+
+recon(validCoord & ~(iHigh == iLow)) = temp(validCoord & ~(iHigh == iLow));
     
 recon = sum(recon,3) .* (pi/K);
+
+clear lowVals;
+clear highVals;
+clear iLow;
+clear iHigh;
+clear temp;
+clear validCoord;
 
 %end compute
 
@@ -100,5 +105,5 @@ imshow(recon,[],'InitialMagnification','fit');
 figure(4);
 imshow(recon-flipud(I),[],'InitialMagnification','fit');
 
-% figure(5);
-% imshow(recon-flipud(iRad),[],'InitialMagnification','fit');
+figure(5);
+imshow(iRad,[],'InitialMagnification','fit');

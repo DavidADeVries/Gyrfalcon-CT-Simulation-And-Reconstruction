@@ -17,7 +17,7 @@ function filteredProjectionValues = filterProjectionValues(projectionValues, fil
 
 % STEP 1: DETERMINE ZERO PADDING AMOUNT
 len = length(projectionValues);
-order = 2^nextpow2(2*len - 1);
+order = 2^nextpow2(2*len-1);
 
 % STEP 2: ZERO PAD AND FFT OF PROJECTION VALUES
 projectionValuesZP = zeroPad(projectionValues, order);
@@ -31,7 +31,7 @@ else
     % First create a bandlimited ramp filter (Eqn. 61 Chapter 3, Kak and
     % Slaney) - go up to the next highest power of 2.
     
-    filtHalfLength = ceil(len/2); % we'll zero-pad this later, so make as long as possible
+    filtHalfLength = (order/2); % we'll zero-pad this later, so make as long as possible
     
     n = 0:1:filtHalfLength-1;
     
@@ -87,7 +87,7 @@ convolvedFFT = projectionFFT .* rampFilterFFT .* windowZP;
 
 filteredProjectionValuesZP = detectorSpacingInM^2 * ifftshift(ifft(fftshift(convolvedFFT), 'symmetric'));
 
-filteredProjectionValues = removeZeroPad(filteredProjectionValuesZP, len);
+filteredProjectionValues = removeZeroPad(filteredProjectionValuesZP,len);
 
 
 end

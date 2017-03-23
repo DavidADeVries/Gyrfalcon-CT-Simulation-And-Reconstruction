@@ -1,12 +1,14 @@
-phantSize = 501;
+phantSize = 500;
 
 I = phantom(phantSize);
 
+% I(230:270,330:370) = 1;
+% I(247:253,347:353) = 0.3;
 
 figure(1);
 imshow(I,[]);
 
-theta = 0:1:359;
+theta = 0:1:179;
 
 R = radon(I,theta);
 tic
@@ -18,9 +20,9 @@ dims = size(R);
 
 for i=1:dims(2)
     projectValues = R(:,i);
-    projectValues = projectValues';
+    projectValues = projectValues;
     
-    filteredProjectionValues = filterProjectionValues(projectValues, 'ram-lak', true, 0.01);
+    filteredProjectionValues = filterProjectionValuesRedo(projectValues, 'ram-lak', true, 0.01);
     
     P(:,i) = filteredProjectionValues';
 end
@@ -38,25 +40,27 @@ iShift = floor(projLength/2);
 figure(3);
 tic
 
-display = false;
+display = true;
+        
+d = (-(phantSize-1)/2):1:((phantSize-1)/2);
+
+
 
 for k = 1:K
     ang = theta(k);
     projValues = P(:,k)';
-        
-    d = (-phantSize/2 + 0.5):1:(phantSize/2 - 0.5);
     
-    [x,y] = meshgrid(d,d);
+    [x,y] = meshgrid(d,-d);
     
     t = x.*cosd(ang) + y.*sind(ang);
         
-    i = projLength/2 + t;
-    iLow = floor(projLength/2 + t);
-    iHigh = ceil(projLength/2 + t);
+    i = t + 1 + ((projLength-1)/2);
+    iLow = floor(i);
+    iHigh = ceil(i);
     
-    iX = floor(x+(phantSize/2))+1;
-    iY = floor(y+(phantSize/2))+1;
-    
+    iX = x + 1 + ((phantSize-1)/2);
+    iY = y + 1 + ((phantSize-1)/2);
+        
     validCoord = ...
         iLow < projLength & iHigh < projLength &...
         iLow > 0 & iHigh > 0 & iX > 0 &...
@@ -103,7 +107,7 @@ recon = recon .* (pi/K);
 imshow(recon,[],'InitialMagnification','fit');
 
 figure(4);
-imshow(recon-flipud(I),[],'InitialMagnification','fit');
+imshow(recon-I,[],'InitialMagnification','fit');
 
-% figure(5);
-% imshow(recon-flipud(iRad),[],'InitialMagnification','fit');
+figure(5);
+imshow(recon - iRad(1:phantSize,1:phantSize),[],'InitialMagnification','fit');
