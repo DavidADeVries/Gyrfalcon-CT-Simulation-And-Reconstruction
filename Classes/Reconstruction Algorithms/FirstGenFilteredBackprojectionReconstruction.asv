@@ -5,7 +5,10 @@ classdef FirstGenFilteredBackprojectionReconstruction < ProcessingRun
         displayName = 'Filtered Backprojection'
         fullName = 'Filtered Backprojection (1st Gen)'
         
-        filterType
+        applyRampFilter = true% boolean of whether to use a ramp (Ram-Lak) filter. This weights the data in frequency space accordingly
+        filterType % these filters (Shepp-Logan, cosine, Hann, etc.) are all noise reduction filters NOT for frequency space weighting
+        
+        applyBandlimiting % bandlimiting based on detector widths
     end
     
     methods
@@ -14,8 +17,13 @@ classdef FirstGenFilteredBackprojectionReconstruction < ProcessingRun
             strings = {'No Settings'};            
         end
         
-        function [filterTypes, filterTypeStrings] = getFilterTypes
+        function [filterTypes, filterTypeStrings] = getFilterTypes(recon)
+            [filterTypes, filterTypeStrings] = enumeration(FirstGenFilterTypes);
+        end
         
+        function recon = changeSettings(recon)
+            recon = firstGenFilteredBackprojectionReconSettingsGUI(recon);
+        end
     end
     
 end

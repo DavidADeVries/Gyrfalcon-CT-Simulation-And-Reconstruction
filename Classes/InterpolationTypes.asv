@@ -1,0 +1,70 @@
+classdef InterpolationTypes
+    % InterpolationTypes
+    % types of interpolation for values
+    
+    properties
+        name
+    end
+    
+    enumeration        
+        nearestNeighbour ('Nearest Neighbour (No Interpolation)')
+        
+        linear ('Linear')
+        
+        cubic ('Cubic Spline')
+        
+        pchip ('Shape-Prevsering Cubic Spline') %second derivative not continuous
+    end
+    
+    methods
+        function interp = createInterpForKnownVals(interType, xvals, yvals)
+            switch interType
+                case InterpolationTypes.nearestNeighbour
+                    interp = createNearestNeighbourInterp(vals)
+                case InterpolationTypes.linear
+                    
+                case InterpolationTypes.cubic
+                    
+                case InterpolationTypes.pchip
+                    
+                otherwise
+                    error('Invalid Interpolation Type!');
+            end
+            
+        end
+    end
+    
+end
+
+
+function interp = createNearestNeighbourInterp(xvals, yvals)
+
+if length(xvals) >= 2
+    midpoints = (xvals(1:end-1) + xvals(2:end)) ./ 2;
+    
+    breaks = [vals(1) midpoints vals(end)];
+    
+    coeffs = vals;
+else
+    breaks = vals;
+    coeffs = vals;
+end
+
+interp = mkpp(breaks, coeffs);
+    
+end
+
+function interp = createLinearInterp(vals)
+
+
+
+
+end
+
+function interp = createCubicSplineInterp(vals)
+
+end
+
+function interp = createPCHIPInterp(vals)
+
+end

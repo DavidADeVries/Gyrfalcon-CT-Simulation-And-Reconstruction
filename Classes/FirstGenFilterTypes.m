@@ -6,9 +6,7 @@ classdef FirstGenFilterTypes
         name
     end
     
-    enumeration
-        rampFilter ('Ramp Filter (Ram-Lak)')
-        
+    enumeration        
         sheppLoganFilter ('Shepp-Logan Filter (Sinc)')
         
         CosineFilter ('Cosine Filter')
@@ -21,6 +19,9 @@ classdef FirstGenFilterTypes
     end
     
     methods
+        function obj = FirstGenFilterTypes(name)
+            obj.name = name;
+        end
         
     end
     
