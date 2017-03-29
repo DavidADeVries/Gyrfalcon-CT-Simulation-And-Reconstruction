@@ -86,15 +86,21 @@ classdef ScanGeometries
         function choice = getDefaultAlgorithmChoice(geometry)
             switch geometry
                 case firstGenCT
-                    choice = FirstGenFilteredBackprojectionReconstruction;
+                    choices = FirstGenFilteredBackprojectionReconstruction;
                 case secondGenCT
-                    choice = SecondGenFilteredBackprojectionReconstruction;
+                    choices = SecondGenFilteredBackprojectionReconstruction;
                 case thirdGenCT
-                    choice = ThirdGenFilteredBackprojectionReconstruction;
+                    choices = {...
+                        ThirdGenFilteredBackprojectionReconstruction,...
+                        };
                 case fourthGenCT
-                    choice = FourthGenFilteredBackprojectionReconstruction;
+                    choices = {...
+                        FourthGenFilteredBackprojectionReconstruction,...
+                        };
                 case coneBeamCT
-                    choice = ConeBeamFDKReconstruction;
+                    choices = {...
+                        ConeBeamFDKReconstruction,...
+                        };
             end
         end
     end

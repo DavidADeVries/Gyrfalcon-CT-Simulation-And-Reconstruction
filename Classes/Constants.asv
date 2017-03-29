@@ -61,7 +61,7 @@ classdef Constants
         Workspace_Display_Name = 'Workspace';
         
         Reconstruction_Folder_Name = 'Recon';
-        Reconstruction_Run_File_Name = 'Reconstruction Run';
+        Reconstruction_Run_File_Name = 'Recon';
     end
     
     methods

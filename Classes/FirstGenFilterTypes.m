@@ -3,7 +3,7 @@ classdef FirstGenFilterTypes
     % types of filter for first generation reconstruction
     
     properties
-        name
+        displayString
     end
     
     enumeration        
@@ -19,8 +19,8 @@ classdef FirstGenFilterTypes
     end
     
     methods
-        function obj = FirstGenFilterTypes(name)
-            obj.name = name;
+        function obj = FirstGenFilterTypes(displayString)
+            obj.displayString = displayString;
         end
         
     end

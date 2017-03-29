@@ -51,27 +51,28 @@ function firstGenFilteredBackprojectionReconSettingsGUI_OpeningFcn(hObject, even
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to firstGenFilteredBackprojectionReconSettingsGUI (see VARARGIN)
 
-% Choose default command line output for firstGenFilteredBackprojectionReconSettingsGUI
-handles.output = 'Yes';
+handles.cancel = true;
+% EXPECTED INPUTS:
+
+% (recon)
+
+recon = varargin{1};
+
+filterType = recon.filterType;
+applyRampFilter = recon.applyRampFilter;
+applyBandlimiting = recon.applyBandlimiting;
+interpolationType = recon.interpolationType;
+
+setPopupMenu(handles.filterTypePopupMenu, 'FirstGenFilterTypes', filterType);
+set(handles.applyRampFilterCheckbox, 'Value', applyRampFilter);
+set(handles.applyBandlimitingCheckbox, 'Value', applyBandlimiting);
+setPopupMenu(handles.interpolationTypePopupMenu, 'InterpolationTypes', interpolationType);
+
+handles.recon = recon;
 
 % Update handles structure
 guidata(hObject, handles);
 
-% Insert custom Title and Text if specified by the user
-% Hint: when choosing keywords, be sure they are not easily confused 
-% with existing figure properties.  See the output of set(figure) for
-% a list of figure properties.
-if(nargin > 3)
-    for index = 1:2:(nargin-3),
-        if nargin-3==index, break, end
-        switch lower(varargin{index})
-         case 'title'
-          set(hObject, 'Name', varargin{index+1});
-         case 'string'
-          set(handles.text1, 'String', varargin{index+1});
-        end
-    end
-end
 
 % Determine the position of the dialog - centered on the callback figure
 % if available, else, centered on the screen
@@ -116,8 +117,25 @@ function varargout = firstGenFilteredBackprojectionReconSettingsGUI_OutputFcn(hO
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Get default command line output from handles structure
-varargout{1} = handles.output;
+% EXPECTED OUTPUT:
+
+% [recon]
+
+recon = handles.recon;
+
+if ~handles.cancel    
+    filterType = getSelectionFromPopupMenu(handles.filterTypePopupMenu, 'FirstGenFilterTypes');
+    applyRampFilter = get(handles.applyRampFilterCheckbox, 'Value');
+    applyBandlimiting = get(handles.applyBandlimitingCheckbox, 'Value');
+    interpolationType = getSelectionFromPopupMenu(handles.interpolationTypePopupMenu, 'InterpolationTypes');
+    
+    recon.filterType = filterType;
+    recon.applyRampFilter = applyRampFilter;
+    recon.applyBandlimiting = applyBandlimiting;
+    recon.interpolationType = interpolationType;
+end
+
+varargout{1} = recon;
 
 % The figure can be deleted now
 delete(handles.firstGenFilteredBackprojectionReconSettingsGUI);
@@ -128,7 +146,7 @@ function okPushButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-handles.output = get(hObject,'String');
+handles.cancel = false;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -143,7 +161,7 @@ function cancelPushButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-handles.output = get(hObject,'String');
+handles.canel = true;
 
 % Update handles structure
 guidata(hObject, handles);

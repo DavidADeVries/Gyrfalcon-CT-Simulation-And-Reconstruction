@@ -866,6 +866,7 @@ function controlPanelRunReconstructionButton_Callback(hObject, eventdata, handle
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+controlPanelRunReconstructionButtonCallback(hObject, eventdata, handles);
 
 
 function simulationScatteringNoiseLevelEdit_Callback(hObject, eventdata, handles)
@@ -1246,6 +1247,7 @@ function simulationRunLoadButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+simulationRunLoadButtonCallback(hObject, eventdata, handles);
 
 % --- Executes on button press in simulationRunDisplayFreeRunCheckbox.
 function simulationRunDisplayFreeRunCheckbox_Callback(hObject, eventdata, handles)
@@ -1362,3 +1364,5 @@ function reconstructionAlgorithmSettingsEditButton_Callback(hObject, eventdata, 
 % hObject    handle to reconstructionAlgorithmSettingsEditButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+reconstructionAlgorithmSettingsEditButtonCallback(hObject, eventdata, handles);

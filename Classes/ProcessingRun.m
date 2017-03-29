@@ -94,6 +94,30 @@ classdef ProcessingRun
                 save(makePath(run.savePath, run.saveFileName), Constants.Processing_Run_Var_Name);
             end
         end
+        
+        function [cancel, run] = collectSettings(run)
+            if parallelComputingToolboxInstalled()
+                g = gpuDevice;
+                
+                gpuAvailable = ~isempty(g);
+                
+                temp = ComputerInfo();
+                
+                numCoresAvailable = temp.cpuNumCores;
+            else
+                numCoresAvailable = 1;
+                gpuAvailable = false;
+            end
+            
+            [cancel, notes, numCores, useGPU] = SimulationRunSettingsGUI(numCoresAvailable, gpuAvailable);
+            
+            if ~cancel
+                run.notes = notes;
+                
+                run.computerInfo.numCoresUsed = numCores;
+                run.computerInfo.gpuUsed = useGPU;
+            end
+        end
     end
     
 end

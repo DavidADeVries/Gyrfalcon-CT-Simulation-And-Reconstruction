@@ -92,19 +92,15 @@ classdef GyrfalconWorkspace < GyrfalconObject
             
             set(handles.gyrofalconMain, 'Name', ['Gyrfalcon - ', path]);
             
-            handles = workspace.simulation.setGUI(handles);
-            handles = workspace.simulationRun.setGUI(handles);
-            handles = workspace.reconstructionRun.setGUI(handles);
+            workspace.simulation.setGUI(handles);
+            workspace.simulationRun.setGUI(handles);
+            wo
         end
         
         function workspace = createFromGUI(workspace, handles)
             workspace.statusOutput = getString(handles.statusOutputText);
                         
             workspace.simulation = workspace.simulation.createFromGUI(handles);
-            
-            workspace.simulationRun = workspace.simulationRun.createFromGUI(handles);
-            
-            workspace.reconstructionRun = workspace.reconstructionRun.createFromGUI(handles);
         end
     end
     

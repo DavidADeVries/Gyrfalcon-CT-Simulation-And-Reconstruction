@@ -3,7 +3,7 @@ classdef InterpolationTypes
     % types of interpolation for values
     
     properties
-        name
+        displayString
     end
     
     enumeration        
@@ -17,8 +17,8 @@ classdef InterpolationTypes
     end
     
     methods        
-        function obj = InterpolationTypes(name)
-            obj.name = name;
+        function obj = InterpolationTypes(displayString)
+            obj.displayString = displayString;
         end
         
         function interp = createInterpForKnownVals(interType, xvals, yvals)

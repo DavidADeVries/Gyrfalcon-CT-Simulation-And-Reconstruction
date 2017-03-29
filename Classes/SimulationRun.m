@@ -111,40 +111,6 @@ classdef SimulationRun < ProcessingRun
             end
             
             setString(handles.simulationRunNotesText, run.notes);
-            
-            if ~isempty(run.simulation)
-                scanGeometry = run.simulation.findScanGeometry();
-                hasScanGeometry = ~isempty(scanGeometry);
-            else
-                hasScanGeometry = false;
-            end
-            
-            if ~hasScanGeometry
-                setString(handles.simulationRunScanGeometryText, '');
-                set(handles.reconstructionAlgorithmSelectionPopupMenu,...
-                    'Enable','inactive',...
-                    'String',{'None'});
-                setString(handles.reconstructionAlgorithmSettingsText, '');
-                set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'off');
-            else
-                numSlices = num2str(length(run.simulation.scan.slices));
-                numAngles = num2str(length(run.simulation.scan.scanAngles));
-                
-                geometryString = {...
-                    scanGeometry.displayName,...
-                    scanGeometry.shortDescriptionString,...
-                    [numAngles, ' Angles, ', numSlices, ' Slices']};
-                
-                setString(handles.simulationRunScanGeometryText, geometryString);
-                
-                [algorithmChoiceStrings, ~] = scanGeometry.getReconAlgorithmChoices();
-                
-                set(handles.reconstructionAlgorithmSelectionPopupMenu,...
-                    'Enable','on',...
-                    'String',algorithmChoiceStrings);
-                setString(handles.reconstructionAlgorithmSettingsText, 'Press "Edit" to Set');
-                set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'on');
-            end
         end
         
         function simulationRun = startRun(simulationRun)
@@ -180,29 +146,7 @@ classdef SimulationRun < ProcessingRun
             run.savePath = makePath(path,dirName);
         end
                 
-        function [cancel, run] = collectSettings(run)
-            if parallelComputingToolboxInstalled()
-                g = gpuDevice;
-                
-                gpuAvailable = ~isempty(g);
-                
-                temp = ComputerInfo();
-                
-                numCoresAvailable = temp.cpuNumCores;
-            else
-                numCoresAvailable = 1;
-                gpuAvailable = false;
-            end
-            
-            [cancel, notes, numCores, useGPU] = SimulationRunSettingsGUI(numCoresAvailable, gpuAvailable);
-            
-            if ~cancel
-                run.notes = notes;
-                
-                run.computerInfo.numCoresUsed = numCores;
-                run.computerInfo.gpuUsed = useGPU;
-            end
-        end
+        
     end
     
 end

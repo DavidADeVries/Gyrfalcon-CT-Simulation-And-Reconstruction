@@ -378,8 +378,8 @@ classdef Simulation < GyrfalconObject
             simulation.scan.beamCharacterization = beam;
         end
         
-        function scanGeometry = findScanGeometry(simulation)
-            scanGeometry = boolLogicForFindScanGeometry(simulation);
+        function [scanGeometry, errorMsg] = findScanGeometry(simulation)
+            [scanGeometry, errorMsg] = boolLogicForFindScanGeometry(simulation);
         end
         
         function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, statusOutputTextHandle, savePath)
