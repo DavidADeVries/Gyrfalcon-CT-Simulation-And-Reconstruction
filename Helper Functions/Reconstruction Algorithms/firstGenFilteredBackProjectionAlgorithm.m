@@ -1,7 +1,11 @@
-function [reconDataSet, sinogram, videoFrames] = firstGenFilteredBackProjectionAlgorithm(firstGenProjectionData, scanAngles, phantomSliceDimensions, phantomVoxelDimensionsInM, detectorWidthInM, filterType, applyRampFilter, applyBandlimiting, interpolationType)
-% function [reconDataSet, sinogram, videoFrames] = firstGenFilteredBackProjectionAlgorithm(firstGenProjectionData, filterType, applyRampFilter, applyBandlimiting, interpolationType)
+function [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(firstGenProjectionData, scanAngles, phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM, filterType, applyRampFilter, applyBandlimiting, interpolationType)
+% function [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(firstGenProjectionData, filterType, applyRampFilter, applyBandlimiting, interpolationType)
 
 numSlices = length(firstGenProjectionData);
+
+reconDataSet = cell(1, numSlices);
+sinograms = cell(1, numSlices);
+videosFrames = cell(1, numSlices);
 
 dims = size(numSlices{1});
 
@@ -20,7 +24,7 @@ for i=1:numSlices
         projectionData(:,j) = filteredProjectionData';
     end
     
-    centreOfDetectorsInM = calcCentreOfDetectors(numDetectors, detectorWidthInM);
+    centreOfDetectorsPlusEdgeInM = calcCentreOfDetectorsPlusEdge(numDetectors, detectorWidthInM);
     
     tDiscrete = centreOfDetectorsInM;
     
@@ -28,7 +32,10 @@ for i=1:numSlices
     
     for j=1:numAngles
         % create piecewise 'interp' function for easy evaluation
-        interpForAngle = interpolationType.createInterpForKnownVals(tDiscrete, projectionData(:,j)');
+        projData = projectionData(:,j)';
+        projData = [0, projData, 0]; %specific "0" signal outside of detector
+        
+        interpForAngle = interpolationType.createInterpForKnownVals(tDiscrete, projData);
         
         interpsOfProjections{j} = interpForAngle;
     end
@@ -37,24 +44,23 @@ for i=1:numSlices
     
     
     % YOU'RE HERE!
-    K = length(theta);
     
-    projLength = dims(1);
-    iShift = floor(projLength/2);
+    xIndices = 1:1:phantomSliceDimensions(1);
+    yIndices = 1:1:phantomSliceDimensions(2);   
     
-    
-    
-    d = (-(phantSize-1)/2):1:((phantSize-1)/2);
-    
-    
-    
-    for k = 1:K
-        ang = theta(k);
-        projValues = projectionData(:,k)';
+    for k = 1:numAngles
+        ang = scanAngles(k);
+        projValuesInterp = interpsOfProjections{j};
         
-        [x,y] = meshgrid(d,-d);
+        % create grid of all x,y index combinations
+        [xxIndices, yyIndices] = meshgrid(xIndices,yIndices);
         
-        t = x.*cosd(ang) + y.*sind(ang);
+        % find coresponding (x,y) values relative to (0,0)
+        % phantomLocation gives top left corner in xy plane
+        xxVals = phantomLocationInM(1) + (xxIndices * phantomVoxelDimensionsInM(1)) + phantomVoxelDimensionsInM(1)/2;
+        yyVals = phantomLocationInM(2) - (yyIndices * phantomVoxelDimensionsInM(2)) - phantomVoxelDimensionsInM(2)/2;
+        
+        t = xxVals.*cosd(ang) + yyVals.*sind(ang);
         
         i = t + 1 + ((projLength-1)/2);
         iLow = floor(i);
@@ -103,6 +109,14 @@ for i=1:numSlices
     
 end
 
-function centreOfDetectorsInM = calcCentreOfDetectors(numDetectors, detectorWidthInM)
-
+% specifics the centre of detector and the edge
+function centreOfDetectorsPlusEdgeInM = calcCentreOfDetectorsPlusEdge(numDetectors, detectorWidthInM)
+    
+    bound = ((numDetectors - 1) / 2) * detectorWidthInM;
+    
+    centreOfDetectorsInM = -bound:detectorWidthInM:bound;
+    
+    edge = (numDetectors / 2) * detectorWidthInM;
+    
+    centterOfDetectorsPlusEdgeInM
 end

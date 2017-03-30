@@ -21,7 +21,9 @@ classdef InterpolationTypes
             obj.displayString = displayString;
         end
         
-        function interp = createInterpForKnownVals(interType, xvals, yvals)
+        % zeroBeyondBounds sets the value for x < xvals(1) and x >
+        % xvals(end) to 0
+        function interp = createInterpForKnownVals(interType, xvals, yvals, zeroBeyondBounds)
             switch interType
                 case InterpolationTypes.nearestNeighbour
                     interp = createNearestNeighbourInterp(xvals, yvals);
@@ -33,6 +35,24 @@ classdef InterpolationTypes
                     interp = createPCHIPInterp(xvals, yvals);
                 otherwise
                     error('Invalid Interpolation Type!');
+            end
+            
+            if zeroBeyondBounds
+                breaks = interp.breaks;
+                coeffs = interp.coeffs;
+                
+                breaks = [xvals(1) - 1, breaks, xvals(end) + 1]; % using -1 and +1 is arbitrary, any -/+ value would work
+                
+                dims = size(coeffs);
+                numTerms = dims(2);
+                
+                zeroCoeffs = zeros(1, numTerms);
+                
+                coeffs = [zeroCoeffs coeffs zeroCoeffs]; % set area beyond to 0
+                
+                interp.breaks = breaks;
+                interp.coeffs = coeffs;
+                interp.pieces = interp.pieces + 2;
             end
             
         end
