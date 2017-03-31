@@ -3,6 +3,10 @@ function intersectionPoints = findLinePhantomIntersections(lineDeltas, linePoint
     
 phantomDims = size(phantomData);
 
+if length(phantomDims) == 2
+    phantomDims = [phantomDims 0];
+end
+
 phantX = phantomLocation(1);
 phantY = phantomLocation(2);
 phantZ = phantomLocation(3);

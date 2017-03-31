@@ -2,6 +2,11 @@ function handles = getPhantomPlotCoords(phantomDataInHU, phantomDimsInM, phantom
             
 dims = size(phantomDataInHU);
 
+if length(dims) == 2
+    dims = [dims 1];
+    phantomDimsInM(3) = 0; % no z dimensionality
+end
+
 numX = dims(2);
 numY = dims(1);
 numZ = dims(3);
@@ -24,8 +29,13 @@ zEnd = phantomLocationInM(3);
 zStart = zEnd - numZ*phantomDimsInM(3);
 zMiddle = mean([zStart zEnd]);
 
-xySliceValues = [zStart, zMiddle, zEnd];
-xySliceIndices = [numZ round((numZ-1)/2) 1];
+if numZ == 1
+    xySliceValues = 0;
+    xySliceIndices = 1;
+else
+    xySliceValues = [zStart, zMiddle, zEnd];
+    xySliceIndices = [numZ round((numZ-1)/2) 1];
+end
 
 % calc xy slices
 numXYSlices = length(xySliceValues);
@@ -114,10 +124,14 @@ hold(axesHandle,'on');
 
 xyHandles = plotSlices(xySliceXCoords, xySliceYCoords, xySlicesZCoords, axesHandle, xySlicesData);
 
-xzHandles = plotSlices(xzSliceXCoords, xzSlicesYCoords, xzSliceZCoords, axesHandle, xzSlicesData);
-
-yzHandles = plotSlices(yzSlicesXCoords, yzSliceYCoords, yzSliceZCoords, axesHandle, yzSlicesData);
-
+if numZ ~= 1 % only plot these if 3D phantom
+    xzHandles = plotSlices(xzSliceXCoords, xzSlicesYCoords, xzSliceZCoords, axesHandle, xzSlicesData);
+    
+    yzHandles = plotSlices(yzSlicesXCoords, yzSliceYCoords, yzSliceZCoords, axesHandle, yzSlicesData);
+else
+    xzHandles = {};
+    yzHandles = {};
+end
 
 boxHandles = plotBox([xStart xEnd], [yStart yEnd], [zStart zEnd], axesHandle, 'w');
 

@@ -1,5 +1,5 @@
-function filteredProjectionValues = filterProjectionValuesRedo(projectionValues, filter, applyRampFilter, detectorSpacingInM)
-% filteredProjectionValues = filterProjectionValues(projectionValues, filter, applyRampFilter, detectorSpacingInM)
+function filteredProjectionValues = filterProjectionValuesRedo(projectionValues, filter, applyRampFilter, applyBandlimiting, detectorSpacingInM)
+% filteredProjectionValues = filterProjectionValues(projectionValues, filter, applyRampFilter, applyBandlimiting, detectorSpacingInM)
 % Mainly based on MATLAB code
 %
 % ***MATLAB CODE COMMENTS:***
@@ -32,6 +32,7 @@ else
     filtImpResp = zeros(1,ceil(len/2)+1); % 'filtImpResp' is the bandlimited ramp's impulse response (values for even n are 0)
     filtImpResp(1) = 1/(4.*(detectorSpacingInM.^2)); % Set the DC term
     filtImpResp(2:2:end) = -1./((pi.*n(2:2:end).*detectorSpacingInM).^2); % Set the values for odd n
+    filtImpResp(order/2) = 0;
     filtImpResp = [filtImpResp filtImpResp(end-1:-1:2)];
     filt = fft(filtImpResp);
     filt = filt(1:(order/2)+1);

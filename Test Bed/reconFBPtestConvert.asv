@@ -44,32 +44,27 @@ display = true;
         
 d = (-(phantSize-1)/2):1:((phantSize-1)/2);
 
+[xxI, yyI] = meshgrid(1:phantSize,1:phantSize);
 
+xx = (xxI - 1) - (phantSize-1)/2;
+yy = (yyI - 1) - (phantSize-1)/2;
 
 for k = 1:K
     ang = theta(k);
     projValues = P(:,k)';
     
-    [x,y] = meshgrid(d,-d);
-    
-    t = x.*cosd(ang) + y.*sind(ang);
+    t = xx.*cosd(ang) + yy.*sind(ang);
         
     i = t + 1 + ((projLength-1)/2);
     iLow = floor(i);
     iHigh = ceil(i);
-    
-    iX = x + 1 + ((phantSize-1)/2);
-    iY = y + 1 + ((phantSize-1)/2);
-        
+            
     validCoord = ...
         iLow < projLength & iHigh < projLength &...
-        iLow > 0 & iHigh > 0 & iX > 0 &...
-        iX <= phantSize & iY > 0 & iY <= phantSize;
+        iLow > 0 & iHigh;
     
     iLow(~validCoord) = 1;
     iHigh(~validCoord) = 1;
-    iX(~validCoord) = 1;
-    iY(~validCoord) = 1;
     
     lowHighEq = iLow == iHigh;
     

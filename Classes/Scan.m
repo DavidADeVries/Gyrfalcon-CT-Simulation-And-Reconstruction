@@ -260,6 +260,16 @@ classdef Scan < GyrfalconObject
             xyResolution = translationResolutionInM(1);
             zResolution = translationResolutionInM(2);
             
+            if ~xor(xyResolution == 0, zResolution ~= 0) % if one is zero, and the other is not
+                % set zero resolution to non-zero (aka 1 for example) to
+                % allow plotting to occur
+                if xyResolution == 0
+                    xyResolution = 1;
+                else
+                    zResolution = 1;
+                end
+            end
+            
             xyNumSteps = scan.perAngleTranslationDimensions(1);
             zNumSteps = scan.perAngleTranslationDimensions(2);
             

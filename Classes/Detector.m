@@ -100,7 +100,16 @@ classdef Detector < GyrfalconObject
         end
         
         function detector = loadFields(detector)
-        end 
+        end
+
+        function dimensions = getSingleDetectorDimensionsInM(detector)
+            radiusInM = detector.getDistanceBetweenOriginAndDetectorCentrePointInM();
+            
+            xy = detector.singleDetectorDimensions(1).getLengthInM(radiusInM);
+            z = detector.singleDetectorDimensions(1).getLengthInM(radiusInM);
+
+            dimensions = [xy,z];
+        end
                 
         function detector = setDefaultValues(detector)
             detector.location = [0,-1];

@@ -19,8 +19,8 @@ checkEndPoint = endClockwisePosZ - startClockwisePosZ;
 clockwisePointAngle = forceAnglePositiveInRadians(clockwisePointAngle);
 clockwiseAngle = forceAnglePositiveInRadians(clockwiseAngle);
 
-isClockwiseWithin = (clockwisePointAngle - clockwiseAngle) < 0;
-isPosZWithin = (posZPointAngle - posZAngle) < 0;
+isClockwiseWithin = (clockwisePointAngle - clockwiseAngle) <= 0;
+isPosZWithin = (posZPointAngle - posZAngle) <= 0;
 
 startCounterClockwiseNegZ = sourceStartBoxCoords(4,:);
 endCounterClockwiseNegZ = sourceEndBoxCoords(4,:);
@@ -34,8 +34,8 @@ checkEndPoint = endCounterClockwiseNegZ - startCounterClockwiseNegZ;
 counterClockwisePointAngle = forceAnglePositiveInRadians(counterClockwisePointAngle);
 counterClockwiseAngle = forceAnglePositiveInRadians(counterClockwiseAngle);
 
-isCounterClockwiseWithin = (counterClockwisePointAngle - counterClockwiseAngle) > 0;
-isNegZWithin = (negZPointAngle - negZAngle) > 0;
+isCounterClockwiseWithin = (counterClockwisePointAngle - counterClockwiseAngle) >= 0;
+isNegZWithin = (negZPointAngle - negZAngle) >= 0;
 
 bool = isClockwiseWithin && isCounterClockwiseWithin && isPosZWithin && isNegZWithin;
 

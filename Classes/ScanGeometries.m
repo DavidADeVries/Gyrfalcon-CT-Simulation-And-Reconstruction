@@ -51,24 +51,24 @@ classdef ScanGeometries
         
         function [algorithmChoiceStrings, choices] = getReconAlgorithmChoices(geometry)
             switch geometry
-                case firstGenCT
+                case ScanGeometries.firstGenCT
                     choices = {...
                         FirstGenFilteredBackprojectionReconstruction,...
                         FirstGenPAIRReconstruction...
                         };
-                case secondGenCT
+                case ScanGeometries.secondGenCT
                     choices = {...
                         SecondGenFilteredBackprojectionReconstruction,...
                         };
-                case thirdGenCT
+                case ScanGeometries.thirdGenCT
                     choices = {...
                         ThirdGenFilteredBackprojectionReconstruction,...
                         };                    
-                case fourthGenCT                    
+                case ScanGeometries.fourthGenCT                    
                     choices = {...
                         FourthGenFilteredBackprojectionReconstruction,...
                         };                    
-                case coneBeamCT                    
+                case ScanGeometries.coneBeamCT                    
                     choices = {...
                         ConeBeamFDKReconstruction,...
                         };
@@ -85,15 +85,15 @@ classdef ScanGeometries
         
         function choice = getDefaultAlgorithmChoice(geometry)
             switch geometry
-                case firstGenCT
+                case ScanGeometries.firstGenCT
                     choice = FirstGenFilteredBackprojectionReconstruction;
-                case secondGenCT
+                case ScanGeometries.secondGenCT
                     choice = SecondGenFilteredBackprojectionReconstruction;
-                case thirdGenCT
+                case ScanGeometries.thirdGenCT
                     choice = ThirdGenFilteredBackprojectionReconstruction;
-                case fourthGenCT
+                case ScanGeometries.fourthGenCT
                     choice = FourthGenFilteredBackprojectionReconstruction;
-                case coneBeamCT
+                case ScanGeometries.coneBeamCT
                     choice = ConeBeamFDKReconstruction;
             end
         end

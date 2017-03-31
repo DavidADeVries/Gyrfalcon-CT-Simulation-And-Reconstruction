@@ -1,5 +1,5 @@
-function filteredProjectionValues = filterProjectionValuesRedo(projectionValues, filter, applyRampFilter, detectorSpacingInM)
-% filteredProjectionValues = filterProjectionValues(projectionValues, filter, applyRampFilter, detectorSpacingInM)
+function filteredProjectionValues = filterProjectionValuesRedo(projectionValues, filter, applyRampFilter, applyBandlimiting, detectorSpacingInM)
+% filteredProjectionValues = filterProjectionValues(projectionValues, filter, applyRampFilter, applyBandlimiting, detectorSpacingInM)
 % Mainly based on MATLAB code
 %
 % ***MATLAB CODE COMMENTS:***
@@ -49,22 +49,24 @@ temp = fftshift(filt);
 w = 2*pi*(0:size(filt,1)-1)/order;   % frequency axis up to Nyquist
 w = w';
 
-temp(w-pi < -1/(2*detectorSpacingInM)) = 0;
-temp(w-pi > 1/(2*detectorSpacingInM)) = 0;
+if applyBandlimiting
+    temp(w-pi < -1/(2*detectorSpacingInM)) = 0;
+    temp(w-pi > 1/(2*detectorSpacingInM)) = 0;
+end
 
 filt = ifftshift(temp);
 
 switch filter
-    case 'ram-lak'
-        % Do nothing
-    case 'shepp-logan'
+    case FirstGenFilterTypes.none
+        % do nothing
+    case FirstGenFilterTypes.sheppLoganFilter
         % be careful not to divide by 0:
         filt(2:end) = filt(2:end) .* (sin(w(2:end))./(w(2:end)));
-    case 'cosine'
+    case FirstGenFilterTypes.cosineFilter
         filt(2:end) = filt(2:end) .* cos(w(2:end));
-    case 'hamming'
+    case FirstGenFilterTypes.hammingWindowFilter
         filt(2:end) = filt(2:end) .* (.54 + .46 * cos(w(2:end)));
-    case 'hann'
+    case FirstGenFilterTypes.hannWindowFilter
         filt(2:end) = filt(2:end) .*(1+cos(w(2:end))) / 2;
     otherwise
         error(message('images:iradon:invalidFilter'))

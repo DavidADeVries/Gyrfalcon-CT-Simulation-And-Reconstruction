@@ -62,6 +62,13 @@ classdef Constants
         
         Reconstruction_Folder_Name = 'Recon';
         Reconstruction_Run_File_Name = 'Reconstruction Run';
+        
+        Slice_Folder = 'Slice';
+        Angle_Folder = 'Angle';
+        Position_Folder = 'Position';
+        
+        Detector_Data_Filename = 'DetectorData';
+        Detector_Data_Var_Name = 'detectorData';
     end
     
     methods

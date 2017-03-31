@@ -181,9 +181,9 @@ classdef SimulationRun < ProcessingRun
                         
                         positionFolder = [Constants.Position_Folder, ' (', num2str(zStep), ',', num2str(xyStep), ')'];
                                                 
-                        loadedData = load(makePath(basePath, sliceFolder, angleFolder, positionFolder, fileName));
+                        loadedData = load(makePath(basePath, sliceFolder, angleFolder, PositionFolder, fileName));
                         
-                        sliceData(xyStep,j) = loadedData.(Constants.Detector_Data_Var_Name);
+                        sliceData(xyStep,j) = get(loadedData, Constants.Detector_Data_Var_Name);
                     end
                 end
                 

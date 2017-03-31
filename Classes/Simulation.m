@@ -369,7 +369,7 @@ classdef Simulation < GyrfalconObject
         end    
         
         function simulation = calibrateAndSetPhantomData(simulation)
-            phantomDataInHU = simulation.phantom.data;
+            phantomDataInHU = simulation.phantom.dataSet.data;
             
             beam = simulation.scan.beamCharacterization;
             
@@ -425,7 +425,7 @@ classdef Simulation < GyrfalconObject
                 setString(statusOutputTextHandle, [baseString; {['  Slice ', num2str(i), '/', num2str(numSlices)]}]);
                 drawnow;
                 
-                newDir = ['Slice ', num2str(i)];
+                newDir = [Constants.Slice_Folder, ' ', num2str(i)];
                 mkdir(savePath, newDir);
                 sliceSavePath = makePath(savePath, newDir);
                 
@@ -461,7 +461,7 @@ classdef Simulation < GyrfalconObject
                 
                 angle = angles(i); 
                 
-                newDir = ['Angle ', num2str(angle)];
+                newDir = [Constants.Angle_Folder, ' ', num2str(angle)];
                 mkdir(sliceSavePath, newDir);
                 angleSavePath = makePath(sliceSavePath, newDir);
                                
@@ -500,7 +500,7 @@ classdef Simulation < GyrfalconObject
                     setString(statusOutputTextHandle, [baseString; {['  Position ', curNumStepStr, '/', totalNumStepStr]}]);
                     drawnow;
                     
-                    newDir = ['Position (', num2str(zStep), ',', num2str(xyStep), ')'];
+                    newDir = [Constants.Position_Folder, ' (', num2str(zStep), ',', num2str(xyStep), ')'];
                     mkdir(angleSavePath, newDir);
                     positionSavePath = makePath(angleSavePath, newDir);
                     
@@ -588,8 +588,8 @@ classdef Simulation < GyrfalconObject
                     setString(statusOutputTextHandle, [baseString; {['  Detector ', curNumStepStr, '/', totalNumStepStr]}]);
                     drawnow;
                     
-                    newDir = ['Detector (', num2str(zDetector), ',', num2str(xyDetector), ')'];
-                    mkdir(positionSavePath, newDir);
+%                     newDir = [Constants.Detector_Folder, ' (', num2str(zDetector), ',', num2str(xyDetector), ')'];
+%                     mkdir(positionSavePath, newDir);
                     
                     clockwisePosZ = [xCoords(zDetector,xyDetector), yCoords(zDetector,xyDetector), zCoords(zDetector,xyDetector)];
                     clockwiseNegZ = [xCoords(zDetector+1,xyDetector), yCoords(zDetector+1,xyDetector), zCoords(zDetector+1,xyDetector)];
@@ -654,7 +654,7 @@ classdef Simulation < GyrfalconObject
             
             beamCharacterization = simulation.scan.beamCharacterization;
             
-            phantomData = simulation.phantom.data;
+            phantomData = simulation.phantom.dataSet.data;
             voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
             phantomLocationInM = simulation.phantom.getLocationInM();
             

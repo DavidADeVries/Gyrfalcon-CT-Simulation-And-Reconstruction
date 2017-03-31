@@ -9,11 +9,11 @@ classdef FirstGenFilterTypes
     enumeration        
         sheppLoganFilter ('Shepp-Logan Filter (Sinc)')
         
-        CosineFilter ('Cosine Filter')
+        cosineFilter ('Cosine Filter')
         
-        HammingWindowFilter ('Hamming Window Filter')
+        hammingWindowFilter ('Hamming Window Filter')
         
-        HannWindowFilter ('Hann Window Filter')
+        hannWindowFilter ('Hann Window Filter')
         
         none ('None')
     end

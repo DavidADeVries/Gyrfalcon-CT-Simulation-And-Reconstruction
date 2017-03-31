@@ -64,10 +64,32 @@ classdef GyrfalconWorkspace < GyrfalconObject
             else
                 saved = true;
             end
+            
+            % simulationRun
+            if ~isempty(workspace.simulationRun.savePath)
+                simRunForSaving = SimulationRun;
+                
+                simRunForSaving.savePath = workspace.simulationRun.savePath;
+                simRunForSaving.saveFileName = workspace.simulationRun.saveFileName;
+                
+                workspaceForParent.simulationRun = simRunForSaving;
+                workspaceForSaving.simulationRun = simRunForSaving;
+            end
+            
+            % reconstructionRun
+            % save everything with workspace, are not saved independently
         end
         
         function workspace = loadFields(workspace)
             workspace.simulation = workspace.simulation.load();
+            
+            if ~isempty(workspace.simulationRun.savePath)
+                loadPath = makePath(workspace.simulationRun.savePath, workspace.simulationRun.saveFileName);
+                
+                loadedData = load(loadPath);
+                
+                workspace.simulationRun = get(loadedData, Constants.Processing_Run_Var_Name);
+            end
         end        
         
         function name = defaultName(workspace)            

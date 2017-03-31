@@ -41,14 +41,16 @@ if source.isPointSource()
         scanValid = scan.perAngleTranslationDimensions(1) == 1 && scan.perAngleTranslationDimensions(2) == 1;
         
         if detectorValid && scanValid
-            scanGeometry = ScanGeometries.ConeBeamCT;
+            scanGeometry = ScanGeometries.coneBeamCT;
         else
+            errorMsg = {};
+            
             if ~detectorValid
-                errorMsg = 'For a cone-beam reconstruction to be done, the detector used must be planar, move with the scan angle, and not move with per angle translations';
+                errorMsg = [errorMsg, {'For a cone-beam reconstruction to be done, the detector used must be planar, move with the scan angle, and not move with per angle translations'}];
             end
             
             if ~scanValid
-                errorMsg = 'For a cone-beam reconstruction to be done, the scan used must not have any per angle translations for the source.';
+                errorMsg = [errorMsg, {'For a cone-beam reconstruction to be done, the scan used must not have any per angle translations for the source.'}];
             end
         end
     elseif isFanBeam
@@ -62,16 +64,16 @@ if source.isPointSource()
             
             if hasPerAngleTranslation
                 if movesWithScanAngle && movesWithPerAngle
-                    scanGeometry = ScanGeometries.SecondGenCT;
+                    scanGeometry = ScanGeometries.secondGenCT;
                 else
                     errorMsg = 'For a 2nd Generation CT scan, the detector must move with the scan angle and per angle translations.';
                 end
             else
                 if ~movesWithPerAngle
                     if movesWithScanAngle
-                        scanGeometry = ScanGeometries.ThirdGenCT;
+                        scanGeometry = ScanGeometries.thirdGenCT;
                     elseif ~detectorPlanar
-                        scanGeometry = ScanGeometries.FourthGenCT;
+                        scanGeometry = ScanGeometries.fourthGenCT;
                     else
                         errorMsg = 'Detector must be curved for 4th Generation CT scans.';
                     end
@@ -80,27 +82,31 @@ if source.isPointSource()
                 end
             end
         else
+            errorMsg = {};
+            
             if ~detectorValid
-                errorMsg = 'For a fan-beam CT scan, the detector must be 1D (no detectors in z-direction).';
+                errorMsg = [errorMsg, {'For a fan-beam CT scan, the detector must be 1D (no detectors in z-direction).'}];
             end
             
             if ~scanValid
-                errorMsg = 'For a fan-beam CT scan, the source must not have an per angle translation in the z-direction.';
+                errorMsg = [errorMsg, {'For a fan-beam CT scan, the source must not have an per angle translation in the z-direction.'}];
             end
         end
     elseif isPencilBeam
-        detectorValid = detectorPlanar && detector.wholeDetectorDimensions(2) == 1 && detector.movesWithScanAngle;
+        detectorValid = detectorPlanar && detector.wholeDetectorDimensions(1) == 1 && detector.wholeDetectorDimensions(2) == 1 && detector.movesWithScanAngle && detector.movesWithPerAngleTranslation;
         scanValid = scan.perAngleTranslationDimensions(2) == 1;
         
         if detectorValid && scanValid
-            scanGeometry = ScanGeometries.FirstGenCT;
+            scanGeometry = ScanGeometries.firstGenCT;
         else
+            errorMsg = {};
+            
             if ~detectorValid
-                errorMsg = 'For a pencil-beam CT scan, the detector must be 1D, planar, and move with the scan angle.';
+                errorMsg = [errorMsg, {'For a pencil-beam CT scan, the detector must be 1D, planar, a single pixel, and move with the scan angle and source.'}];
             end
             
             if ~scanValid
-                errorMsg = 'For a pencil-beam CT scan, the source must not have an per angle translation in the z-direction.';
+                errorMsg = [errorMsg, {'For a pencil-beam CT scan, the source must not have an per angle translation in the z-direction.'}];
             end
         end
     end

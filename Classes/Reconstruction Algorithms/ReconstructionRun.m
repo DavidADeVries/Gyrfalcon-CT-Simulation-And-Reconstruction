@@ -8,6 +8,10 @@ classdef ReconstructionRun < ProcessingRun
     end
     
     methods
+        function run = createFromGUI(run, handles)
+            
+        end
+        
         function handles = setGUI(run, handles)
             [scanGeometry, errorMsg] = run.getScanGeometry();
                             
@@ -30,11 +34,11 @@ classdef ReconstructionRun < ProcessingRun
                 set(handles.controlPanelRunReconstructionButton, 'Enable', 'off');
             else
                 % set simulationRunScanGeometryText
-                numSlices = num2str(length(run.simulation.scan.slices));
-                numAngles = num2str(length(run.simulation.scan.scanAngles));
+                numSlices = num2str(length(run.simulationRun.simulation.scan.slices));
+                numAngles = num2str(length(run.simulationRun.simulation.scan.scanAngles));
                 
                 geometryString = {...
-                    scanGeometry.displayName,...
+                    scanGeometry.displayString,...
                     scanGeometry.shortDescriptionString,...
                     [numAngles, ' Angles, ', numSlices, ' Slices']};
                 
@@ -79,10 +83,10 @@ classdef ReconstructionRun < ProcessingRun
             savePath = run.simulationRun.savePath;
             
             lastReconNumber = getLastReconNumber(savePath);
-            numStr = num2str(lastReconNumber);
+            numStr = num2str(lastReconNumber+1);
             algoStr = run.reconstructionAlgorithm.getNameString();
             
-            defaultName = [Constants.Reconstruction_Folder_Name, numStr, ' (', algoStr, ')'];
+            defaultName = [Constants.Reconstruction_Folder_Name, ' ', numStr, ' (', algoStr, ')'];
             
             answer = {''}; % this is NOT empty
             validFolder = false;
@@ -102,7 +106,7 @@ classdef ReconstructionRun < ProcessingRun
                 if ~isempty(answer) % not cancelled
                     folderName = answer{1};
                     
-                    validFolder = isStrInCellArray(getFolders(savePath), folderName);
+                    validFolder = ~isStrInCellArray(getFolders(savePath), folderName);
                 end
             end
             

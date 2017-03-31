@@ -46,7 +46,7 @@ classdef ComputerInfo
         end
         
         function string = getSummaryString(info)
-            str0 = {'Computer Information'};
+            str0 = 'Computer Information';
             
             str1 = ['OS: ', info.osType, ' (', info.osVersion, ')'];
             str2 = ['CPU Type: ', info.cpuType];
@@ -56,7 +56,7 @@ classdef ComputerInfo
             
             str6 = 'User Memory:';
             str7 = ['Max Possible Array Size: ', bytesToGbString(info.userMemory.MaxPossibleArrayBytes)];
-            str8 = ['MATLAB Memory Usage: ', bytesToGbString(info.userMemory.MemUsedMATALB), '/', bytesToGbString(info.userMemory.MemAvailableAllArrays)];
+            str8 = ['MATLAB Memory Usage: ', bytesToGbString(info.userMemory.MemUsedMATLAB), '/', bytesToGbString(info.userMemory.MemAvailableAllArrays)];
             
             str9 = 'System Memory:';
             str10 = ['Total Available: ', bytesToGbString(info.systemMemory.SystemMemory.Available)];

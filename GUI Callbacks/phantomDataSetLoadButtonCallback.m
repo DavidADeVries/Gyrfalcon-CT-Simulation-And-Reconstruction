@@ -57,25 +57,29 @@ function dataSet = createNewDataSet()
     else
         xyDim = str2double(answers{1});
         zDim = str2double(answers{2});
-                
-        radius = zDim/2;
-
-        data = zeros(xyDim,xyDim,zDim);
-
-        for i=1:zDim %through slices
-            height = abs(radius-i);
-
-            radiusForSlice = sqrt(radius^2 - height^2);
-
-            dimForSlice = round(radiusForSlice/radius * xyDim);
-
-            sliceData = phantomInHU('Modified Shepp-Logan',dimForSlice,xyDim);
+        
+        if zDim == 1
+            data = phantomInHU('Modified Shepp-Logan', xyDim, xyDim);
+        else
+            radius = zDim/2;
             
-            data(...
-                :,...
-                :,...
-                i) = sliceData ;
-
+            data = zeros(xyDim,xyDim,zDim);
+            
+            for i=1:zDim %through slices
+                height = abs(radius-i);
+                
+                radiusForSlice = sqrt(radius^2 - height^2);
+                
+                dimForSlice = round(radiusForSlice/radius * xyDim);
+                
+                sliceData = phantomInHU('Modified Shepp-Logan',dimForSlice,xyDim);
+                
+                data(...
+                    :,...
+                    :,...
+                    i) = sliceData ;
+                
+            end
         end
         
         dataSet = PhantomDataSet(data);

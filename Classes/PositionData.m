@@ -46,7 +46,9 @@ classdef PositionData
         function data = saveBigData(data, savePath)
             detectorData = data.detectorData;
             
-            save(makePath(savePath,'detectorData.mat'),'detectorData','-v7.3');
+            filename = [Constants.Detector_Data_Filename, Constants.Matlab_File_Extension];
+            
+            save(makePath(savePath,filename),Constants.Detector_Data_Var_Name);
             
 %             dims = size(data.distancesAcrossVoxels);
 %             

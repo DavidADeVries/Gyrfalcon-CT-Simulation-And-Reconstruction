@@ -30,28 +30,28 @@ classdef InterpolationTypes
                 case InterpolationTypes.linear
                     interp = createLinearInterp(xvals, yvals);
                 case InterpolationTypes.cubic
-                    interp = createCubicSplineInterp(xvals, yvals);
+                    interp = createCubicSplineInterp(xvals, yvals, zeroBeyondBounds);
                 case InterpolationTypes.pchip                    
-                    interp = createPCHIPInterp(xvals, yvals);
+                    interp = createPCHIPInterp(xvals, yvals, zeroBeyondBounds);
                 otherwise
                     error('Invalid Interpolation Type!');
             end
             
             if zeroBeyondBounds
                 breaks = interp.breaks;
-                coeffs = interp.coeffs;
+                coefs = interp.coefs;
                 
                 breaks = [xvals(1) - 1, breaks, xvals(end) + 1]; % using -1 and +1 is arbitrary, any -/+ value would work
                 
-                dims = size(coeffs);
+                dims = size(coefs);
                 numTerms = dims(2);
                 
                 zeroCoeffs = zeros(1, numTerms);
                 
-                coeffs = [zeroCoeffs coeffs zeroCoeffs]; % set area beyond to 0
+                coefs = [zeroCoeffs; coefs; zeroCoeffs]; % set area beyond to 0
                 
                 interp.breaks = breaks;
-                interp.coeffs = coeffs;
+                interp.coefs = coefs;
                 interp.pieces = interp.pieces + 2;
             end
             
@@ -96,13 +96,21 @@ interp = mkpp(breaks, coeffs);
 
 end
 
-function interp = createCubicSplineInterp(xvals, yvals)
+function interp = createCubicSplineInterp(xvals, yvals, zeroBeyondBounds)
+
+if zeroBeyondBounds
+    yvals = [0 yvals 0]; %clamp the end
+end
 
 interp = spline(xvals, yvals); %thanks MATLAB!
 
 end
 
-function interp = createPCHIPInterp(xvals, yvals)
+function interp = createPCHIPInterp(xvals, yvals, zeroBeyondBounds)
+
+if zeroBeyondBounds
+    yvals = [0 yvals 0]; %clamp the end
+end
 
 interp = pchip(xvals, yvals);
 
