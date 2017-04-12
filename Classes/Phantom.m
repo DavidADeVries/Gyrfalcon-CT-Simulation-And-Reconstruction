@@ -147,7 +147,7 @@ classdef Phantom < GyrfalconObject
         function voxelDimsInM = getVoxelDimensionsInM(phant)
             units = phant.voxelDimensionUnits;
             voxelDims = phant.voxelDimensions;
-            
+                        
             voxelDimsInM = units.convertToM(voxelDims);
         end
         

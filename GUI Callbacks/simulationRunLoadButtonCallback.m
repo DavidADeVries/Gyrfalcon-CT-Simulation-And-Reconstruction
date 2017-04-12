@@ -16,6 +16,10 @@ if ~all(fileName == 0) % have a selection
         simulationRun = loadedData.(Constants.Processing_Run_Var_Name);
         
         if isa(simulationRun, class(SimulationRun)) % we're good!
+            h = popupMessage('Loading Simulation Run projection data...', 'Loading...');
+            simulationRun = simulationRun.loadData();
+            delete(h);
+            
             workspace = handles.workspace.createFromGUI(handles);
             
             workspace.simulationRun = simulationRun;
@@ -24,6 +28,8 @@ if ~all(fileName == 0) % have a selection
             
             if ~isempty(scanGeometry)
                 choice = scanGeometry.getDefaultAlgorithmChoice();
+                
+                choice = choice.setReconDataSetDefaults(simulationRun.simulation.phantom);
                 
                 reconRun = ReconstructionRun;
                 

@@ -20,13 +20,21 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
     end
     
     methods        
+        function recon = FirstGenFilteredBackprojectionReconstruction()
+            
+        end
+        
         function strings = getSettingsString(recon)
             str1 = ['Filter Type: ', recon.filterType.displayString];
             str2 = ['Apply Ramp Filter: ', convertBoolToYesNo(recon.applyRampFilter)];
             str3 = ['Apply Bandlimiting: ', convertBoolToYesNo(recon.applyBandlimiting)];
             str4 = ['Interpolation Type: ', recon.interpolationType.displayString];
 
-            strings = {str1 str2 str3 str4};            
+            strings1 = {str1 str2 str3 str4};
+            
+            strings2 = recon.getReconstructionSettingsString();
+            
+            strings = [strings1, {''}, strings2];
         end
         
         function [filterTypes, filterTypeStrings] = getFilterTypes(recon)
@@ -45,6 +53,8 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
             firstGenData = simulationRun.compileProjectionDataFor1stGenRecon();
             
             simulation = simulationRun.simulation;
+            
+            photonBeam = simulationRun.simulation.scan.beamCharacterization;
             
             scanAngles = simulation.scan.getScanAnglesInDegrees();
             sourceStartingLocationInM = simulation.source.getLocationInM();
@@ -66,13 +76,13 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
             applyBandlimiting = recon.applyBandlimiting;
             interpolationType = recon.interpolationType;
             
-            [reconDataSet, sinograms, reconVideosFrames] = firstGenFilteredBackProjectionAlgorithm(...
-                firstGenData,...
+            [reconDataSetSlices, sinograms, reconVideosFrames] = firstGenFilteredBackProjectionAlgorithm(...
+                firstGenData, photonBeam,...
                 scanAngles, sourceStartingLocationInM,...
                 phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM,...
                 filterType, applyRampFilter, applyBandlimiting, interpolationType);
                             
-            recon.reconDataSet = reconDataSet;
+            recon.reconDataSetSlices = reconDataSetSlices;
             recon.sinograms = sinograms;
             recon.reconVideosFrames = reconVideosFrames;
         end

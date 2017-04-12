@@ -22,7 +22,7 @@ function varargout = firstGenFilteredBackprojectionReconSettingsGUI(varargin)
 
 % Edit the above text to modify the response to help firstGenFilteredBackprojectionReconSettingsGUI
 
-% Last Modified by GUIDE v2.5 28-Mar-2017 14:06:32
+% Last Modified by GUIDE v2.5 12-Apr-2017 12:22:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -63,11 +63,39 @@ applyRampFilter = recon.applyRampFilter;
 applyBandlimiting = recon.applyBandlimiting;
 interpolationType = recon.interpolationType;
 
+reconSliceDims = recon.reconSliceDimensions;
+reconVoxelDimsInM = recon.reconSliceVoxelDimensionsInM;
+
+reconDataSetDims = recon.reconDataSetDimensions;
+reconDataSetVoxelDimsInM = recon.reconDataSetVoxelDimensionsInM;
+
+reconDataSetInterpolationType = recon.reconDataSetInterpolationType;
+
+% FBP settings
 setPopupMenu(handles.filterTypePopupMenu, 'FirstGenFilterTypes', filterType);
 set(handles.applyRampFilterCheckbox, 'Value', applyRampFilter);
 set(handles.applyBandlimitingCheckbox, 'Value', applyBandlimiting);
 setPopupMenu(handles.interpolationTypePopupMenu, 'InterpolationTypes', interpolationType);
 
+% recon settings
+
+setPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes', reconDataSetInterpolationType);
+
+setDoubleForHandle(handles.reconSliceDimsXEdit, reconSliceDims(1));
+setDoubleForHandle(handles.reconSliceDimsYEdit, reconSliceDims(2));
+
+setDoubleForHandle(handles.reconPixelDimsXEdit, Units.mm.convertFromM(reconVoxelDimsInM(1)));
+setDoubleForHandle(handles.reconPixelDimsYEdit, Units.mm.convertFromM(reconVoxelDimsInM(2)));
+
+setDoubleForHandle(handles.reconDataSetDimsXEdit, reconDataSetDims(1));
+setDoubleForHandle(handles.reconDataSetDimsYEdit, reconDataSetDims(2));
+setDoubleForHandle(handles.reconDataSetDimsZEdit, reconDataSetDims(3));
+
+setDoubleForHandle(handles.reconDataSetVoxelDimsXEdit, Units.mm.convertFromM(reconDataSetVoxelDimsInM(1)));
+setDoubleForHandle(handles.reconDataSetVoxelDimsYEdit, Units.mm.convertFromM(reconDataSetVoxelDimsInM(2)));
+setDoubleForHandle(handles.reconDataSetVoxelDimsZEdit, Units.mm.convertFromM(reconDataSetVoxelDimsInM(3)));
+
+% set Reconstruction object to handles
 handles.recon = recon;
 
 % Update handles structure
@@ -133,6 +161,38 @@ if ~handles.cancel
     recon.applyRampFilter = applyRampFilter;
     recon.applyBandlimiting = applyBandlimiting;
     recon.interpolationType = interpolationType;
+    
+    % set data set reconstruction properities
+    reconDataSetInterpolationType = getSelectionFromPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes');
+    
+    reconSliceDims(1) = getDoubleFromHandle(handles.reconSliceDimsXEdit);
+    reconSliceDims(2) = getDoubleFromHandle(handles.reconSliceDimsYEdit);
+    reconSliceDims(3) = 1; % always 1
+    
+    reconVoxelDimsInMM(1) = getDoubleFromHandle(handles.reconPixelDimsXEdit);
+    reconVoxelDimsInMM(2) = getDoubleFromHandle(handles.reconPixelDimsYEdit);
+    reconVoxelDimsInMM(3) = 0; %always 0
+    
+    reconVoxelDimsInM = Units.mm.convertToM(reconVoxelDimsInMM);
+    
+    reconDataSetDims(1) = getDoubleFromHandle(handles.reconDataSetDimsXEdit);
+    reconDataSetDims(2) = getDoubleFromHandle(handles.reconDataSetDimsYEdit);
+    reconDataSetDims(3) = getDoubleFromHandle(handles.reconDataSetDimsZEdit);
+    
+    reconDataSetVoxelDimsInMM(1) = getDoubleFromHandle(handles.reconDataSetVoxelDimsXEdit);
+    reconDataSetVoxelDimsInMM(2) = getDoubleFromHandle(handles.reconDataSetVoxelDimsYEdit);
+    reconDataSetVoxelDimsInMM(3) = getDoubleFromHandle(handles.reconDataSetVoxelDimsZEdit);
+    
+    reconDataSetVoxelDimsInM = Units.mm.convertToM(reconDataSetVoxelDimsInMM);
+    
+    % set values
+    recon.reconSliceDimensions = reconSliceDims;
+    recon.reconSliceVoxelDimensionsInM = reconVoxelDimsInM;
+    
+    recon.reconDataSetDimensions = reconDataSetDims;
+    recon.reconDataSetVoxelDimensionsInM = reconDataSetVoxelDimsInM;
+    
+    recon.reconDataSetInterpolationType = reconDataSetInterpolationType;
 end
 
 varargout{1} = recon;
@@ -262,6 +322,259 @@ function interpolationTypePopupMenu_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function interpolationTypePopupMenu_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to interpolationTypePopupMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconSliceDimsXEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconSliceDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconSliceDimsXEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconSliceDimsXEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconSliceDimsXEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconSliceDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconSliceDimsYEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconSliceDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconSliceDimsYEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconSliceDimsYEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconSliceDimsYEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconSliceDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconPixelDimsXEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconPixelDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconPixelDimsXEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconPixelDimsXEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconPixelDimsXEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconPixelDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconPixelDimsYEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconPixelDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconPixelDimsYEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconPixelDimsYEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconPixelDimsYEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconPixelDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconDataSetDimsXEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconDataSetDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconDataSetDimsXEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconDataSetDimsXEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconDataSetDimsXEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconDataSetDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconDataSetDimsYEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconDataSetDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconDataSetDimsYEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconDataSetDimsYEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconDataSetDimsYEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconDataSetDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconDataSetVoxelDimsXEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconDataSetVoxelDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconDataSetVoxelDimsXEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconDataSetVoxelDimsXEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconDataSetVoxelDimsXEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconDataSetVoxelDimsXEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconDataSetVoxelDimsYEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconDataSetVoxelDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconDataSetVoxelDimsYEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconDataSetVoxelDimsYEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconDataSetVoxelDimsYEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconDataSetVoxelDimsYEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconDataSetDimsZEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconDataSetDimsZEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconDataSetDimsZEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconDataSetDimsZEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconDataSetDimsZEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconDataSetDimsZEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function reconDataSetVoxelDimsZEdit_Callback(hObject, eventdata, handles)
+% hObject    handle to reconDataSetVoxelDimsZEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of reconDataSetVoxelDimsZEdit as text
+%        str2double(get(hObject,'String')) returns contents of reconDataSetVoxelDimsZEdit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function reconDataSetVoxelDimsZEdit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to reconDataSetVoxelDimsZEdit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in dataSetInterpolationTypePopupMenu.
+function dataSetInterpolationTypePopupMenu_Callback(hObject, eventdata, handles)
+% hObject    handle to dataSetInterpolationTypePopupMenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns dataSetInterpolationTypePopupMenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from dataSetInterpolationTypePopupMenu
+
+
+% --- Executes during object creation, after setting all properties.
+function dataSetInterpolationTypePopupMenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dataSetInterpolationTypePopupMenu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

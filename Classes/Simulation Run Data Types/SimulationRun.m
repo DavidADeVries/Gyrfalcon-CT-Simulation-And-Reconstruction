@@ -57,6 +57,31 @@ classdef SimulationRun < ProcessingRun
             end
         end
         
+        function run = loadData(run)
+            sim = run.simulation;
+            
+            basePath = run.savePath;
+            
+            numSlices = length(sim.scan.slices);
+                        
+            sliceData = cell(1, numSlices);
+            
+            for i=1:numSlices
+                sliceFolder = [Constants.Slice_Folder, ' ', num2str(i)];
+                
+                path = makePath(basePath, sliceFolder);
+                
+                data = SliceData;
+                
+                data = data.loadData(path, sim);
+                
+                sliceData{i} = data;
+            end
+            
+            run.sliceData = sliceData;
+            
+        end
+        
         function run = setDefaultValues(run)
             run.simulation = [];
             run.displayFreeRun = false;
@@ -151,43 +176,14 @@ classdef SimulationRun < ProcessingRun
         end
           
         function firstGenData = compileProjectionDataFor1stGenRecon(run)
-            sim = run.simulation;
-            
-            basePath = run.savePath;
-            
-            numSlices = length(sim.scan.slices);
-            
-            angles = sim.scan.getScanAnglesInDegrees();
-            numAngles = length(angles);
-            
-            numPositions = sim.scan.perAngleTranslationDimensions(1); %in xy plane
-            
-            firstGenData = cell(1, numSlices);
-                        
-            fileName = [Constants.Detector_Data_Filename, Constants.Matlab_File_Extension];
+            slices = run.sliceData;
+
+            numSlices = length(slices);
+
+            firstGenData = cell(1,numSlices);
             
             for i=1:numSlices
-                sliceFolder = [Constants.Slice_Folder, ' ', num2str(i)];
-                
-                sliceData = zeros(numPositions, numAngles);
-                
-                for j=1:numAngles
-                    angle = angles(j);
-                    
-                    angleFolder = [Constants.Angle_Folder, ' ', num2str(angle)];
-                    
-                    for xyStep=1:numPositions
-                        zStep = 1;
-                        
-                        positionFolder = [Constants.Position_Folder, ' (', num2str(zStep), ',', num2str(xyStep), ')'];
-                                                
-                        loadedData = load(makePath(basePath, sliceFolder, angleFolder, PositionFolder, fileName));
-                        
-                        sliceData(xyStep,j) = get(loadedData, Constants.Detector_Data_Var_Name);
-                    end
-                end
-                
-                firstGenData{i} = sliceData;
+                firstGenData{i} = slices{i}.compileProjectionDataFor1stGenRecon();
             end
         end
         

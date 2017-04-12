@@ -74,6 +74,14 @@ classdef PhantomDataSet < GyrfalconObject
         function dataSet = createFromGUI(dataSet, handles)
             dataSet.saveInSeparateFile = get(handles.phantomDataSetSaveInSeparateFileCheckbox,'Value');
         end
+        
+        function dims = getSize(dataSet)
+            dims = size(dataSet.data);
+            
+            if length(dims) == 2
+                dims = [dims 1]; %if only in x,y, we add a height of 1 (technically, though dimension length in z is 0mm)
+            end
+        end
     end
     
 end

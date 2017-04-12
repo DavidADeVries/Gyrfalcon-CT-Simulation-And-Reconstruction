@@ -28,12 +28,14 @@ classdef PositionData
     
     methods
         function data = PositionData(detectorData, attenuationCoords, attenuationDistances, detectorCornerCoords, sourceStartBoxCoords, sourceEndBoxCoords)
-            data.detectorData = detectorData;
-            data.attenuationCoords = attenuationCoords;
-            data.attenuationDistances = attenuationDistances;
-            data.detectorCornerCoords = detectorCornerCoords;
-            data.sourceStartBoxCoords = sourceStartBoxCoords;
-            data.sourceEndBoxCoords = sourceEndBoxCoords;
+            if nargin ~= 0
+                data.detectorData = detectorData;
+                data.attenuationCoords = attenuationCoords;
+                data.attenuationDistances = attenuationDistances;
+                data.detectorCornerCoords = detectorCornerCoords;
+                data.sourceStartBoxCoords = sourceStartBoxCoords;
+                data.sourceEndBoxCoords = sourceEndBoxCoords;
+            end
         end
         
         function data = clearBeforeSave(data)
@@ -63,6 +65,14 @@ classdef PositionData
 %                     saveDetectorData(fileSavePath, distancesAcrossVoxels, voxelPhantomCoords, detectorCornerCoords)
 %                 end
 %             end
+        end
+        
+        function positionData = loadData(positionData, basePath)
+            fileName = [Constants.Detector_Data_Filename, Constants.Matlab_File_Extension];
+            
+            loadedData = load(makePath(basePath, fileName));
+
+            positionData.detectorData = loadedData.(Constants.Detector_Data_Var_Name);
         end
     end
     

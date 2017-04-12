@@ -1,10 +1,31 @@
 function [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(...
-    firstGenProjectionData,...
+    firstGenProjectionData, photonBeam,...
     scanAngles, sourceStartingLocationInM, phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM,...
     filterType, applyRampFilter, applyBandlimiting, interpolationType)
 % function [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(firstGenProjectionData, scanAngles, sourceStartingLocationInM, phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM, filterType, applyRampFilter, applyBandlimiting, interpolationType)
 
+% the projection data we have is the final intensity value measured by the
+% detector pixel (I'). This is modelled using linear attenuation:
+% I' = I * exp(-sum(mu * x))
+% However, FBP works upon the Radon transform which is defined by:
+% R = sum(mu * x)
+% The solution is clear. We get the original intensity, I, from the
+% photonBeam used, and use logarithms to get back to sum(mu * x)
+% sum(mu * x) = - ln(I'/I)
+% NOTE: ln is reallog in MATLAB
+
+originalIntensity = photonBeam.rawIntensity();
+
 numSlices = length(firstGenProjectionData);
+
+radonProjectionData = cell(size(firstGenProjectionData));
+
+for i=1:numSlices
+    sliceData = firstGenProjectionData{i};
+    
+    radonProjectionData{i} = - reallog(sliceData ./ originalIntensity);
+end    
+    
 
 % set angles to match Kak and Slaney convention
 [startingAngle,~] = cart2pol(sourceStartingLocationInM(1), sourceStartingLocationInM(2));
@@ -22,27 +43,27 @@ numAngles = dims(2); %num cols
 numDetectors = dims(1); %num rows
 
 for i=1:numSlices
-    projectionData = firstGenProjectionData{i}; %each column contains on angle of projection data (aka sinogram!)
+    projectionData = radonProjectionData{i}; %each column contains on angle of projection data (aka sinogram!)
     
-    % filter projection data
-%     for j=1:numAngles
-%         projectValues = projectionData(:,j);
-%         
-%         filteredProjectionData = filterProjectionValuesRedo(projectValues, filterType, applyRampFilter, applyBandlimiting, detectorWidthInM);
-%         
-%         projectionData(:,j) = filteredProjectionData';
-%     end
+    %filter projection data
+    for j=1:numAngles
+        projectValues = projectionData(:,j);
+        
+        filteredProjectionData = filterProjectionValuesRedo(projectValues, filterType, applyRampFilter, applyBandlimiting, detectorWidthInM);
+        
+        projectionData(:,j) = filteredProjectionData';
+    end
     
     centreOfDetectorsPlusEdgeInM = calcCentreOfDetectorsPlusEdge(numDetectors, detectorWidthInM);
     
     tDiscrete = centreOfDetectorsPlusEdgeInM;
-    
+        
     interpsOfProjections = cell(1, numAngles);
     
     for j=1:numAngles
         % create piecewise 'interp' function for easy evaluation
         projData = [projectionData(1,j) projectionData(:,j)' projectionData(end,j)]; %specific edge of detector values
-                
+               
         zeroBeyondBounds = true;
         interpForAngle = interpolationType.createInterpForKnownVals(tDiscrete, projData, zeroBeyondBounds);
         
@@ -56,35 +77,24 @@ for i=1:numSlices
     yIndices = 1:1:phantomSliceDimensions(2);  
 
     % create grid of all x,y index combinations
-    [yyIndices, xxIndices] = meshgrid(yIndices,xIndices);
+    [xxIndices, yyIndices] = meshgrid(xIndices, yIndices);
     
     % find coresponding (x,y) values relative to (0,0)
     % phantomLocation gives top left corner in xy plane
     xxVals = phantomLocationInM(1) + ((xxIndices-1) * phantomVoxelDimensionsInM(1)) + phantomVoxelDimensionsInM(1)/2;
     yyVals = phantomLocationInM(2) - ((yyIndices-1) * phantomVoxelDimensionsInM(2)) - phantomVoxelDimensionsInM(2)/2;
-         
+             
     figure(2);
-
-    thetas = 0:1:179;
 
     for k = 1:numAngles
         ang = thetas(k);
-        projValuesInterp = interpsOfProjections{j};
+        projValuesInterp = interpsOfProjections{k};
         
         t = xxVals.*cosd(ang) + yyVals.*sind(ang);
+                
+        projValueAtT = ppval(projValuesInterp, t);
         
-        dims = size(t);
-        t = fliplr(t);
-        tRowVector = reshape(t, 1, dims(1)*dims(2));
-        
-        projValueAtTRow = ppval(projValuesInterp, tRowVector);
-        
-        xxIndicesRow = reshape(xxIndices, 1, dims(1)*dims(2));
-        yyIndicesRow = reshape(yyIndices, 1, dims(1)*dims(2));
-
-        linearIndices = sub2ind(phantomSliceDimensions, yyIndicesRow, xxIndicesRow);
-
-        sliceRecon(linearIndices) = sliceRecon(linearIndices) + projValueAtTRow;
+        sliceRecon = sliceRecon + projValueAtT;
         
         imshow(sliceRecon,[],'InitialMagnification','fit');
         drawnow;

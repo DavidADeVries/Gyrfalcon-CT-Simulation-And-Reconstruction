@@ -19,7 +19,7 @@ detectorWidthInM = 1;
 filterType = FirstGenFilterTypes.none;
 applyRampFilter = true;
 applyBandlimiting = false;
-interpolationType = InterpolationTypes.linear;
+interpolationType = InterpolationTypes.nearestNeighbour;
 
 
 [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(...
