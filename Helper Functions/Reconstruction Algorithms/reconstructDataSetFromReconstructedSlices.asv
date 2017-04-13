@@ -120,16 +120,16 @@ else
         
     end
     
-    [knownX, knownY, knownZ] = meshgrid(xSlicePoints, ySlicePoints, sortedZVals);
+    [knownX knownY knownZ] = meshgrid(xSlicePoints, ySlicePoints, sortedZVals);
     
     knownVals = sortedSliceData;
     
-    valForPointsBeyondRange = NaN;
+    va
     
     reconDataSet = interp3(...
         knownX, knownY, knownZ, knownVals,...
         xDataSetPoint, yDataSetPoint, zDataSetPoint,...
-        interpolationType, valForPointsBeyondRange);
+        interpolationType, 
 end
 
 
