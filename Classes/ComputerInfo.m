@@ -30,11 +30,7 @@ classdef ComputerInfo
             info.osVersion = tempInfo.OSVersion;
             
             if parallelComputingToolboxInstalled()
-                temp = struct(...
-                    'computeCapability', gpuDevice.computeCapability...
-                );
-                
-                info.gpuDevice = temp;
+                info.gpuDevice = gpuDevice;
             else
                 info.gpuDevice = [];
             end
@@ -75,9 +71,16 @@ classdef ComputerInfo
                 
                 string = [string, {str16}];
             else
-                str16 = ['Compute Capability: ', info.gpuDevice.computeCapability];
+                str16 = ['GPU Type: ', info.gpuDevice.Name];
+                str17 = ['Compute Capability: ', info.gpuDevice.ComputeCapability];
+                str18 = ['Max Threads per Block: ', num2str(info.gpuDevice.MaxThreadsPerBlock)];
+                str19 = ['Total Memory: ', bytesToGbString(info.gpuDevice.TotalMemory)];
+                str20 = ['Memory Available: ', bytesToGbString(info.gpuDevice.AvailableMemory)];
+                str21 = ['Multiprocessor Count: ', num2str(info.gpuDevice.MultiprocessorCount)];
+                str22 = ['Clock Rate (KHz): ', num2str(info.gpuDevice.ClockRateKHz)];
+                str23 = 'Note: More information is available from the gpuDevice Matlab object stored.';
                 
-                string = [string, {str16}];
+                string = [string, {str16}, {str17}, {str18}, {str19}, {str20}, {str21}, {str22}, {str23}];
             end
         end
     end

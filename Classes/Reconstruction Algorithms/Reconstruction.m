@@ -2,15 +2,17 @@ classdef Reconstruction
     % Reconstruction
     
     properties
-        reconDataSetSlices % the reconstructed data set (cell array of slices)
+        reconDataSetSlices % the reconstructed data set slices (cell array of slices)
         
-        reconDataSet
+        reconDataSet % the 3D reconstructed data set (which can be compared to the original phantom)
         
         reconSliceDimensions % number of voxels in x,y,z for each slice
         reconSliceVoxelDimensionsInM % dimension of each voxel in data set
+        reconSliceLocationInM
         
         reconDataSetDimensions % number of voxels in x,y,z for dataset
         reconDataSetVoxelDimensionsInM % dimension of each voxel
+        reconDataSetLocationInM
         
         reconDataSetInterpolationType = InterpolationTypes.cubic
     end
@@ -33,7 +35,7 @@ classdef Reconstruction
             recon.reconSliceVoxelDimensionsInM = voxelDimsInM(1:2);
             
             recon.reconDataSetDimensions = dims;
-            recon.reconDataSetVoxelDimensionsInM = voxelDimsInM(1:2);
+            recon.reconDataSetVoxelDimensionsInM = voxelDimsInM;
         end
         
         function strings = getReconstructionSettingsString(recon)
@@ -58,6 +60,24 @@ classdef Reconstruction
             str5 = ['Data Set Voxel Dimensions (mm): ', dataSetVoxelDimString];
             
             strings = {str1 str2 str3 str4 str5};
+        end
+        
+        function recon = reconFullDataSet(recon, simulation)
+            phantom = simulation.phantom;
+            
+            reconLocationInM = calculateNewPhantomLocationForReconstruction(...
+                phantom.getLocationInM(), phantom.getVoxelDimensionsInM(), phantom.dataSet.getSize(),...
+                recon.reconDataSetVoxelDimensionsInM, recon.reconDataSetDimensions);
+            
+            recon.reconDataSetLocationInM = reconLocationInM;
+            
+            sliceLocationsInM = simulation.scan.getSlicesInM();
+            
+            recon.reconDataSet = reconstructDataSetFromReconstructedSlices(...
+                recon.reconDataSetSlices, sliceLocationsInM,...
+                reconLocationInM, recon.reconDataSetVoxelDimensionsInM, recon.reconDataSetDimensions,...
+                recon.reconSliceLocationInM, recon.reconSliceVoxelDimensionsInM, recon.reconSliceDimensions,...
+                recon.reconDataSetInterpolationType);
         end
     end
     

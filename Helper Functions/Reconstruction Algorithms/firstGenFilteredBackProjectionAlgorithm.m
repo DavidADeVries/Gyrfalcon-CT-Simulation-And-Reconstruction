@@ -1,6 +1,6 @@
 function [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(...
     firstGenProjectionData, photonBeam,...
-    scanAngles, sourceStartingLocationInM, phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM,...
+    scanAngles, sourceStartingLocationInM, reconSliceDimensions, reconSliceVoxelDimsInM, reconSliceLocationInM, detectorWidthInM,...
     filterType, applyRampFilter, applyBandlimiting, interpolationType)
 % function [reconDataSet, sinograms, videosFrames] = firstGenFilteredBackProjectionAlgorithm(firstGenProjectionData, scanAngles, sourceStartingLocationInM, phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM, filterType, applyRampFilter, applyBandlimiting, interpolationType)
 
@@ -70,19 +70,19 @@ for i=1:numSlices
         interpsOfProjections{j} = interpForAngle;
     end
     
-    sliceRecon = zeros(phantomSliceDimensions);
-    frames = zeros([phantomSliceDimensions numAngles]);
+    sliceRecon = zeros(reconSliceDimensions);
+    frames = zeros([reconSliceDimensions numAngles]);
     
-    xIndices = 1:1:phantomSliceDimensions(1);
-    yIndices = 1:1:phantomSliceDimensions(2);  
+    xIndices = 1:1:reconSliceDimensions(1);
+    yIndices = 1:1:reconSliceDimensions(2);  
 
     % create grid of all x,y index combinations
     [xxIndices, yyIndices] = meshgrid(xIndices, yIndices);
     
     % find coresponding (x,y) values relative to (0,0)
     % phantomLocation gives top left corner in xy plane
-    xxVals = phantomLocationInM(1) + ((xxIndices-1) * phantomVoxelDimensionsInM(1)) + phantomVoxelDimensionsInM(1)/2;
-    yyVals = phantomLocationInM(2) - ((yyIndices-1) * phantomVoxelDimensionsInM(2)) - phantomVoxelDimensionsInM(2)/2;
+    xxVals = reconSliceLocationInM(1) + ((xxIndices-1) * reconSliceVoxelDimsInM(1)) + reconSliceVoxelDimsInM(1)/2;
+    yyVals = reconSliceLocationInM(2) - ((yyIndices-1) * reconSliceVoxelDimsInM(2)) - reconSliceVoxelDimsInM(2)/2;
              
     figure(2);
 

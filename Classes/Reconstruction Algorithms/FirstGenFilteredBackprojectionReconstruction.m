@@ -53,20 +53,22 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
             firstGenData = simulationRun.compileProjectionDataFor1stGenRecon();
             
             simulation = simulationRun.simulation;
+            phantom = simulation.phantom;
             
             photonBeam = simulationRun.simulation.scan.beamCharacterization;
             
             scanAngles = simulation.scan.getScanAnglesInDegrees();
             sourceStartingLocationInM = simulation.source.getLocationInM();
             
-            phantomSliceDimensions = size(simulation.phantom.dataSet.data);
-            phantomSliceDimensions = phantomSliceDimensions(1:2); % just need x,y
+            reconSliceDimensions = recon.reconSliceDimensions;
+            reconSliceDimensions = reconSliceDimensions(1:2); % just need x,y
             
-            phantomVoxelDimensionsInM = simulation.phantom.getVoxelDimensionsInM();
-            phantomVoxelDimensionsInM  = phantomVoxelDimensionsInM(1:2); % just need x,y
-            
-            phantomLocationInM = simulation.phantom.getLocationInM();
-            phantomLocationInM  = phantomLocationInM(1:2); % just need x,y
+            reconSliceVoxelDimsInM = recon.reconSliceVoxelDimensionsInM;
+            reconSliceVoxelDimsInM  = reconSliceVoxelDimsInM(1:2); % just need x,y
+                        
+            slicePhantomLocationInM = calculateNewPhantomLocationForReconstruction(...
+                phantom.getLocationInM(), phantom.getVoxelDimensionsInM(), phantom.dataSet.getSize(),...
+                recon.reconSliceVoxelDimensionsInM, recon.reconSliceDimensions);
 
             detectorWidthInM = simulation.detector.getSingleDetectorDimensionsInM();
             detectorWidthInM = detectorWidthInM(1);
@@ -79,12 +81,14 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
             [reconDataSetSlices, sinograms, reconVideosFrames] = firstGenFilteredBackProjectionAlgorithm(...
                 firstGenData, photonBeam,...
                 scanAngles, sourceStartingLocationInM,...
-                phantomSliceDimensions, phantomVoxelDimensionsInM, phantomLocationInM, detectorWidthInM,...
+                reconSliceDimensions, reconSliceVoxelDimsInM, slicePhantomLocationInM, detectorWidthInM,...
                 filterType, applyRampFilter, applyBandlimiting, interpolationType);
                             
             recon.reconDataSetSlices = reconDataSetSlices;
             recon.sinograms = sinograms;
             recon.reconVideosFrames = reconVideosFrames;
+            
+            recon.reconSliceLocationInM = slicePhantomLocationInM;
         end
     end
     

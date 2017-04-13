@@ -2,9 +2,12 @@ classdef ReconstructionRun < ProcessingRun
     %ReconstructionRun
     
     properties
-        reconstructionAlgorithm
+        reconstruction
         
         simulationRun
+        
+        reconPhantomDataSet %reconDataSet but interpolated to size of phantom data set (NaN at voxels if reconDataSet smaller than phantom)
+        
     end
     
     methods
@@ -48,13 +51,13 @@ classdef ReconstructionRun < ProcessingRun
                 setAlgorithmSelectionPopupMenu(...
                     handles.reconstructionAlgorithmSelectionPopupMenu,...
                     scanGeometry,...
-                    run.reconstructionAlgorithm);
+                    run.reconstruction);
                 
                 set(handles.reconstructionAlgorithmSelectionPopupMenu, 'Enable','on');
                 
                 % set reconstructionAlgorithmSettingsText
                 set(handles.reconstructionAlgorithmSettingsText,...
-                    'String', run.reconstructionAlgorithm.getSettingsString());
+                    'String', run.reconstruction.getSettingsString());
                 
                 % set reconstructionAlgorithmSettingsEditButton
                 set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'on');
@@ -74,7 +77,7 @@ classdef ReconstructionRun < ProcessingRun
         end
         
         function run = setDefaultValues(run)
-            run.reconstructionAlgorithm = [];
+            run.reconstruction = [];
             run.simulationRun = [];
         end
         
@@ -84,7 +87,7 @@ classdef ReconstructionRun < ProcessingRun
             
             lastReconNumber = getLastReconNumber(savePath);
             numStr = num2str(lastReconNumber+1);
-            algoStr = run.reconstructionAlgorithm.getNameString();
+            algoStr = run.reconstruction.getNameString();
             
             defaultName = [Constants.Reconstruction_Folder_Name, ' ', numStr, ' (', algoStr, ')'];
             
@@ -130,18 +133,49 @@ classdef ReconstructionRun < ProcessingRun
                     
                     % run the recon
                     run = run.startProcessingRun(); % set start time
-                    run.reconstructionAlgorithm = ...
-                        run.reconstructionAlgorithm.runReconstruction(run.simulationRun, handles);
+                    run.reconstruction = ...
+                        run.reconstruction.runReconstruction(run.simulationRun, handles);
                     run = run.endProcessingRun(); % set end time
                     
                     % set status string complete
                     
                     setString(handles.statusOutputText, [baseString; {['Reconstruction Run Complete (', convertTimestampToString(now), ')']}]);
                     
+                    % perform the recon of the 3D data-set from recon'ed
+                    % slices
+                    
+                    run.reconstruction = run.reconstruction.reconFullDataSet(run.simulationRun.simulation);
+                    
+                    % compare to the original phantom
+                    
+                    run = run.calculateReconPhantomDataSet();
+                    
                     % save files
                     run.saveReconstructionValues();
                 end
             end
+        end
+        
+        function run = calculateReconPhantomDataSet(run)
+            interpolationType = run.reconstruction.reconDataSetInterpolationType;
+            
+            recon = run.reconstruction;
+            phantom = run.simulationRun.simulation.phantom;
+            
+            reconCompareSet = calculateReconstructedDataSetForComparison(...
+                recon.reconDataSet, recon.reconDataSetLocationInM, recon.reconDataSetVoxelDimensionsInM, recon.reconDataSetDimensions,...
+                phantom.getLocationInM(), phantom.getVoxelDimensionsInM(), phantom.dataSet.getSize(),...
+                interpolationType);
+            
+            run.reconPhantomDataSet = reconCompareSet;
+        end
+        
+        function [] = saveReconstructionValues(run)
+            % clear out simulationRun projection data
+            run.simulationRun.sliceData = {};
+            
+            
+            
         end
         
     end

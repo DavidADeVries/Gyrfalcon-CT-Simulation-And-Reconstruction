@@ -57,10 +57,8 @@ classdef SimulationRun < ProcessingRun
             end
         end
         
-        function run = loadData(run)
+        function run = loadData(run, basePath) %use given basePath in case files are moved around
             sim = run.simulation;
-            
-            basePath = run.savePath;
             
             numSlices = length(sim.scan.slices);
                         

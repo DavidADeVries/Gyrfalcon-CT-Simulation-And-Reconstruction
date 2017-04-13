@@ -8,7 +8,7 @@ defaultName = Constants.object_save_directory;
 [fileName, pathName, ~] = uigetfile(filterSpec, dialogTitle, defaultName);
 
 if ~all(fileName == 0) % have a selection
-    openPath = makePath(pathName, fileName);
+    openPath = [pathName, fileName];
     
     loadedData = load(openPath);
     
@@ -17,7 +17,7 @@ if ~all(fileName == 0) % have a selection
         
         if isa(simulationRun, class(SimulationRun)) % we're good!
             h = popupMessage('Loading Simulation Run projection data...', 'Loading...');
-            simulationRun = simulationRun.loadData();
+            simulationRun = simulationRun.loadData(pathName);
             delete(h);
             
             workspace = handles.workspace.createFromGUI(handles);
