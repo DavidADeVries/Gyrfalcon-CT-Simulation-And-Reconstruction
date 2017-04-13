@@ -33,7 +33,7 @@ if ~all(fileName == 0) % have a selection
                 
                 reconRun = ReconstructionRun;
                 
-                reconRun.reconstructionAlgorithm = choice;
+                reconRun.reconstruction = choice;
                 reconRun.simulationRun = simulationRun;
             else
                 reconRun = [];

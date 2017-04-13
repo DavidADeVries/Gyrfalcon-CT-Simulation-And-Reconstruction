@@ -39,6 +39,9 @@ classdef Constants
         Slash = '\';
         
         Matlab_File_Extension = '.mat';
+        PNG_File_Extension = '.png';
+        MPEG4_File_Extension = '.mp4';
+        AVI_File_Extension = '.avi';
                 
         Processing_Run_Var_Name = 'run';
         
@@ -69,6 +72,16 @@ classdef Constants
         
         Detector_Data_Filename = 'DetectorData';
         Detector_Data_Var_Name = 'detectorData';
+        
+        Recon_Slices_Folder_Name = 'Slices';
+        Recon_Slices_File_Name = 'Slice';
+        
+        FBP_Recon_Sinograms_Folder_Name = 'Sinograms';
+        FBP_Recon_Sinograms_File_Name = 'Slice Sinogram';
+        
+        FBP_Recon_Videos_Folder_Name = 'Recon Videos';
+        FBP_Recon_Videos_File_Name = 'Slice Video';
+        
     end
     
     methods

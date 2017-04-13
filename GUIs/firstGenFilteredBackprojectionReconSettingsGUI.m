@@ -22,7 +22,7 @@ function varargout = firstGenFilteredBackprojectionReconSettingsGUI(varargin)
 
 % Edit the above text to modify the response to help firstGenFilteredBackprojectionReconSettingsGUI
 
-% Last Modified by GUIDE v2.5 12-Apr-2017 12:22:57
+% Last Modified by GUIDE v2.5 13-Apr-2017 13:42:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -62,6 +62,7 @@ filterType = recon.filterType;
 applyRampFilter = recon.applyRampFilter;
 applyBandlimiting = recon.applyBandlimiting;
 interpolationType = recon.interpolationType;
+saveSinogramsAndVideos = recon.saveSinogramsAndVideos;
 
 reconSliceDims = recon.reconSliceDimensions;
 reconVoxelDimsInM = recon.reconSliceVoxelDimensionsInM;
@@ -71,11 +72,13 @@ reconDataSetVoxelDimsInM = recon.reconDataSetVoxelDimensionsInM;
 
 reconDataSetInterpolationType = recon.reconDataSetInterpolationType;
 
+
 % FBP settings
 setPopupMenu(handles.filterTypePopupMenu, 'FirstGenFilterTypes', filterType);
 set(handles.applyRampFilterCheckbox, 'Value', applyRampFilter);
 set(handles.applyBandlimitingCheckbox, 'Value', applyBandlimiting);
 setPopupMenu(handles.interpolationTypePopupMenu, 'InterpolationTypes', interpolationType);
+set(handles.saveSinogramsAndReconVideosCheckbox, 'Value', saveSinogramsAndVideos);
 
 % recon settings
 
@@ -156,11 +159,13 @@ if ~handles.cancel
     applyRampFilter = get(handles.applyRampFilterCheckbox, 'Value');
     applyBandlimiting = get(handles.applyBandlimitingCheckbox, 'Value');
     interpolationType = getSelectionFromPopupMenu(handles.interpolationTypePopupMenu, 'InterpolationTypes');
+    saveSinogramsAndVideos = get(handles.saveSinogramsAndReconVideosCheckbox, 'Value');
     
     recon.filterType = filterType;
     recon.applyRampFilter = applyRampFilter;
     recon.applyBandlimiting = applyBandlimiting;
     recon.interpolationType = interpolationType;
+    recon.saveSinogramsAndVideos = saveSinogramsAndVideos;
     
     % set data set reconstruction properities
     reconDataSetInterpolationType = getSelectionFromPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes');
@@ -573,7 +578,7 @@ function dataSetInterpolationTypePopupMenu_Callback(hObject, eventdata, handles)
 
 
 % --- Executes during object creation, after setting all properties.
-function dataSetInterpolationTypePopupMenu_CreateFcn(hObject, eventdata, handles)
+function dataSetInterpolationTypePopupMenu_CreateFcn(hObject, ~, handles)
 % hObject    handle to dataSetInterpolationTypePopupMenu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -583,3 +588,12 @@ function dataSetInterpolationTypePopupMenu_CreateFcn(hObject, eventdata, handles
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in saveSinogramsAndReconVideosCheckbox.
+function saveSinogramsAndReconVideosCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to saveSinogramsAndReconVideosCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of saveSinogramsAndReconVideosCheckbox

@@ -70,8 +70,8 @@ for i=1:numSlices
         interpsOfProjections{j} = interpForAngle;
     end
     
-    sliceRecon = zeros(reconSliceDimensions);
-    frames = zeros([reconSliceDimensions numAngles]);
+    sliceRecon = zeros(reconSliceDimensions(2), reconSliceDimensions(1));
+    frames = zeros([reconSliceDimensions(2) reconSliceDimensions(1) numAngles]);
     
     xIndices = 1:1:reconSliceDimensions(1);
     yIndices = 1:1:reconSliceDimensions(2);  
@@ -84,8 +84,6 @@ for i=1:numSlices
     xxVals = reconSliceLocationInM(1) + ((xxIndices-1) * reconSliceVoxelDimsInM(1)) + reconSliceVoxelDimsInM(1)/2;
     yyVals = reconSliceLocationInM(2) - ((yyIndices-1) * reconSliceVoxelDimsInM(2)) - reconSliceVoxelDimsInM(2)/2;
              
-    figure(2);
-
     for k = 1:numAngles
         ang = thetas(k);
         projValuesInterp = interpsOfProjections{k};
@@ -96,9 +94,6 @@ for i=1:numSlices
         
         sliceRecon = sliceRecon + projValueAtT;
         
-        imshow(sliceRecon,[],'InitialMagnification','fit');
-        drawnow;
-
         frames(:,:,k) = sliceRecon;
     end
     

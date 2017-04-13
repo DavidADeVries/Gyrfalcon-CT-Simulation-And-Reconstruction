@@ -112,9 +112,7 @@ classdef Reconstruction
                 
                 adjSlice = applyContrastToMaximizeGrayscale(slice, window, 1);
                 
-                filename = [Constants.Recon_Slices_File_Name, ' ', num2str(i), Constants.PNG_File_Extension];
-                
-                imwrite(adjSlice, makePath(savePath, sliceFolder, filename));
+                filename = [Constants.Recon_Slices_File_Name, ' ', num2str(
             end
         end
     end

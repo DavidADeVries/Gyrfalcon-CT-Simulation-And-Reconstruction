@@ -58,7 +58,7 @@ classdef SliceData
             numAngles = length(angles);
             
             if numAngles > 0
-                numDetectors = length(angles(1).projectionData);
+                numDetectors = length(angles{1}.positionData);
                 
                 firstGenData = zeros(numDetectors, numAngles);
                 

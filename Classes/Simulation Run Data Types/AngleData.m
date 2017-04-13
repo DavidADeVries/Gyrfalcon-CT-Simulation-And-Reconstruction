@@ -58,7 +58,7 @@ classdef AngleData
         function firstGenDataColumn = compileProjectionDataFor1stGenRecon(data)
             positions = data.positionData;
 
-            numDetectors = length(position); %each position is a detector since 1st gen (parallel pencil beams)
+            numDetectors = length(positions); %each position is a detector since 1st gen (parallel pencil beams)
             
             firstGenDataColumn = zeros(numDetectors, 1);
 

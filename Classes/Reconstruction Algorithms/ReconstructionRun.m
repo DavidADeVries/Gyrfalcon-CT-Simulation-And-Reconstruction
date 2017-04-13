@@ -174,7 +174,11 @@ classdef ReconstructionRun < ProcessingRun
             % clear out simulationRun projection data
             run.simulationRun.sliceData = {};
             
+            % have reconstruction save any extra outputs
+            run.reconstruction.saveOuput(run.savePath);
             
+            % save this, the reconstruction run
+            save(makePath(run.savePath, run.saveFileName), Constants.Processing_Run_Var_Name);
             
         end
         

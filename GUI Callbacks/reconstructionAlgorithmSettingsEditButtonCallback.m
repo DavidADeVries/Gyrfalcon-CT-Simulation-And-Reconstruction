@@ -8,11 +8,11 @@ workspace = workspace.createFromGUI(handles);
 [scanGeometry, ~] = getScanGeometry(workspace.reconstructionRun);
 
 if ~isempty(scanGeometry)
-    reconAlgorithm = workspace.reconstructionRun.reconstructionAlgorithm;
+    reconAlgorithm = workspace.reconstructionRun.reconstruction;
     
     reconAlgorithm = reconAlgorithm.changeSettings();
     
-    workspace.reconstructionRun.reconstructionAlgorithm = reconAlgorithm;
+    workspace.reconstructionRun.reconstruction = reconAlgorithm;
     
     handles = workspace.setGUI(handles);
     
