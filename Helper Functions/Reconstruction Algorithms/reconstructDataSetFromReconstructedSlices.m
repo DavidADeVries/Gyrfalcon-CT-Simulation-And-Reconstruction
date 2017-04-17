@@ -1,8 +1,6 @@
 function reconDataSet = reconstructDataSetFromReconstructedSlices(reconSlices, sliceCentreLocationsInM, dataSetLocationInM, dataSetVoxelDimsInM, dataSetDims, reconSliceLocationInM, reconSliceVoxelDimsInM, reconSliceDims, interpolationType)
 % reconDataSet = reconstructDataSetFromReconstructedSlices(reconSlices, sliceLocationsInM, dataSetLocationInM, dataSetVoxelDimsInM, dataSetDims, reconSliceLocationInM, reconSliceVoxelDimsInM, reconSliceDims, interpolationType)
 
-reconDataSet = zeros(dataSetDims);
-
 xStart = dataSetLocationInM(1);
 yStart = dataSetLocationInM(2);
 zStart = dataSetLocationInM(3);
@@ -19,8 +17,8 @@ numZ = dataSetDims(3);
 % we will use these points as the coords to interpolate to from the given
 % recon slices
 xVoxelPoints = (xStart + delX / 2):delX:(xStart + (delX * numX) - (delX / 2));
-yVoxelPoints = (yStart - (delY * numY) - (delY / 2)):delY:(yStart - delY / 2);
-zVoxelPoints = (zStart + delZ / 2):delZ:(zStart + (delZ * numZ) - (delZ / 2));
+yVoxelPoints = (yStart - (delY / 2)):-delY:(yStart - (delY * numY) + delY / 2);
+zVoxelPoints = (zStart - (delZ / 2)):-delZ:(zStart - (delZ * numZ) + delZ / 2);
 
 [xDataSetPoint, yDataSetPoint, zDataSetPoint] = meshgrid(xVoxelPoints, yVoxelPoints, zVoxelPoints);
 
@@ -36,7 +34,7 @@ sliceNumX = reconSliceDims(1);
 sliceNumY = reconSliceDims(2);
 
 xSlicePoints = (sliceXStart + sliceDelX / 2):sliceDelX:(sliceXStart + (sliceDelX * sliceNumX) - (sliceDelX / 2));
-ySlicePoints = (sliceYStart + (sliceDelY * sliceNumY) - (sliceDelY / 2)):sliceDelY:(sliceYStart + sliceDelY / 2);
+ySlicePoints = sliceYStart - (sliceDelY / 2):-sliceDelY:sliceYStart - (sliceDelY * sliceNumY) + (sliceDelY / 2);
 
 % slice locations give the centre of the recon'ed slice
 % most slices are 2D (aka no z height, and so they're only at that centre
@@ -54,7 +52,7 @@ delZDiv2 = sliceDelZ / 2;
 
 endPoint = (sliceNumZ / 2)*sliceDelZ - delZDiv2;
 
-zSliceShiftsFromCentre = -endPoint:delZ:endPoint;
+zSliceShiftsFromCentre = endPoint:-sliceDelZ:-endPoint;
 
 % compile all the slice data and accompanying z vals
 
@@ -76,7 +74,7 @@ else
     end
     
     % some "thick" slices may overlap, so we need to sort this!
-    [sortedZVals, sortedI] = sort(zVals);
+    [sortedZVals, sortedI] = sort(zSlicePoints,'descend');
     
     sortedSliceData = sliceData(:,:,sortedI);
     
@@ -104,7 +102,7 @@ else
             
             % no need to increment i, since we just cleared out the values
             % at i
-        elseif prevVal ~= curVal && numDuplicates > 0
+        elseif prevVal ~= curVal && numDuplicates > 1
             sortedSliceData(:,:,i-1) = sliceSum ./ numDuplicates; %take the average
             numDuplicates = 1; %reset
             
@@ -120,16 +118,25 @@ else
         
     end
     
-    [knownX, knownY, knownZ] = meshgrid(xSlicePoints, ySlicePoints, sortedZVals);
+    % buffer out points of grid, such that the edge points are not the
+    % centre of the outermost voxels, but the edge of those voxels
     
-    knownVals = sortedSliceData;
+    xSlicePoints = [xSlicePoints(1) - sliceDelX/2, xSlicePoints, xSlicePoints(end) + sliceDelX/2];
+    ySlicePoints = [ySlicePoints(1) + sliceDelY/2, ySlicePoints, ySlicePoints(end) - sliceDelY/2];
+    zSlicePoints = [sortedZVals(1) + sliceDelZ/2, sortedZVals, sortedZVals(end) - sliceDelZ/2];
+    
+    [knownX, knownY, knownZ] = meshgrid(xSlicePoints, ySlicePoints, zSlicePoints);
+        
+    bufferedSlices = padarray(sortedSliceData, [1, 1, 1], 'replicate');
+    
+    knownVals = bufferedSlices;
     
     valForPointsBeyondRange = NaN;
     
     reconDataSet = interp3(...
         knownX, knownY, knownZ, knownVals,...
         xDataSetPoint, yDataSetPoint, zDataSetPoint,...
-        interpolationType, valForPointsBeyondRange);
+        interpolationType.getMatlabString(), valForPointsBeyondRange);
 end
 
 

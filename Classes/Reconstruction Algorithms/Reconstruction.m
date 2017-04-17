@@ -14,7 +14,7 @@ classdef Reconstruction
         reconDataSetVoxelDimensionsInM % dimension of each voxel
         reconDataSetLocationInM
         
-        reconDataSetInterpolationType = InterpolationTypes.cubic
+        reconDataSetInterpolationType = InterpolationTypes3D.spline
     end
     
     methods

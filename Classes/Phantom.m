@@ -15,6 +15,7 @@ classdef Phantom < GyrfalconObject
     % gives the location of the (1,1,1) index with respect to the origin 
     % (0,0,0) where (0,0,z) is the center of rotation for the gantry for 
     % slice z, and where z > 0 (e.g. z=0 is a head/foot)
+    % coords are of the leftmost (x), topmost (y), topmost (z) point
     % units are in mm
     
     

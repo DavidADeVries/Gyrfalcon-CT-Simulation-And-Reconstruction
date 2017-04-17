@@ -82,7 +82,7 @@ set(handles.saveSinogramsAndReconVideosCheckbox, 'Value', saveSinogramsAndVideos
 
 % recon settings
 
-setPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes', reconDataSetInterpolationType);
+setPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes3D', reconDataSetInterpolationType);
 
 setDoubleForHandle(handles.reconSliceDimsXEdit, reconSliceDims(1));
 setDoubleForHandle(handles.reconSliceDimsYEdit, reconSliceDims(2));
@@ -168,7 +168,7 @@ if ~handles.cancel
     recon.saveSinogramsAndVideos = saveSinogramsAndVideos;
     
     % set data set reconstruction properities
-    reconDataSetInterpolationType = getSelectionFromPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes');
+    reconDataSetInterpolationType = getSelectionFromPopupMenu(handles.dataSetInterpolationTypePopupMenu, 'InterpolationTypes3D');
     
     reconSliceDims(1) = getDoubleFromHandle(handles.reconSliceDimsXEdit);
     reconSliceDims(2) = getDoubleFromHandle(handles.reconSliceDimsYEdit);
