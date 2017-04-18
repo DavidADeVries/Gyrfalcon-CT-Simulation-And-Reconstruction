@@ -152,6 +152,10 @@ classdef Phantom < GyrfalconObject
             voxelDimsInM = units.convertToM(voxelDims);
         end
         
+        function dims = getDataSetDimensions(phant)
+            dims = phant.dataSet.getSize();
+        end
+        
         function locationInM = getLocationInM(phant)
             units = phant.locationUnits;
             location = phant.location;

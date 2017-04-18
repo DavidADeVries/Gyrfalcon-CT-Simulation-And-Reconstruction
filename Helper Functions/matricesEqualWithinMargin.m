@@ -5,7 +5,7 @@ dims1 = size(mat1);
 dims2 = size(mat2);
 
 if length(dims1) == length(dims2) && all(dims1 == dims2)
-    comp = abs(mat1 - mat2) < margin;
+    comp = abs(mat1 - mat2) < margin | (isnan(mat1) & isnan(mat2));
     
     for i=1:length(dims1)
         comp = all(comp);

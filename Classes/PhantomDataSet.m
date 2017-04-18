@@ -81,6 +81,12 @@ classdef PhantomDataSet < GyrfalconObject
             if length(dims) == 2
                 dims = [dims 1]; %if only in x,y, we add a height of 1 (technically, though dimension length in z is 0mm)
             end
+            
+            numRows = dims(1);
+            numCols = dims(2);
+            numSlices = dims(3);
+            
+            dims = [numCols, numRows, numSlices]; %numCols goes to x, numRows is y
         end
     end
     

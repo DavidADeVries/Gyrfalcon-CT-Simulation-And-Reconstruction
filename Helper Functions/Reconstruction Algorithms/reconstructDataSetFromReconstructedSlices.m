@@ -1,45 +1,21 @@
 function reconDataSet = reconstructDataSetFromReconstructedSlices(reconSlices, sliceCentreLocationsInM, dataSetLocationInM, dataSetVoxelDimsInM, dataSetDims, reconSliceLocationInM, reconSliceVoxelDimsInM, reconSliceDims, interpolationType)
 % reconDataSet = reconstructDataSetFromReconstructedSlices(reconSlices, sliceLocationsInM, dataSetLocationInM, dataSetVoxelDimsInM, dataSetDims, reconSliceLocationInM, reconSliceVoxelDimsInM, reconSliceDims, interpolationType)
 
-xStart = dataSetLocationInM(1);
-yStart = dataSetLocationInM(2);
-zStart = dataSetLocationInM(3);
-
-delX = dataSetVoxelDimsInM(1);
-delY = dataSetVoxelDimsInM(2);
-delZ = dataSetVoxelDimsInM(3);
-
-numX = dataSetDims(1);
-numY = dataSetDims(2);
-numZ = dataSetDims(3);
-
 % these are the coords of the centre of the reconDataSet voxels
 % we will use these points as the coords to interpolate to from the given
 % recon slices
-xVoxelPoints = (xStart + delX / 2):delX:(xStart + (delX * numX) - (delX / 2));
-yVoxelPoints = (yStart - (delY / 2)):-delY:(yStart - (delY * numY) + delY / 2);
-zVoxelPoints = (zStart - (delZ / 2)):-delZ:(zStart - (delZ * numZ) + delZ / 2);
+[xVoxelPoints, yVoxelPoints, zVoxelPoints] = getVoxelCentreCoordinates(dataSetLocationInM, dataSetVoxelDimsInM, dataSetDims);
 
 [xDataSetPoint, yDataSetPoint, zDataSetPoint] = meshgrid(xVoxelPoints, yVoxelPoints, zVoxelPoints);
 
 % know need coords for the slice data
 
-sliceXStart = reconSliceLocationInM(1);
-sliceYStart = reconSliceLocationInM(2);
-
-sliceDelX = reconSliceVoxelDimsInM(1);
-sliceDelY = reconSliceVoxelDimsInM(2);
-
-sliceNumX = reconSliceDims(1);
-sliceNumY = reconSliceDims(2);
-
-xSlicePoints = (sliceXStart + sliceDelX / 2):sliceDelX:(sliceXStart + (sliceDelX * sliceNumX) - (sliceDelX / 2));
-ySlicePoints = sliceYStart - (sliceDelY / 2):-sliceDelY:sliceYStart - (sliceDelY * sliceNumY) + (sliceDelY / 2);
+[xSlicePoints, ySlicePoints, ~] = getVoxelCentreAndEndEdgeCoordinates(reconSliceLocationInM, reconSliceVoxelDimsInM, reconSliceDims);
 
 % slice locations give the centre of the recon'ed slice
 % most slices are 2D (aka no z height, and so they're only at that centre
 % slice value)
-% But...for the sake of completeness, if we had think slices (aka like in
+% But...for the sake of completeness, if we had thick slices (aka like in
 % helical scanners) or cone beam imaging, we want to be apply to combine
 % multiple slices, and so this would give the shifts, so that from the
 % centre z coord, the z coords of all the voxels in the thick slice could
@@ -59,7 +35,7 @@ zSliceShiftsFromCentre = endPoint:-sliceDelZ:-endPoint;
 numSlices = length(reconSlices);
 
 zSlicePoints = zeros(1, numSlices * sliceNumZ);
-sliceData = zeros(sliceNumX, sliceNumY, numSlices * sliceNumZ);
+sliceData = zeros(reconSliceDims(2), reconSliceDims(1), numSlices * sliceNumZ);
 
 if numSlices < 1
     reconDataSet = NaN .* ones(dataSetDims); % no recon possible
@@ -81,7 +57,7 @@ else
     % if any z-val is represented multiply times, we should fix that
     prevVal = NaN;
     numDuplicates = 1;
-    sliceSum = zeros(sliceNumX, sliceNumY); % we'll average the slice values here!    
+    sliceSum = zeros(reconSliceDims(2), reconSliceDims(1)); % we'll average the slice values here!    
     
     endVal = length(sortedZVals);
     
@@ -121,8 +97,6 @@ else
     % buffer out points of grid, such that the edge points are not the
     % centre of the outermost voxels, but the edge of those voxels
     
-    xSlicePoints = [xSlicePoints(1) - sliceDelX/2, xSlicePoints, xSlicePoints(end) + sliceDelX/2];
-    ySlicePoints = [ySlicePoints(1) + sliceDelY/2, ySlicePoints, ySlicePoints(end) - sliceDelY/2];
     zSlicePoints = [sortedZVals(1) + sliceDelZ/2, sortedZVals, sortedZVals(end) - sliceDelZ/2];
     
     [knownX, knownY, knownZ] = meshgrid(xSlicePoints, ySlicePoints, zSlicePoints);
