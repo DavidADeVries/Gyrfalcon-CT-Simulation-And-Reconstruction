@@ -26,7 +26,7 @@ order = 2^nextpow2(2*len-1);
 
 % STEP 3: CREATE AND ZERO PAD RAMP FILTER, THEN CREATE FFT OF FILTER
 if ~applyRampFilter
-    filtImpRespZP = ones(1, order) .* (1/(2*detectorSpacingInM));
+    filt = ones(1, (order/2)+1) .* (1/(2*detectorSpacingInM));
 else
     n = 0:ceil(len/2); % 'order' is always even.
     filtImpResp = zeros(1,ceil(len/2)+1); % 'filtImpResp' is the bandlimited ramp's impulse response (values for even n are 0)
