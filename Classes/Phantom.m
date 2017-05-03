@@ -179,35 +179,35 @@ classdef Phantom < GyrfalconObject
             handles = getPhantomPlotCoords(phantomDataInHU, phantomDimsInM, phantomLocationInM, axesHandle);           
         end
         
-        function handles = setGUI(phantom, handles)
+        function app = setGUI(phantom, app)
             % set "editable" values
             x = phantom.location(1);
             y = phantom.location(2);
             z = phantom.location(3);
             
-            setDoubleForHandle(handles.phantomStartingLocationXEdit, x);
-            setDoubleForHandle(handles.phantomStartingLocationYEdit, y);
-            setDoubleForHandle(handles.phantomStartingLocationZEdit, z);
+            app.PhantomLocationXEditField.Value = x;
+            app.PhantomLocationYEditField.Value = y;
+            app.PhantomLocationZEditField.Value = z;
             
             x = phantom.voxelDimensions(1);
             y = phantom.voxelDimensions(2);
             z = phantom.voxelDimensions(3);
             
-            setDoubleForHandle(handles.phantomVoxelDimensionsXEdit, x);
-            setDoubleForHandle(handles.phantomVoxelDimensionsYEdit, y);
-            setDoubleForHandle(handles.phantomVoxelDimensionsZEdit, z);
+            app.PhantomVoxelDimsXEditField.Value = x;
+            app.PhantomVoxelDimsYEditField.Value = y;
+            app.PhantomVoxelDimsZEditField.Value = z;
             
-            set(handles.phantomSaveInSeparateFileCheckbox, 'Value', phantom.saveInSeparateFile);
-            
+            app.PhantomSaveInSeparateFileCheckBox.Value = phantom.saveInSeparateFile;
+                        
             if ~phantom.saveInSeparateFile
-                setString(handles.phantomFileNameText, 'Tied to Simulation');
+                app.PhantomFilePathLabel.Text = 'Tied to Simulation';
             elseif isempty(phantom.saveFileName)
-                setString(handles.phantomFileNameText, 'Not Saved');
+                app.PhantomFilePathLabel.Text = 'Not Saved';
             else
-                setString(handles.phantomFileNameText, phantom.saveFileName);
+                app.PhantomFilePathLabel.Text = phantom.saveFileName;
             end
             
-            handles = phantom.dataSet.setGUI(handles);
+            app = phantom.dataSet.setGUI(app);
         end
         
         function phant = createFromGUI(phant, handles)

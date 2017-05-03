@@ -30,7 +30,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
         end
         
         function workspace = setDefaultValues(workspace)
-            workspace.statusOutput = '';
+            workspace.statusOutput = 'Initializing Gyrfalcon...';
             
             sim = Simulation;
             sim = sim.setDefaultValues();
@@ -103,8 +103,11 @@ classdef GyrfalconWorkspace < GyrfalconObject
             bool = b1 && b2;
         end
         
-        function handles = setGUI(workspace, handles)
-            setString(handles.statusOutputText, workspace.statusOutput);
+        function app = setGUI(workspace, app)
+            newLine = true;
+            newString = workspace.statusOutput;
+            
+            app = updateStatusOutput(app, newString, newLine);
             
             path = workspace.getPath();
             
@@ -112,11 +115,11 @@ classdef GyrfalconWorkspace < GyrfalconObject
                 path = 'Unsaved Workspace';
             end
             
-            set(handles.gyrofalconMain, 'Name', ['Gyrfalcon - ', path]);
+            app.GyrfalconUIFigure.Name = ['Gyrfalcon - ', path];
             
-            handles = workspace.simulation.setGUI(handles);
-            handles = workspace.simulationRun.setGUI(handles);
-            handles = workspace.reconstructionRun.setGUI(handles);
+            app = workspace.simulation.setGUI(app);
+%             app = workspace.simulationRun.setGUI(app);
+%             app = workspace.reconstructionRun.setGUI(app);
         end
         
         function workspace = createFromGUI(workspace, handles)

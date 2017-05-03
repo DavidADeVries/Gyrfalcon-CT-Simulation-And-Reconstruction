@@ -1,13 +1,13 @@
-function handles = initializeDisplayFigure(handles)
-% handles = initializeDisplayFigure(handles)
+function app = initializeDisplayFigure(app)
+% handles = initializeDisplayFigure(appd)
 % initialize figure that axes will be displayed on
 
 % set up the axes figure
 figureHandle = figure('Color',[0,0,0],'Name','Gyrfalcon - Display');
 axesHandle = axes();
 
-handles.displayFigureHandle = figureHandle;
-handles.axesHandle = axesHandle;
+app.displayFigureHandle = figureHandle;
+app.axesHandle = axesHandle;
 
 redrawAxes(axesHandle);
 

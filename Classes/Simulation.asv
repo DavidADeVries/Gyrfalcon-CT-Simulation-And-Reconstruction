@@ -188,37 +188,37 @@ classdef Simulation < GyrfalconObject
         
         function app = setGUI(simulation, app)
             
-            % PHANTOM
-            
-            app = simulation.phantom.setGUI(app);
-            
-            % DETECTOR
-            
-            app = simulation.detector.setGUI(app);
-            
-            % SOURCE
-            
-            app = simulation.source.setGUI(app);
-            
-            % SCAN
-            
-            app = simulation.scan.setGUI(app);
+%             % PHANTOM
+%             
+%             app = simulation.phantom.setGUI(app);
+%             
+%             % DETECTOR
+%             
+%             app = simulation.detector.setGUI(app);
+%             
+%             % SOURCE
+%             
+%             app = simulation.source.setGUI(app);
+%             
+%             % SCAN
+%             
+%             app = simulation.scan.setGUI(app);
             
             % SIMULATION
             
             app.SimulationScatteringNoiseLevelEditField.Value = simulation.scatteringNoiseLevel;
             app.SimulationDetectorNoiseLevelEditField.Value = simulation.detectorNoiseLevel;
-            app.SimulationEnablePartialPixelModellingCheckBox.Value = simulation.partialPixelModelling;
-            app.SimulationPartialPixelResolutionEditField.Value = simulation.partialPixelResolution;
+            app.SimulationEnablePartialPixelModellingCheckBox.Value, simulation.partialPixelModelling);
+            setDoubleForHandle(app.simulationPartialPixelResolutionEdit, simulation.partialPixelResolution);
                         
-            app.SimulationSaveInSeparateFileCheckBox.Value = simulation.saveInSeparateFile;
+            set(app.simulationSaveInSeparateFileCheckbox, 'Value', simulation.saveInSeparateFile);
             
             if ~simulation.saveInSeparateFile
-                app.SimulationFilePathLabel.Text = 'Tied to Workspace';
+                setString(app.simulationFileNameText, 'Tied to Workspace');
             elseif isempty(simulation.saveFileName)
-                app.SimulationFilePathLabel.Text = 'Not Saved';
+                setString(app.simulationFileNameText, 'Not Saved');
             else
-                app.SimulationFilePathLabel.Text = simulation.saveFileName;
+                setString(app.simulationFileNameText, simulation.saveFileName);
             end
         end
         

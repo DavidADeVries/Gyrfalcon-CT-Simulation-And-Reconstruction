@@ -248,14 +248,14 @@ classdef Detector < GyrfalconObject
             x = detector.location(1);
             y = detector.location(2);
             
-            app.DetectorLocationXEditField.Value = x;
-            app.DetectorLocationXEditField.Value = y;
+            app.DetectorLocationXEditField = x;
+            app.detectorStartingLocationYEdit, y);
             
             xy = detector.wholeDetectorDimensions(1);
             z = detector.wholeDetectorDimensions(2);
             
-            app.DetectorWholeDetectorDimsXYEditField.Value = xy;
-            app.DetectorWholeDetectorDimsXYEditField.Value = z;
+            setDoubleForHandle(app.detectorWholeDetectorDimensionsXYEdit, xy);
+            setDoubleForHandle(app.detectorWholeDetectorDimensionsZEdit, z);
             
             xy = detector.singleDetectorDimensions(1).value;
             z = detector.singleDetectorDimensions(2).value;
@@ -263,8 +263,8 @@ classdef Detector < GyrfalconObject
             xyUnits = detector.singleDetectorDimensions(1).units;
             zUnits = detector.singleDetectorDimensions(2).units;
             
-            app.DetectorPixelDimsXYEditField.Value = xy;
-            app.DetectorPixelDimsXYEditField.Value = z;
+            setDoubleForHandle(app.detectorSingleDetectorDimensionsXYEdit, xy);
+            setDoubleForHandle(app.detectorSingleDetectorDimensionsZEdit, z);
             
             setSelectionForPopupMenu(app.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units', xyUnits);
             setSelectionForPopupMenu(app.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units', zUnits);

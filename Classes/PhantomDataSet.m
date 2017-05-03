@@ -59,15 +59,15 @@ classdef PhantomDataSet < GyrfalconObject
             bool = b1;
         end
         
-        function handles = setGUI(dataSet, handles) 
-            set(handles.phantomDataSetSaveInSeparateFileCheckbox, 'Value', dataSet.saveInSeparateFile);            
+        function app = setGUI(dataSet, app) 
+            app.PhantomDataSetSaveInSeparateFileCheckBox.Value = dataSet.saveInSeparateFile;
         
             if ~dataSet.saveInSeparateFile
-                setString(handles.phantomDataSetFileNameText, 'Tied to Phantom');
+                app.PhantomDataSetFilePathLabel.Text = 'Tied to Phantom';
             elseif isempty(dataSet.saveFileName)
-                setString(handles.phantomDataSetFileNameText, 'None Selected');
+                app.PhantomDataSetFilePathLabel.Text = 'None Selected';
              else                
-                setString(handles.phantomDataSetFileNameText, dataSet.saveFileName);
+                app.PhantomDataSetFilePathLabel.Text = dataSet.saveFileName;
             end
         end
         
