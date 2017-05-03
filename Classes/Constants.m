@@ -82,6 +82,7 @@ classdef Constants
         FBP_Recon_Videos_Folder_Name = 'Recon Videos';
         FBP_Recon_Videos_File_Name = 'Slice Video';
         
+        Round_Off_Error_Bound = 1E-9; %1nm
     end
     
     methods

@@ -277,3 +277,46 @@ function thickSliceNonInterleavedZValueTest(testCase)
     
     verifyEqual(testCase,act,exp,'AbsTol',1E-9);
 end
+
+function thickSliceInterleavedTest(testCase)
+    presetSlice = [1 2 3; 4 5 6; 7 8 9];
+    dataSetSlice1 = zeros(3,3,3);
+
+    dataSetSlice1(:,:,1) = presetSlice;
+    dataSetSlice1(:,:,2) = presetSlice + 9;
+    dataSetSlice1(:,:,3) = presetSlice + 2*9;
+
+    dataSetSlice2 = dataSetSlice1 + 3*9;
+    dataSetSlice3 = dataSetSlice1 + 2*3*9;
+
+    % set data for test
+    reconSlices = {dataSetSlice1, dataSetSlice2, dataSetSlice3};
+    sliceCentreLocationsInM = [0.15 0 -0.45];
+
+    dataSetLocationInM = [-0.15 0.15 0.525];
+    dataSetVoxelDimsInM = [0.1 0.1 0.15];
+    dataSetDims = [3 3 9];
+
+    reconSliceLocationInM = [-0.15 0.15 0.45];
+    reconSliceVoxelDimsInM = [0.1 0.1 0.3];
+    reconSliceDims = [3 3 3];
+
+    act = reconstructDataSetFromReconstructedSlices(...
+        reconSlices, sliceCentreLocationsInM,...
+        dataSetLocationInM, dataSetVoxelDimsInM, dataSetDims,...
+        reconSliceLocationInM, reconSliceVoxelDimsInM, reconSliceDims,...
+        InterpolationTypes3D.linear);
+
+    exp = zeros(3,3,9);
+    exp(:,:,1) = dataSetSlice1(:,:,1);
+    exp(:,:,2) = dataSetSlice2(:,:,1);
+    exp(:,:,3) = dataSetSlice1(:,:,2);
+    exp(:,:,4) = dataSetSlice2(:,:,2);
+    exp(:,:,5) = (dataSetSlice1(:,:,3) + dataSetSlice3(:,:,1))./2; %due to overlapping slices
+    exp(:,:,6) = dataSetSlice2(:,:,3);
+    exp(:,:,7) = dataSetSlice3(:,:,2);
+    exp(:,:,8) = (dataSetSlice3(:,:,2) + dataSetSlice3(:,:,3))./2; %due to linear interpolation between data slices
+    exp(:,:,9) = dataSetSlice3(:,:,3);
+    
+    verifyEqual(testCase,act,exp,'AbsTol',1E-9);
+end

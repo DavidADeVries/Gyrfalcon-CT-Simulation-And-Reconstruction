@@ -66,7 +66,9 @@ else
     while i <= endVal
         curVal = sortedZVals(i);
         
-        if prevVal == curVal
+        valsEqual = equalWithinBound(prevVal, curVal);
+        
+        if valsEqual
             numDuplicates = numDuplicates + 1;
             sliceSum = sliceSum + sortedSliceData(:,:,i);
             
@@ -78,7 +80,7 @@ else
             
             % no need to increment i, since we just cleared out the values
             % at i
-        elseif prevVal ~= curVal && numDuplicates > 1
+        elseif ~valsEqual && numDuplicates > 1
             sortedSliceData(:,:,i-1) = sliceSum ./ numDuplicates; %take the average
             numDuplicates = 1; %reset
             
