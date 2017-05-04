@@ -423,7 +423,7 @@ classdef Simulation < GyrfalconObject
             
             app = updateStatusOutput(app, newString, newLine);
             
-            app.StatusOutputLamp.Color = [1 1 0]; % yellow
+            app.StatusOutputLamp = [1 1 0]; % yellow
             
             for i=1:numSlices
                 newString = ['  Slice ', num2str(i), '/', num2str(numSlices)];
@@ -450,7 +450,7 @@ classdef Simulation < GyrfalconObject
             
             app = updateStatusOutput(app, newString, newLine);
             
-            app.StatusOutputLamp.Color = [0 1 0]; % green
+            app.StatusOutputLamp = [1 1 0]; % yellow
         end
         
         function string = getScanGeometryString(simulation, scanGeometry, errorMsg)

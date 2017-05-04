@@ -13,6 +13,7 @@ else
     currentString{end} = lastString;
     
     app.StatusOutputTextArea.Value = currentString;
+    drawnow;
 end
 
 end

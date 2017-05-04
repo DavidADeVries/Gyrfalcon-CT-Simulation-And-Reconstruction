@@ -17,11 +17,8 @@ displayDetectorRayTrace = app.SimulationRunShowDetectorRayTracesCheckBox.Value;
 
 displayFreeRun = ~(displaySlices || displayAngles || displayPerAnglePosition || displayDetectorRaster || displayDetectorValues || displayDetectorRayTrace);
 
-% set simulationRun
 simulationRun = app.workspace.simulationRun;
-
 simulationRun.displayFreeRun = displayFreeRun;
-simulationRun.simulation = simulation;
 
 if ~isempty(simulationRun) && simulationRun.isValidForSave()
     simulationRun = simulationRun.startRun();

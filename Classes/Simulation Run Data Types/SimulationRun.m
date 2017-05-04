@@ -33,28 +33,8 @@ classdef SimulationRun < ProcessingRun
     end
     
     methods
-        function simulationRun = SimulationRun(simulation, displayFreeRun)
-            if nargin > 0
-                % SimulationRun specific
-                simulationRun.simulation = simulation;
-                simulationRun.displayFreeRun = displayFreeRun;
-                
-                % Set notes and save path at initialization
-                [cancel1, simulationRun] = simulationRun.collectSettings();
-                
-                if ~cancel1
-                    [cancel2, simulationRun] = simulationRun.collectSavePathAndFilename();
-                else
-                    cancel2 = true;
-                end
-                
-                % set by startRun and endRun functions:
-                simulationRun.sliceData = [];
-                
-                if cancel1 || cancel2
-                    simulationRun = SimulationRun; % cancelled, so clear it out
-                end
-            end
+        function simulationRun = SimulationRun(simulation)
+            
         end
         
         function run = loadData(run, basePath) %use given basePath in case files are moved around
