@@ -69,24 +69,35 @@ classdef PhantomDataSet < GyrfalconObject
              else                
                 app.PhantomDataSetFilePathLabel.Text = dataSet.saveFileName;
             end
+            
+            % dimension text
+            size = dataSet.getSize();
+            
+            sizeString = [num2str(size(1)), 'x', num2str(size(2)), 'x', num2str(size(3))];
+            
+            app.PhantomDataSetDimensionsEditField.Value = sizeString;
         end
         
-        function dataSet = createFromGUI(dataSet, handles)
-            dataSet.saveInSeparateFile = get(handles.phantomDataSetSaveInSeparateFileCheckbox,'Value');
+        function dataSet = createFromGUI(dataSet, app)
+            dataSet.saveInSeparateFile = app.PhantomDataSetSaveInSeparateFileCheckBox.Value;
         end
         
         function dims = getSize(dataSet)
-            dims = size(dataSet.data);
-            
-            if length(dims) == 2
-                dims = [dims 1]; %if only in x,y, we add a height of 1 (technically, though dimension length in z is 0mm)
+            if isempty(dataSet.data)
+                dims = [0 0 0];
+            else
+                dims = size(dataSet.data);
+                
+                if length(dims) == 2
+                    dims = [dims 1]; %if only in x,y, we add a height of 1 (technically, though dimension length in z is 0mm)
+                end
+                
+                numRows = dims(1);
+                numCols = dims(2);
+                numSlices = dims(3);
+                
+                dims = [numCols, numRows, numSlices]; %numCols goes to x, numRows is y
             end
-            
-            numRows = dims(1);
-            numCols = dims(2);
-            numSlices = dims(3);
-            
-            dims = [numCols, numRows, numSlices]; %numCols goes to x, numRows is y
         end
     end
     

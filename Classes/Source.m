@@ -274,12 +274,12 @@ methods
 
 
 
-    function handles = setGUI(source, handles)
+    function app = setGUI(source, app)
         x = source.location(1);
         y = source.location(2);
 
-        setDoubleForHandle(handles.sourceStartingLocationXEdit, x);
-        setDoubleForHandle(handles.sourceStartingLocationYEdit, y);
+        app.SourceLocationXEditField.Value = x;
+        app.SourceLocationYEditField.Value = y;
 
         xy = source.dimensions(1).value;
         z = source.dimensions(2).value;
@@ -287,52 +287,52 @@ methods
         xyUnits = source.dimensions(1).units;
         zUnits = source.dimensions(2).units;
 
-        setDoubleForHandle(handles.sourceDimensionsXYEdit, xy);
-        setDoubleForHandle(handles.sourceDimensionsZEdit, z);
+        app.SourceDimsXYEditField.Value = xy;
+        app.SourceDimsZEditField.Value = z;
 
-        setSelectionForPopupMenu(handles.sourceDimensionsXYUnitsPopupMenu, 'Units', xyUnits);
-        setSelectionForPopupMenu(handles.sourceDimensionsZUnitsPopupMenu, 'Units', zUnits);
+        app.SourceDimsXYUnitsDropDown.Value = xyUnits;
+        app.SourceDimsXYUnitsDropDown.Value = zUnits;
 
         xy = source.beamAngle(1);
         z = source.beamAngle(2);
 
-        setDoubleForHandle(handles.sourceBeamAngleXYEdit, xy);
-        setDoubleForHandle(handles.sourceBeamAngleZEdit, z);
+        app.SourceBeamAngleXYEditField.Value = xy;
+        app.SourceBeamAngleZEditField.Value = z;
             
-        set(handles.sourceSaveInSeparateFileCheckbox, 'Value', source.saveInSeparateFile);
+        app.SourceSaveInSeparateFileCheckBox.Value = source.saveInSeparateFile;
 
         if ~source.saveInSeparateFile
-            setString(handles.sourceFileNameText, 'Tied to Simulation');
+            app.SourceFilePathLabel.Text = 'Tied to Simulation';
         elseif isempty(source.saveFileName)
-            setString(handles.sourceFileNameText, 'Not Saved');
+            app.SourceFilePathLabel.Text = 'Not Saved';
         else
-            setString(handles.sourceFileNameText, source.saveFileName);
+            app.SourceFilePathLabel.Text = source.saveFileName;
         end
     end
 
-    function source = createFromGUI(source, handles)
-        x = getDoubleFromHandle(handles.sourceStartingLocationXEdit);
-        y = getDoubleFromHandle(handles.sourceStartingLocationYEdit);
+    function source = createFromGUI(source, app)
+        x = app.SourceLocationXEditField.Value;
+        y = app.SourceLocationYEditField.Value;
 
         source.location = [x,y];
 
-        xy = getDoubleFromHandle(handles.sourceDimensionsXYEdit);
-        z = getDoubleFromHandle(handles.sourceDimensionsZEdit);
+        xy = app.SourceDimsXYEditField.Value;
+        z = app.SourceDimsZEditField.Value;
 
-        xyUnits = getSelectionFromPopupMenu(handles.sourceDimensionsXYUnitsPopupMenu, 'Units');
-        zUnits = getSelectionFromPopupMenu(handles.sourceDimensionsZUnitsPopupMenu, 'Units');
+        xyUnits = app.SourceDimsXYUnitsDropDown.Value;
+        zUnits = app.SourceDimsZUnitsDropDown.Value;
 
         xyDimension = Dimension(xy, xyUnits);
         zDimension = Dimension(z, zUnits);
 
         source.dimensions = [xyDimension, zDimension];
 
-        xy = getDoubleFromHandle(handles.sourceBeamAngleXYEdit);
-        z = getDoubleFromHandle(handles.sourceBeamAngleZEdit);
+        xy = app.SourceBeamAngleXYEditField.Value;
+        z = app.SourceBeamAngleZEditField.Value;
 
         source.beamAngle = [xy, z];
         
-        source.saveInSeparateFile = get(handles.sourceSaveInSeparateFileCheckbox,'Value');
+        source.saveInSeparateFile = app.SourceSaveInSeparateFileCheckBox.Value;
     end
 
     function [startBoxCoords, endBoxCoords, directionUnitVector, perAngleShift] = getSourcePosition(source, slicePosition, angle, perAngleXY, perAngleZ, diameter)

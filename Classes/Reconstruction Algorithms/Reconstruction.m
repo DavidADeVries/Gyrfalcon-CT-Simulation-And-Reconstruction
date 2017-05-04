@@ -6,12 +6,12 @@ classdef Reconstruction
         
         reconDataSet % the 3D reconstructed data set (which can be compared to the original phantom)
         
-        reconSliceDimensions % number of voxels in x,y,z for each slice
-        reconSliceVoxelDimensionsInM % dimension of each voxel in data set
+        reconSliceDimensions = [0 0]% number of voxels in x,y,z for each slice
+        reconSliceVoxelDimensionsInM = [0 0]% dimension of each voxel in data set
         reconSliceLocationInM
         
-        reconDataSetDimensions % number of voxels in x,y,z for dataset
-        reconDataSetVoxelDimensionsInM % dimension of each voxel
+        reconDataSetDimensions = [0 0 0] % number of voxels in x,y,z for dataset
+        reconDataSetVoxelDimensionsInM = [0 0 0] % dimension of each voxel
         reconDataSetLocationInM
         
         reconDataSetInterpolationType = InterpolationTypes3D.spline

@@ -88,19 +88,21 @@ classdef SimulationRun < ProcessingRun
             run.startTimestamp = [];
             run.endTimestamp = [];
             
-            run.computerInfo = [];
-            run.versionUsed = [];
+            run.computerInfo = ComputerInfo();
+            run.versionUsed = Constants.version;
             
             run.notes = '';
             run.savePath = '';
             run.saveFileName = '';
         end
         
-        function run = createFromGUI(run, handles)
-            
+        function run = createFromGUI(run, app)
+            run.computerInfo.gpuUsed = app.SimulationRunUseGPUCheckBox.Value;
+            run.computerInfo.numCoresUsed = app.SimulationRunNumCPUsEditField.Value;
+            run.notes = app.SimulationRunNotesTextArea.Value;
         end
         
-        function handles = setGUI(run, handles)
+        function handles = setGUIForDatasetReconstruction(run, handles)
             if isempty(run.getPath())
                 setString(handles.simulationRunPathText, 'No Simulation Run Selected');
                 
@@ -138,6 +140,40 @@ classdef SimulationRun < ProcessingRun
             end
             
             setString(handles.simulationRunNotesText, run.notes);
+        end
+        
+        function app = setGUIForScanSimulation(run, app)
+            % save path
+            path = run.getPath();
+            
+            if isempty(path)
+                app.SimulationRunSavePathLabel.Text = 'Select Path...';
+                
+                app.ScanSimRunSimulationButton.Enable = 'off';
+            else
+                app.SimulationRunSavePathLabel.Text = path;
+                
+                app.ScanSimRunSimulationButton.Enable = 'on';
+            end
+            
+            % use GPU checkbox
+            app.SimulationRunUseGPUCheckBox.Value = run.computerInfo.gpuUsed;
+            
+            if isempty(run.computerInfo.gpuDevice)
+                app.SimulationRunUseGPUCheckBox.Enable = 'off';
+            else
+                app.SimulationRunUseGPUCheckBox.Enable = 'on';
+            end
+            
+            % number of CPUs
+            app.SimulationRunNumCPUsEditField.Value = run.computerInfo.numCoresUsed;
+            app.SimulationRunNumCPUsEditField.Limits = [1 run.computerInfo.cpuNumCores];
+            
+            numCPUsAvailableString = ['/' num2str(run.computerInfo.cpuNumCores)];
+            app.SimulationRunNumCPUsAvailableLabel.Text = numCPUsAvailableString;
+            
+            % notes
+            app.SimulationRunNotesTextArea.Value = run.notes;
         end
         
         function simulationRun = startRun(simulationRun)

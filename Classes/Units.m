@@ -15,6 +15,25 @@ classdef Units
         radian ('rad', true)
     end
     
+    methods(Static)
+        function [] = setDropDown(handle)
+            [rawItemData,~] = enumeration('Units');
+            
+            numItems = length(rawItemData);
+            
+            items = cell(1, numItems);
+            itemsData = cell(1, numItems);
+            
+            for i=1:numItems
+                items{i} = rawItemData(i).displayString;
+                itemsData{i} = rawItemData(i);
+            end
+            
+            handle.Items = items;
+            handle.ItemsData = itemsData;
+        end
+    end
+    
     methods
         function obj = Units(displayString, isAngular)
             obj.displayString = displayString;
@@ -65,6 +84,7 @@ classdef Units
                 end
             end
         end
+        
     end
     
 end

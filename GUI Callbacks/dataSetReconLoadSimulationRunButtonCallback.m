@@ -1,5 +1,5 @@
-function [] = simulationRunLoadButtonCallback(hObject, eventdata, handles)
-% [] = simulationRunLoadButtonCallback(hObject, eventdata, handles)
+function [] = dataSetReconLoadSimulationRunButtonCallback(app)
+% [] = dataSetReconLoadSimulationRunButtonCallback(app)
 
 filterSpec = '*.mat';
 dialogTitle = 'Open Simulation Run...';
@@ -20,7 +20,7 @@ if ~all(fileName == 0) % have a selection
             simulationRun = simulationRun.loadData(pathName);
             delete(h);
             
-            workspace = handles.workspace.createFromGUI(handles);
+            workspace = app.workspace.createFromGUI(app);
             
             workspace.simulationRun = simulationRun;
             
@@ -41,11 +41,9 @@ if ~all(fileName == 0) % have a selection
             
             workspace.reconstructionRun = reconRun;
             
-            handles.workspace = workspace;
+            app.workspace = workspace;
             
-            handles = handles.workspace.setGUI(handles);
-            
-            guidata(hObject, handles);
+            app = app.workspace.setGUI(app);
         else
             errordlg('The selected file was not a Simulation Run file and so could not be opened.', 'Invalid File');
         end

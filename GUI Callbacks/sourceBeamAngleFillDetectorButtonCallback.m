@@ -1,7 +1,7 @@
-function []  = sourceFillDetectorButtonCallback(hObject, eventdata, handles)
-%[]  = sourceFillDetectorButtonCallback(hObject, eventdata, handles)
+function []  = sourceBeamAngleFillDetectorButtonCallback(app)
+%[] = sourceBeamAngleFillDetectorButtonCallback(app)
 
-workspace = handles.workspace.createFromGUI(handles);
+workspace = app.workspace.createFromGUI(app);
 
 detector = workspace.simulation.detector;
 
@@ -49,11 +49,9 @@ workspace.simulation.source.beamAngle = [2*xyHalfAngle, 2*zHalfAngle];
 
 % update handles
 
-handles = workspace.setGUI(handles);
+app = workspace.setGUI(app);
 
-handles.workspace = workspace;
-
-guidata(hObject, handles);
+app.workspace = workspace;
 
 
 end

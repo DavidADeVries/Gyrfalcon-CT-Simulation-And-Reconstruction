@@ -342,52 +342,53 @@ classdef Scan < GyrfalconObject
             
         end
                
-        function handles = setGUI(scan, handles)
-            setMultipleDoublesForHandle(handles.scanAnglesEdit, scan.scanAngles);
-            setMultipleDoublesForHandle(handles.scanSlicePositionsEdit, scan.slices);
+        function app = setGUI(scan, app)
+            setMultipleDoublesForHandle(app.ScanAnglesEditField, scan.scanAngles);
+            setMultipleDoublesForHandle(app.ScanSlicePositionsEditField, scan.slices);
             
             xy = scan.perAngleTranslationDimensions(1);
             z = scan.perAngleTranslationDimensions(2);
             
-            setDoubleForHandle(handles.scanPerAngleTranslationStepsXYEdit, xy);
-            setDoubleForHandle(handles.scanPerAngleTranslationStepsZEdit, z);
+            app.ScanPerAngleTranslationXYEditField.Value = xy;
+            app.ScanPerAngleTranslationZEditField.Value = z;
             
             xy = scan.perAngleTranslationResolution(1);
             z = scan.perAngleTranslationResolution(2);
             
-            setDoubleForHandle(handles.scanPerAngleStepDimensionsXYEdit, xy);
-            setDoubleForHandle(handles.scanPerAngleStepDimensionsZEdit, z);
+            app.ScanPerAngleStepDimsXYEditField.Value = xy;
+            app.ScanPerAngleStepDimsZEditField.Value = z;
             
-            set(handles.scanSaveInSeparateFileCheckbox, 'Value', scan.saveInSeparateFile);
+            app.ScanSaveInSeparateFileCheckBox.Value = scan.saveInSeparateFile;
                                     
             if ~scan.saveInSeparateFile
-                setString(handles.scanFileNameText, 'Tied to Simulation');
+                app.ScanFilePathLabel.Text = 'Tied to Simulation';
             elseif isempty(scan.saveFileName)
-                setString(handles.scanFileNameText, 'Not Saved');
+                app.ScanFilePathLabel.Text = 'Not Saved';
             else
-                setString(handles.scanFileNameText, scan.saveFileName);
+                app.ScanFilePathLabel.Text = scan.saveFileName;
             end
             
-            handles = scan.beamCharacterization.setGUI(handles);
+            app = scan.beamCharacterization.setGUI(app);
         end
         
-        function scan = createFromGUI(scan, handles)
-            scan.scanAngles = getMultipleDoublesFromHandle(handles.scanAnglesEdit);
-            scan.slices = getMultipleDoublesFromHandle(handles.scanSlicePositionsEdit);
+        function scan = createFromGUI(scan, app)
+            scan.scanAngles = getMultipleDoublesFromHandle(app.ScanAnglesEditField);
+            scan.slices = getMultipleDoublesFromHandle(app.ScanSlicePositionsEditField);
             
-            xy = getDoubleFromHandle(handles.scanPerAngleTranslationStepsXYEdit);
-            z = getDoubleFromHandle(handles.scanPerAngleTranslationStepsZEdit);
+            xy = app.ScanPerAngleTranslationXYEditField.Value;
+            z = app.ScanPerAngleTranslationZEditField.Value;
             
             scan.perAngleTranslationDimensions = [xy, z];
             
-            xy = getDoubleFromHandle(handles.scanPerAngleStepDimensionsXYEdit);
-            z = getDoubleFromHandle(handles.scanPerAngleStepDimensionsZEdit);
+            xy = app.ScanPerAngleStepDimsXYEditField.Value;
+            z = app.ScanPerAngleStepDimsZEditField.Value;
             
             scan.perAngleTranslationResolution = [xy, z];
             
-            scan.beamCharacterization = scan.beamCharacterization.createFromGUI(handles);
+            scan.saveInSeparateFile = app.ScanSaveInSeparateFileCheckBox.Value;
             
-            scan.saveInSeparateFile = get(handles.scanSaveInSeparateFileCheckbox,'Value');
+            % beam characterization
+            scan.beamCharacterization = scan.beamCharacterization.createFromGUI(app);
         end
         
     end

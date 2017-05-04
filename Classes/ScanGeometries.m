@@ -76,7 +76,7 @@ classdef ScanGeometries
             
             numChoices = length(choices);
             
-            algorithmChoiceStrings = cell(numChoices,1);
+            algorithmChoiceStrings = cell(1,numChoices);
             
             for i=1:numChoices
                 algorithmChoiceStrings{i} = choices{i}.displayName;

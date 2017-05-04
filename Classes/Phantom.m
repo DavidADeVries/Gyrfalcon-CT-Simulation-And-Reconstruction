@@ -210,24 +210,25 @@ classdef Phantom < GyrfalconObject
             app = phantom.dataSet.setGUI(app);
         end
         
-        function phant = createFromGUI(phant, handles)
+        function phant = createFromGUI(phant, app)
             % get "editable" values
             
-            x = getDoubleFromHandle(handles.phantomStartingLocationXEdit);
-            y = getDoubleFromHandle(handles.phantomStartingLocationYEdit);
-            z = getDoubleFromHandle(handles.phantomStartingLocationZEdit);
+            x = app.PhantomLocationXEditField.Value;
+            y = app.PhantomLocationYEditField.Value;
+            z = app.PhantomLocationZEditField.Value;
             
             phant.location = [x,y,z];
             
-            x = getDoubleFromHandle(handles.phantomVoxelDimensionsXEdit);
-            y = getDoubleFromHandle(handles.phantomVoxelDimensionsYEdit);
-            z = getDoubleFromHandle(handles.phantomVoxelDimensionsZEdit);
+            x = app.PhantomVoxelDimsXEditField.Value;
+            y = app.PhantomVoxelDimsYEditField.Value;
+            z = app.PhantomVoxelDimsZEditField.Value;
             
             phant.voxelDimensions = [x,y,z];
             
-            phant.dataSet = phant.dataSet.createFromGUI(handles);
+            phant.saveInSeparateFile = app.PhantomSaveInSeparateFileCheckBox.Value;
             
-            phant.saveInSeparateFile = get(handles.phantomSaveInSeparateFileCheckbox,'Value');
+            % phantom data set
+            phant.dataSet = phant.dataSet.createFromGUI(app);
         end
     end
     

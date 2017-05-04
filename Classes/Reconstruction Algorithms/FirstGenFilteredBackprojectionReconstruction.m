@@ -21,9 +21,23 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
         saveSinogramsAndVideos = false
     end
     
+    methods(Static)
+        function handle = getSettingsTabHandle(app)
+            handle = app.Gen1FBP_SettingsTab;
+        end
+    end
+    
     methods        
         function recon = FirstGenFilteredBackprojectionReconstruction()
             
+        end
+        
+        function app = setGUI(recon, app)
+            app.Gen1FBP_FilterTypeDropDown.Value = recon.filterType;
+            app.Gen1FBP_ApplyRampRamLakFilterCheckBox.Value = recon.applyRampFilter;
+            app.Gen1FBP_ApplyBandlimitingofHighFrequenciesCheckBox.Value = recon.applyBandlimiting;
+            app.Gen1FBP_SaveSinogramsandReconstructionVideosCheckBox.Value = recon.saveSinogramsAndVideos;
+            app.Gen1FBP_InterpolationTypeDropDown.Value = recon.interpolationType;
         end
         
         function strings = getSettingsString(recon)
@@ -52,7 +66,7 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
             string = '1st Gen. FBP';
         end
         
-        function recon = runReconstruction(recon, simulationRun, handles)
+        function recon = runReconstruction(recon, simulationRun, app)
             firstGenData = simulationRun.compileProjectionDataFor1stGenRecon();
             
             simulation = simulationRun.simulation;

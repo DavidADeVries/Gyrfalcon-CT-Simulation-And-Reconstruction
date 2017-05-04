@@ -192,20 +192,20 @@ classdef PhotonBeam < GyrfalconObject
             end
         end
         
-        function handles = setGUI(photonBeam, handles)            
-            set(handles.photonBeamSaveInSeparateFileCheckbox, 'Value', photonBeam.saveInSeparateFile);
+        function app = setGUI(photonBeam, app)            
+            app.BeamCharacterizationSaveInSeparateFileCheckBox.Value = photonBeam.saveInSeparateFile;
         
             if ~photonBeam.saveInSeparateFile
-                setString(handles.scanBeamCharacterizationFileNameText, 'Tied to Scan');
+                app.BeamCharacterizationFilePathLabel.Text = 'Tied to Scan';
             elseif isempty(photonBeam.saveFileName)
-                setString(handles.scanBeamCharacterizationFileNameText, 'None Selected');
+                app.BeamCharacterizationFilePathLabel.Text = 'None Selected';
             else                
-                setString(handles.scanBeamCharacterizationFileNameText, photonBeam.saveFileName);
+                app.BeamCharacterizationFilePathLabel.Text = photonBeam.saveFileName;
             end
         end
         
-        function photonBeam = createFromGUI(photonBeam, handles)
-            photonBeam.saveInSeparateFile = get(handles.photonBeamSaveInSeparateFileCheckbox,'Value');
+        function photonBeam = createFromGUI(photonBeam, app)
+            photonBeam.saveInSeparateFile = app.BeamCharacterizationSaveInSeparateFileCheckBox.Value;
         end
     end
     

@@ -249,13 +249,13 @@ classdef Detector < GyrfalconObject
             y = detector.location(2);
             
             app.DetectorLocationXEditField.Value = x;
-            app.DetectorLocationXEditField.Value = y;
+            app.DetectorLocationYEditField.Value = y;
             
             xy = detector.wholeDetectorDimensions(1);
             z = detector.wholeDetectorDimensions(2);
             
             app.DetectorWholeDetectorDimsXYEditField.Value = xy;
-            app.DetectorWholeDetectorDimsXYEditField.Value = z;
+            app.DetectorWholeDetectorDimsZEditField.Value = z;
             
             xy = detector.singleDetectorDimensions(1).value;
             z = detector.singleDetectorDimensions(2).value;
@@ -264,51 +264,51 @@ classdef Detector < GyrfalconObject
             zUnits = detector.singleDetectorDimensions(2).units;
             
             app.DetectorPixelDimsXYEditField.Value = xy;
-            app.DetectorPixelDimsXYEditField.Value = z;
+            app.DetectorPixelDimsZEditField.Value = z;
             
-            setSelectionForPopupMenu(app.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units', xyUnits);
-            setSelectionForPopupMenu(app.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units', zUnits);
+            app.DetectorPixelDimsXYUnitsDropDown.Value = xyUnits;
+            app.DetectorPixelDimsZUnitsDropDown.Value = zUnits;
             
-            set(app.detectorMovesWithScanAngleCheckbox, 'Value', detector.movesWithScanAngle);
-            set(app.detectorMovesWithPerAngleTranslationCheckbox, 'Value', detector.movesWithPerAngleTranslation);
+            app.DetectorMovesWithScanAngleCheckBox.Value = detector.movesWithScanAngle;
+            app.DetectorMovesWithPerAngleStepsCheckBox.Value = detector.movesWithPerAngleTranslation;
             
-            set(app.detectorSaveInSeparateFileCheckbox, 'Value', detector.saveInSeparateFile);
+            app.DetectorSaveInSeparateFileCheckBox.Value = detector.saveInSeparateFile;
             
             if ~detector.saveInSeparateFile
-                setString(app.detectorFileNameText, 'Tied to Simulation');
+                app.DetectorFilePathLabel.Text = 'Tied to Simulation';
             elseif isempty(detector.saveFileName)
-                setString(app.detectorFileNameText, 'Not Saved');
+                app.DetectorFilePathLabel.Text = 'Not Saved';
             else
-                setString(app.detectorFileNameText, detector.saveFileName);
+                app.DetectorFilePathLabel.Text = detector.saveFileName;
             end
         end
         
-        function detector = createFromGUI(detector, handles)
-            x = getDoubleFromHandle(handles.detectorStartingLocationXEdit);
-            y = getDoubleFromHandle(handles.detectorStartingLocationYEdit);
+        function detector = createFromGUI(detector, app)
+            x = app.DetectorLocationXEditField.Value;
+            y = app.DetectorLocationYEditField.Value;
             
             detector.location = [x,y];
             
-            xy = getDoubleFromHandle(handles.detectorWholeDetectorDimensionsXYEdit);
-            z = getDoubleFromHandle(handles.detectorWholeDetectorDimensionsZEdit);
+            xy = app.DetectorWholeDetectorDimsXYEditField.Value;
+            z = app.DetectorWholeDetectorDimsZEditField.Value;
             
             detector.wholeDetectorDimensions = [xy, z];
             
-            xy = getDoubleFromHandle(handles.detectorSingleDetectorDimensionsXYEdit);
-            z = getDoubleFromHandle(handles.detectorSingleDetectorDimensionsZEdit);
+            xy = app.DetectorPixelDimsXYEditField.Value;
+            z = app.DetectorPixelDimsZEditField.Value;
             
-            xyUnits = getSelectionFromPopupMenu(handles.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units');
-            zUnits = getSelectionFromPopupMenu(handles.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units');
+            xyUnits = app.DetectorPixelDimsXYUnitsDropDown.Value;
+            zUnits = app.DetectorPixelDimsZUnitsDropDown.Value;
             
             xyDimension = Dimension(xy, xyUnits);
             zDimension = Dimension(z, zUnits);
             
             detector.singleDetectorDimensions = [xyDimension, zDimension];
             
-            detector.movesWithScanAngle = get(handles.detectorMovesWithScanAngleCheckbox, 'Value');
-            detector.movesWithPerAngleTranslation = get(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value');
+            detector.movesWithScanAngle = app.DetectorMovesWithScanAngleCheckBox.Value;
+            detector.movesWithPerAngleTranslation = app.DetectorMovesWithPerAngleStepsCheckBox.Value;
             
-            detector.saveInSeparateFile = get(handles.detectorSaveInSeparateFileCheckbox,'Value');
+            detector.saveInSeparateFile = app.DetectorSaveInSeparateFileCheckBox.Value;
         end
         
     end

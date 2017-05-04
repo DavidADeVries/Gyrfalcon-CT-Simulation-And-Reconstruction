@@ -4,8 +4,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
     properties
         statusOutput
         
-        simulation
-        
+        simulation       
         simulationRun
         
         reconstructionRun
@@ -30,7 +29,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
         end
         
         function workspace = setDefaultValues(workspace)
-            workspace.statusOutput = 'Initializing Gyrfalcon...';
+            workspace.statusOutput = '';
             
             sim = Simulation;
             sim = sim.setDefaultValues();
@@ -104,10 +103,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
         end
         
         function app = setGUI(workspace, app)
-            newLine = true;
-            newString = workspace.statusOutput;
-            
-            app = updateStatusOutput(app, newString, newLine);
+            app.StatusOutputTextArea.Value = workspace.statusOutput;
             
             path = workspace.getPath();
             
@@ -118,18 +114,18 @@ classdef GyrfalconWorkspace < GyrfalconObject
             app.GyrfalconUIFigure.Name = ['Gyrfalcon - ', path];
             
             app = workspace.simulation.setGUI(app);
-%             app = workspace.simulationRun.setGUI(app);
-%             app = workspace.reconstructionRun.setGUI(app);
+            app = workspace.simulationRun.setGUIForScanSimulation(app);
+            app = workspace.reconstructionRun.setGUI(app);
         end
         
-        function workspace = createFromGUI(workspace, handles)
-            workspace.statusOutput = getString(handles.statusOutputText);
+        function workspace = createFromGUI(workspace, app)
+            workspace.statusOutput = app.StatusOutputTextArea.Value;
                         
-            workspace.simulation = workspace.simulation.createFromGUI(handles);
+            workspace.simulation = workspace.simulation.createFromGUI(app);
             
-            workspace.simulationRun = workspace.simulationRun.createFromGUI(handles);
+            workspace.simulationRun = workspace.simulationRun.createFromGUI(app);
             
-            workspace.reconstructionRun = workspace.reconstructionRun.createFromGUI(handles);
+            workspace.reconstructionRun = workspace.reconstructionRun.createFromGUI(app);
         end
     end
     

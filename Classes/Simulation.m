@@ -112,8 +112,8 @@ classdef Simulation < GyrfalconObject
             name = 'Simulation';
         end
         
-        function [] = plot(simulation, handles)
-            axesHandle = handles.axesHandle;
+        function [] = plot(simulation, app)
+            axesHandle = app.axesHandle;
             
             axes(axesHandle);
             
@@ -220,33 +220,36 @@ classdef Simulation < GyrfalconObject
             else
                 app.SimulationFilePathLabel.Text = simulation.saveFileName;
             end
+            
+            % SIMULATION RUN FIELDS
+            
         end
         
-        function simulation = createFromGUI(simulation, handles)
+        function simulation = createFromGUI(simulation, app)
             % PHANTOM
                         
-            simulation.phantom = simulation.phantom.createFromGUI(handles);
+            simulation.phantom = simulation.phantom.createFromGUI(app);
             
             % DETECTOR
                         
-            simulation.detector = simulation.detector.createFromGUI(handles);
+            simulation.detector = simulation.detector.createFromGUI(app);
             
             % SOURCE
                         
-            simulation.source = simulation.source.createFromGUI(handles);
+            simulation.source = simulation.source.createFromGUI(app);
             
             % SCAN
                         
-            simulation.scan = simulation.scan.createFromGUI(handles);
+            simulation.scan = simulation.scan.createFromGUI(app);
             
             % SIMULATION
             
-            simulation.scatteringNoiseLevel = getDoubleFromHandle(handles.simulationScatteringNoiseLevelEdit);
-            simulation.detectorNoiseLevel = getDoubleFromHandle(handles.simulationDetectorNoiseLevelEdit);
-            simulation.partialPixelModelling = get(handles.simulationPartialPixelModellingCheckbox, 'Value');
-            simulation.partialPixelResolution = getDoubleFromHandle(handles.simulationPartialPixelResolutionEdit);
+            simulation.scatteringNoiseLevel = app.SimulationScatteringNoiseLevelEditField.Value;
+            simulation.detectorNoiseLevel = app.SimulationDetectorNoiseLevelEditField.Value;
+            simulation.partialPixelModelling = app.SimulationEnablePartialPixelModellingCheckBox.Value;
+            simulation.partialPixelResolution = app.SimulationPartialPixelResolutionEditField.Value;
             
-            simulation.saveInSeparateFile = get(handles.simulationSaveInSeparateFileCheckbox,'Value');
+            simulation.saveInSeparateFile = app.SimulationSaveInSeparateFileCheckBox.Value;
         end
         
         function bool = equal(sim1, sim2)
@@ -382,7 +385,7 @@ classdef Simulation < GyrfalconObject
             [scanGeometry, errorMsg] = boolLogicForFindScanGeometry(simulation);
         end
         
-        function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, statusOutputTextHandle, savePath)
+        function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, app, savePath)
             slices = simulation.scan.getSlicesInM();
             
             numSlices = length(slices);
@@ -415,15 +418,16 @@ classdef Simulation < GyrfalconObject
                 detectorImageHandle = [];
             end
             
-            baseString = getString(statusOutputTextHandle);
+            newString = ['Simulation Run Start (', convertTimestampToString(now), ')'];
+            newLine = true;
             
-            baseString = [baseString; {['Simulation Run Start (', convertTimestampToString(now), ')']}];
-                        
-            setString(statusOutputTextHandle, baseString);
+            app = updateStatusOutput(app, newString, newLine);
             
             for i=1:numSlices
-                setString(statusOutputTextHandle, [baseString; {['  Slice ', num2str(i), '/', num2str(numSlices)]}]);
-                drawnow;
+                newString = ['  Slice ', num2str(i), '/', num2str(numSlices)];
+                newLine = true;
+                
+                app = updateStatusOutput(app, newString, newLine);
                 
                 newDir = [Constants.Slice_Folder, ' ', num2str(i)];
                 mkdir(savePath, newDir);
@@ -431,16 +435,49 @@ classdef Simulation < GyrfalconObject
                 
                 slicePosition = slices(i);
                 
-                sliceData = simulation.runScanSimulationForSlice(axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, sliceSavePath);
+                sliceData = simulation.runScanSimulationForSlice(axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, sliceSavePath);
+                
+                app = removeLastLineOfStatusOutput(app);
                 
                 data{i} = SliceData(sliceData, slicePosition);
                 
             end   
             
-            setString(statusOutputTextHandle, [baseString; {['Simulation Run Complete (', convertTimestampToString(now), ')']}]);
+            newString = ['Simulation Run Complete (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
         end
         
-        function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, sliceSavePath)
+        function string = getScanGeometryString(simulation, scanGeometry, errorMsg)
+            if isempty(scanGeometry)
+                string = errorMsg;
+            else
+                numSlices = num2str(length(simulation.scan.slices));
+                numAngles = num2str(length(simulation.scan.scanAngles));
+                
+                angleString = [numAngles, ' Scan Angles [°] (', ')'];
+                slicesString = [numSlices, ' Slices [mm] (', ')'];
+                
+                detectorDims = simulation.detector.wholeDetectorDimensions;
+                
+                detectorSizeString = ['Detector Size: ', num2str(detectorDims(1)), 'x', num2str(detectorDims(2))];
+                
+                perAngleDims = simulation.perAngleTranslationResolution;
+                
+                perAngleString = ['Per Angle Translation Steps: ', num2str(perAngleDims(1)), 'x', num2str(perAngleDims(2))];
+                
+                string = {...
+                    scanGeometry.displayString,...
+                    scanGeometry.shortDescriptionString,...
+                    angleString,...
+                    slicesString,...
+                    detectorSizeString,...
+                    perAngleString};
+            end
+        end
+        
+        function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, sliceSavePath)
             angles = simulation.scan.getScanAnglesInDegrees();
             
             numAngles = length(angles);
@@ -452,12 +489,12 @@ classdef Simulation < GyrfalconObject
                 
                 pause(0.000001);
             end
-            
-            baseString = getString(statusOutputTextHandle);
-            
+                        
             for i=1:numAngles
-                setString(statusOutputTextHandle, [baseString; {['  Angle ', num2str(i), '/', num2str(numAngles)]}]);
-                drawnow;
+                newString = ['  Angle ', num2str(i), '/', num2str(numAngles)];
+                newLine = true;
+                
+                app = updateStatusOutput(app, newString, newLine);
                 
                 angle = angles(i); 
                 
@@ -466,8 +503,10 @@ classdef Simulation < GyrfalconObject
                 angleSavePath = makePath(sliceSavePath, newDir);
                                
                 
-                angleData = simulation.runScanSimulationForAngle(axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, angleSavePath);
+                angleData = simulation.runScanSimulationForAngle(axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, angleSavePath);
                                 
+                app = removeLastLineOfStatusOutput(app);
+                
                 sliceData{i} = AngleData(angleData, angle);
             end
             
@@ -476,7 +515,7 @@ classdef Simulation < GyrfalconObject
             end
         end
         
-        function angleData = runScanSimulationForAngle(simulation, axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, angleSavePath)
+        function angleData = runScanSimulationForAngle(simulation, axesHandle, slicePosition, angle, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, angleSavePath)
             perAngleTranslationDimensions = simulation.scan.perAngleTranslationDimensions;
             
             xyNumSteps = perAngleTranslationDimensions(1);
@@ -489,16 +528,16 @@ classdef Simulation < GyrfalconObject
                 
                 pause(0.000001);
             end
-            
-            baseString = getString(statusOutputTextHandle);
-            
+                        
             totalNumStepStr = num2str(zNumSteps*xyNumSteps);
             
             for zStep=1:zNumSteps
                 for xyStep=1:xyNumSteps
                     curNumStepStr = num2str(((zStep-1)*zNumSteps) + xyStep);
-                    setString(statusOutputTextHandle, [baseString; {['  Position ', curNumStepStr, '/', totalNumStepStr]}]);
-                    drawnow;
+                    newString = ['  Position ', curNumStepStr, '/', totalNumStepStr];
+                    newLine = true;
+                    
+                    app = updateStatusOutput(app, newString, newLine);
                     
                     newDir = [Constants.Position_Folder, ' (', num2str(zStep), ',', num2str(xyStep), ')'];
                     mkdir(angleSavePath, newDir);
@@ -518,7 +557,7 @@ classdef Simulation < GyrfalconObject
                         displayDetectorValues,...
                         displayDetectorRayTrace,...
                         detectorImageHandle,...
-                        statusOutputTextHandle,...
+                        app,...
                         positionSavePath);
                     
                     positionDataType = PositionData(...
@@ -531,7 +570,9 @@ classdef Simulation < GyrfalconObject
                                            
                     positionDataType.saveBigData(positionSavePath);
                     
-                    angleData{zStep, xyStep} = positionDataType.clearBeforeSave();                    
+                    angleData{zStep, xyStep} = positionDataType.clearBeforeSave();  
+                    
+                    app = removeLastLineOfStatusOutput(app);
                 end
             end
             
@@ -541,7 +582,7 @@ classdef Simulation < GyrfalconObject
         end
         
         function [positionData, attenuationCoords, attenuationDistances, detectorCoords, sourceStartBoxCoords, sourceEndBoxCoords]...
-                = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, statusOutputTextHandle, positionSavePath)
+                = runScanSimulationForPerAnglePosition(simulation, axesHandle, slicePosition, angle, perAngleXY, perAngleZ, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, positionSavePath)
             diameter = [];
             
             [...
@@ -575,9 +616,7 @@ classdef Simulation < GyrfalconObject
             if displayDetectorRaster
                 rasterPlotHandles = {};
             end
-            
-            baseString = getString(statusOutputTextHandle);
-            
+                        
             totalNumStepStr = num2str(zNumDetectors*xyNumDetectors);
             
             [xCoords, yCoords, zCoords] = getAllDetectorCoords(simulation.detector, slicePosition, angle, perAngleXY, perAngleZ);
@@ -585,8 +624,10 @@ classdef Simulation < GyrfalconObject
             for zDetector=1:zNumDetectors
                 for xyDetector=1:xyNumDetectors                    
                     curNumStepStr = num2str(((zDetector-1)*zNumDetectors) + xyDetector);
-                    setString(statusOutputTextHandle, [baseString; {['  Detector ', curNumStepStr, '/', totalNumStepStr]}]);
-                    drawnow;
+                    newString = ['  Detector ', curNumStepStr, '/', totalNumStepStr];
+                    newLine = true;
+                    
+                    app = updateStatusOutput(app, newString, newLine);
                     
 %                     newDir = [Constants.Detector_Folder, ' (', num2str(zDetector), ',', num2str(xyDetector), ')'];
 %                     mkdir(positionSavePath, newDir);
@@ -614,7 +655,7 @@ classdef Simulation < GyrfalconObject
                         sourceDirectionUnitVector,...
                         detectorCornerCoords,...
                         displayDetectorRayTrace,...
-                        statusOutputTextHandle);
+                        app);
                                                          
                     positionData(zDetector, xyDetector) = detectorData;                    
                     attenuationCoords{zDetector, xyDetector} = attenuationCoordsForDetector;
@@ -625,6 +666,8 @@ classdef Simulation < GyrfalconObject
                         % update image data
                         set(detectorImageHandle, 'CData', positionData);
                     end
+                    
+                    app = removeLastLineOfStatusOutput(app);
                 end
             end
             
@@ -645,7 +688,7 @@ classdef Simulation < GyrfalconObject
                 sourceDirectionUnitVector,...
                 detectorCornerCoords,...
                 displayDetectorRayTrace,...
-                statusOutputTextHandle)
+                app)
             
             scatteringNoiseLevel = simulation.scatteringNoiseLevel;
             detectorNoiseLevel = simulation.detectorNoiseLevel;

@@ -15,56 +15,119 @@ classdef ReconstructionRun < ProcessingRun
             
         end
         
-        function handles = setGUI(run, handles)
+        function app = setGUI(run, app)
             [scanGeometry, errorMsg] = run.getScanGeometry();
-                            
-            if isempty(scanGeometry)
-                % set simulationRunScanGeometryText
-                setString(handles.simulationRunScanGeometryText, errorMsg);
                 
-                % set reconstructionAlgorithmSelectionPopupMenu
-                set(handles.reconstructionAlgorithmSelectionPopupMenu,...
-                    'Enable','inactive',...
-                    'String',{'None'});
+            % simulationRun 
+            if isempty(run.simulationRun)
+                app.SimulationRunInfoLoadPathLabel.Text = 'Simulation Run Not Loaded';
                 
-                % set reconstructionAlgorithmSettingsText
-                setString(handles.reconstructionAlgorithmSettingsText, '');
+                app.SimulationRunInfoStartDateTimeEditField.Value = '';
+                app.SimulationRunInfoRunTimeEditField.Value = '';
+                app.SimulationRunInfoGyrfalconVersionEditField.Value = '';
+                app.SimulationRunInfoDisplayFreeRunLamp.Color = [0.5 0.5 0.5]; % grey/out
                 
-                % set reconstructionAlgorithmSettingsEditButton
-                set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'off');
+                app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = {''};
+                app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = {''};
+                app.SimulationRunInfoNotesTextArea.Value = {''};
                 
-                % set controlPanelRunReconstructionButton
-                set(handles.controlPanelRunReconstructionButton, 'Enable', 'off');
-            else
-                % set simulationRunScanGeometryText
-                numSlices = num2str(length(run.simulationRun.simulation.scan.slices));
-                numAngles = num2str(length(run.simulationRun.simulation.scan.scanAngles));
+                app.SimulationRunInfoLoadSimulationButton.Enable = 'off';
+            else                
+                app.SimulationRunInfoLoadPathLabel.Text = run.simulationRun.getPath();
                 
-                geometryString = {...
-                    scanGeometry.displayString,...
-                    scanGeometry.shortDescriptionString,...
-                    [numAngles, ' Angles, ', numSlices, ' Slices']};
+                app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
+                app.SimulationRunInfoRunTimeEditField.Value = run.getRunTimeString();
+                app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.versionUsed];
+                app.SimulationRunInfoDisplayFreeRunLamp.Color = convertBoolToLampColour(run.displayFreeRun); % green/red
                 
-                setString(handles.simulationRunScanGeometryText, geometryString);
+                app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = simulation.getScanGeometryString(scanGeometry, errorMsg);
+                app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
+                app.SimulationRunInfoNotesTextArea.Value = run.notes;
                 
-                % set reconstructionAlgorithmSelectionPopupMenu                
-                setAlgorithmSelectionPopupMenu(...
-                    handles.reconstructionAlgorithmSelectionPopupMenu,...
-                    scanGeometry,...
-                    run.reconstruction);
-                
-                set(handles.reconstructionAlgorithmSelectionPopupMenu, 'Enable','on');
-                
-                % set reconstructionAlgorithmSettingsText
-                set(handles.reconstructionAlgorithmSettingsText,...
-                    'String', run.reconstruction.getSettingsString());
-                
-                % set reconstructionAlgorithmSettingsEditButton
-                set(handles.reconstructionAlgorithmSettingsEditButton, 'Enable', 'on');
-                
-                % set controlPanelRunReconstructionButton
-                set(handles.controlPanelRunReconstructionButton, 'Enable', 'on');
+                %app.SimulationRunInfoLoadSimulationButton.Enable = 'on'; %TODO
             end
+            
+            % reconstructionRun
+            savePath = run.getPath();
+            
+            if isempty(savePath)
+                app.ReconstructionRunSavePathLabel.Text = 'Select path...';
+            else
+                app.ReconstructionRunSavePathLabel.Text = savePath;
+            end
+            
+            if isempty(scanGeometry)
+                app.ReconstructionRunAlgorithmDropDown.Enable = 'off';
+                app.ReconstructionRunAlgorithmDropDown.Items = {'Invalid Scan Geometry'};
+                app.ReconstructionRunAlgorithmDropDown.ItemsData = {};
+                
+                app.DataSetReconRunReconstructionButton.Enable = 'off';
+                
+                % clear out tabs
+                hideAllAlgorithmSettingsTabs(app);
+            else
+                app.ReconstructionRunAlgorithmDropDown.Enable = 'on';
+                
+                setAlgorithmSelectionPopupMenu(...
+                    app.ReconstructionRunAlgorithmDropDown,...
+                    scanGeometry,...
+                    run.reconstruction)
+                
+                app.DataSetReconRunReconstructionButton.Enable = 'on';
+                
+                % set visible tab
+                hideAllAlgorithmSettingsTabs(app);
+                
+                tabHandle = run.reconstruction.getSettingsTabHandle(app);
+                tabHandle.Parent = app.ReconstructionAlgorithmSettingsTabGroup;
+                
+                app = run.reconstruction.setGUI(app);
+            end
+            
+            % recon settings
+            app.ReconstructionRunSliceDimsXEditField.Value = run.reconstruction.reconSliceDimensions(1);
+            app.ReconstructionRunSliceDimsYEditField.Value = run.reconstruction.reconSliceDimensions(2);
+            
+            % convert to mm
+            pixelDimsInMM = Units.mm.convertFromM(run.reconstruction.reconSliceVoxelDimensionsInM);
+            
+            app.ReconstructionRunSlicePixelDimsXEditField.Value = pixelDimsInMM(1);
+            app.ReconstructionRunSlicePixelDimsYEditField.Value = pixelDimsInMM(2);
+            
+            app.ReconstructionRunDataSetDimsXEditField.Value = run.reconstruction.reconDataSetDimensions(1);
+            app.ReconstructionRunDataSetDimsYEditField.Value = run.reconstruction.reconDataSetDimensions(2);
+            app.ReconstructionRunDataSetDimsZEditField.Value = run.reconstruction.reconDataSetDimensions(3);
+            
+            % convert to mm
+            voxelDimsInMM = Units.mm.convertFromM(run.reconstruction.reconDataSetVoxelDimensionsInM);
+            
+            app.ReconstructionRunDataSetVoxelDimsXEditField.Value = voxelDimsInMM(1);
+            app.ReconstructionRunDataSetVoxelDimsYEditField.Value = voxelDimsInMM(2);
+            app.ReconstructionRunDataSetVoxelDimsZEditField.Value = voxelDimsInMM(3);
+            
+            % interpolation type drop-down
+            app.ReconstructionRun3DInterpolationTypeDropDown.Value = run.reconstruction.reconDataSetInterpolationType;
+            
+            % set computerInfo
+            
+            % use GPU checkbox
+            app.ReconstructionRunUseGPUCheckBox.Value = run.computerInfo.gpuUsed;
+            
+            if isempty(run.computerInfo.gpuDevice)
+                app.ReconstructionRunUseGPUCheckBox.Enable = 'off';
+            else
+                app.ReconstructionRunUseGPUCheckBox.Enable = 'on';
+            end
+            
+            % number of CPUs
+            app.ReconstructionRunNumCPUsEditField.Value = run.computerInfo.numCoresUsed;
+            app.ReconstructionRunNumCPUsEditField.Limits = [1 run.computerInfo.cpuNumCores];
+            
+            numCPUsAvailableString = ['/' num2str(run.computerInfo.cpuNumCores)];
+            app.ReconstructionRunNumCPUsAvailableLabel.Text = numCPUsAvailableString;
+            
+            % notes
+            app.ReconstructionRunNotesTextArea.Value = run.notes;
         end
         
         function [scanGeometry, errorMsg] = getScanGeometry(run)
@@ -77,11 +140,13 @@ classdef ReconstructionRun < ProcessingRun
         end
         
         function run = setDefaultValues(run)
-            run.reconstruction = [];
+            run.reconstruction = Reconstruction();
             run.simulationRun = [];
+            
+            run.notes = '';
         end
         
-        function [] = runReconstruction(run, handles)
+        function [] = runReconstruction(run, app)
             % get save path
             savePath = run.simulationRun.savePath;
             
@@ -125,21 +190,24 @@ classdef ReconstructionRun < ProcessingRun
                 if ~cancel
                     % set status string with recon running
                     
-                    baseString = getString(handles.statusOutputText);
+                    newString = ['Reconstruction Run Start (', convertTimestampToString(now), ')'];
+                    newLine = true;
                     
-                    baseString = [baseString; {['Reconstruction Run Start (', convertTimestampToString(now), ')']}];
-                    
-                    setString(handles.statusOutputText, baseString);
+                    app = updateStatusOutput(app, newString, newLine);
                     
                     % run the recon
                     run = run.startProcessingRun(); % set start time
                     run.reconstruction = ...
-                        run.reconstruction.runReconstruction(run.simulationRun, handles);
+                        run.reconstruction.runReconstruction(run.simulationRun, app);
                     run = run.endProcessingRun(); % set end time
                     
                     % set status string complete
                     
-                    setString(handles.statusOutputText, [baseString; {['Reconstruction Run Complete (', convertTimestampToString(now), ')']}]);
+                    newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
+                    newLine = true;
+                    
+                    app = updateStatusOutput(app, newString, newLine);
+                    
                     
                     % perform the recon of the 3D data-set from recon'ed
                     % slices
@@ -203,17 +271,13 @@ function [] = setAlgorithmSelectionPopupMenu(handle, scanGeometry, choice)
         end
     end
     
-    set(handle,...
-        'String', algorithmChoiceStrings,...
-        'Value', index);
+    handle.Items = algorithmChoiceStrings;
+    handle.ItemsData = choices;
+    handle.Value = choices{index};
 end
 
 function [choice] = getChoiceFromAlgorithmSelectionPopupMenu(handle, scanGeometry)
-    [~, choices] = scanGeometry.getReconAlgorithmChoices();
-    
-    index = get(handle, 'Value');
-    
-    choice = choices{index};
+    choice = handle.Value;
 end
 
 function lastReconNumber = getLastReconNumber(path)

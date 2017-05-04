@@ -1,19 +1,19 @@
-function controlPanelRunScanSimButtonCallback(hObject, eventdata, handles)
-% controlPanelRunScanSimButtonCallback(hObject, eventdata, handles)
+function scanSimRunSimulationButtonCallback(app)
+% scanSimRunSimulationButtonCallback(app)
 % using the current simulation parameters specified by the GUI a simulation
 % is run
 
-simulation = handles.workspace.simulation;
+simulation = app.workspace.simulation;
 
-simulation = simulation.createFromGUI(handles);
+simulation = simulation.createFromGUI(app);
 
-displaySlices = isChecked(handles.scanSimViewSlices);
-displayAngles = isChecked(handles.scanSimViewAngles);
-displayPerAnglePosition = isChecked(handles.scanSimViewPerAnglePosition);
-displayDetectorRaster = isChecked(handles.scanSimViewDetectorRaster);
+displaySlices = app.SimulationRunShowSlicesCheckBox.Value;
+displayAngles = app.SimulationRunShowAnglesCheckBox.Value;
+displayPerAnglePosition = app.SimulationRunShowPerAngleRasterCheckBox.Value;
+displayDetectorRaster = app.SimulationRunShowDetectorRasterCheckBox.Value;
 
-displayDetectorValues = isChecked(handles.scanSimViewDetectorValues);
-displayDetectorRayTrace = isChecked(handles.scanSimViewDetectorRayTraces);
+displayDetectorValues = app.SimulationRunShowDetectorValuesCheckBox.Value;
+displayDetectorRayTrace = app.SimulationRunShowDetectorRayTracesCheckBox.Value;
 
 displayFreeRun = ~(displaySlices || displayAngles || displayPerAnglePosition || displayDetectorRaster || displayDetectorValues || displayDetectorRayTrace);
 
@@ -25,14 +25,14 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
     simulation = simulation.calibrateAndSetPhantomData();
     
     data = simulation.runScanSimulation(...
-        handles.axesHandle,...
+        app.axesHandle,...
         displaySlices,...
         displayAngles,...
         displayPerAnglePosition,...
         displayDetectorRaster,...
         displayDetectorValues,...
         displayDetectorRayTrace,...
-        handles.statusOutputText,...
+        app,...
         simulationRun.savePath);
     
     simulationRun = simulationRun.endRun(data);
@@ -42,8 +42,4 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
 end
 
 
-end
-
-function bool = isChecked(handle)
-    bool = strcmp(get(handle, 'Checked'), 'on');
 end
