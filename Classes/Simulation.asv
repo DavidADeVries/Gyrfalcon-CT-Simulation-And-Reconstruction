@@ -423,7 +423,7 @@ classdef Simulation < GyrfalconObject
             
             app = updateStatusOutput(app, newString, newLine);
             
-            app.StatusOutputLamp = [1 1 0]; % yellow
+            app.StatusOutputLamp.Color = [1 1 0]; % yellow
             
             for i=1:numSlices
                 newString = ['  Slice ', num2str(i), '/', num2str(numSlices)];
@@ -450,7 +450,7 @@ classdef Simulation < GyrfalconObject
             
             app = updateStatusOutput(app, newString, newLine);
             
-            app.StatusOutputLamp = [1 1 0]; % yellow
+            app.StatusOutputLamp.Color = [0 1 0]; % green
         end
         
         function string = getScanGeometryString(simulation, scanGeometry, errorMsg)
@@ -723,7 +723,276 @@ classdef Simulation < GyrfalconObject
                 displayDetectorRayTrace);
         end
         
+        function data = runScanSimulationHighPerformanceOnCPUs(simulation, simulationRun, app, savePath, numCPUs)
+            % SET-UP
+            newString = ['Simulation Run Start (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            app.StatusOutputLamp.Color = [1 1 0]; % yellow
+             
+            % START PARALLEL WORKER POOL
+            newString = ['Starting Parallel Worker Pool (', num2str(numCPUs), ' cores)...'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            parpool(numCPUS);
+            
+            newString = 'Complete';
+            newLine = false;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            % START THE TIMER!
+            
+            % GATHER INFORMATION FOR ALL BEAM TRACES
+            slices = simulation.scan.getSlicesInM();            
+            numSlices = length(slices);
+            
+            angles = simulation.scan.getScanAnglesInDegrees();
+            numAngles = length(angles);
+            
+            perAngleTranslationDimensions = simulation.scan.perAngleTranslationDimensions;
+            
+            xyNumSteps = perAngleTranslationDimensions(1);
+            zNumSteps = perAngleTranslationDimensions(2);
+            totalNumSteps = zNumSteps*xyNumSteps;
+            
+            xyNumDetectors = simulation.detector.wholeDetectorDimensions(1);
+            zNumDetectors = simulation.detector.wholeDetectorDimensions(2);
+            totalNumDetectors = xyNumDetectors * zNumDetectors;
+            
+            numBeamTraces = numSlices * numAngles * totalNumSteps * totalNumDetectors;
+            
+            % FIGURE OUT HOW TO PARALLELIZE
+            
+            maxNumBeamTraces = 0.75*simulationRun.computerInfo.getMaxArraySize(); % 75% of available memory
+            
+            parallelForSlices = true;
+            parallelForAngles = true;
+            parallelForPerAngleTranslation = true;
+            parallelForDetector = true;
+            
+            if numBeamTraces > maxNumBeamTraces
+                if totalNumDetectors > 1000 % worth parallelizing
+                    if numAngles * totalNumSteps * totalNumDetectors <= maxNumBeamTraces
+                        parallelForSlices = false;
+                    elseif totalNumSteps * totalNumDetectors <= maxNumBeamTraces
+                        parallelForAngles = false;
+                    elseif totalNumDetectors <= maxNumBeamTraces
+                        parallelForPerAngleTranslation = false;
+                    else
+                        error('Not enough memory for High Performance CPU simulation');
+                    end
+                else
+                    parallelForDetectors = false;
+                    
+                    if numSlices * numAngles * totalNumSteps > maxNumBeamTraces
+                        if numAngles * totalNumSteps <= maxNumBeamTraces
+                            parallelForSlices = false;
+                        elseif totalNumSteps <= maxNumBeamTraces
+                            parallelForAngles = false;
+                        else
+                            error('Not enough memory for High Performance CPU simulation');
+                        end
+                    end
+                end
+            end
+            
+%             sourceStartBoxCoordsForBeamTraces = zeros(4,3,numBeamTraces);
+%             sourceEndBoxCoordsForBeamTraces = zeros(4,3,numBeamTraces);
+%             detectorCornerCoords = zeros
+%                     sourceEndBoxCoords,...
+%                     sourceDirectionUnitVector,...
+%                     detectorCornerCoords,...
+%             
+%             for slicePosition = slices
+%                 for angle = angles
+%                     for zStep=1:zNumSteps
+%                         for xyStep=1:xyNumSteps
+%                             [perAngleXYInM, perAngleZInM] = simulation.scan.getPerAnglePositionInM(xyStep, zStep);
+%                             
+%                             diameter = [];
+%                             
+%                             [...
+%                                 sourceStartBoxCoords,...
+%                                 sourceEndBoxCoords,...
+%                                 sourceDirectionUnitVector,...
+%                                 perAngleShiftUsed] = ...
+%                                 simulation.source.getSourcePosition(...
+%                                 slicePosition,...
+%                                 angle,...
+%                                 perAngleXY,...
+%                                 perAngleZ,...
+%                                 diameter);
+%                             
+%                             detectorPosition = simulation.detector.getDetectorPosition(slicePosition, angle);
+%                             
+%                             [xCoords, yCoords, zCoords] = getAllDetectorCoords(simulation.detector, slicePosition, angle, perAngleXY, perAngleZ);
+%                             
+%                             for zDetector=1:zNumDetectors
+%                                 for xyDetector=1:xyNumDetectors
+%                                     
+%                                     clockwisePosZ = [xCoords(zDetector,xyDetector), yCoords(zDetector,xyDetector), zCoords(zDetector,xyDetector)];
+%                                     clockwiseNegZ = [xCoords(zDetector+1,xyDetector), yCoords(zDetector+1,xyDetector), zCoords(zDetector+1,xyDetector)];
+%                                     counterClockwisePosZ = [xCoords(zDetector,xyDetector+1), yCoords(zDetector,xyDetector+1), zCoords(zDetector,xyDetector+1)];
+%                                     counterClockwiseNegZ = [xCoords(zDetector+1,xyDetector+1), yCoords(zDetector+1,xyDetector+1), zCoords(zDetector+1,xyDetector+1)];
+%                                     
+%                                     detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
+%                                     
+%                                     
+%                                     [detectorData, attenuationCoordsForDetector, attenuationDistancesForDetector]...
+%                                         = simulation.runScanSimulationForDetector(...
+%                                         axesHandle,...
+%                                         sourceStartBoxCoords,...
+%                                         sourceEndBoxCoords,...
+%                                         sourceDirectionUnitVector,...
+%                                         detectorCornerCoords,...
+%                                         displayDetectorRayTrace,...
+%                                         app);
+%                                     
+%                                 end
+%                             end
+%                         end
+%                     end
+%                 end
+%             end
+            
+
+
+            % RUN BEAM TRACES
+            
+            scatteringNoiseLevel = simulation.scatteringNoiseLevel;
+            detectorNoiseLevel = simulation.detectorNoiseLevel;
+            partialPixel = simulation.partialPixelModelling;
+            partialPixelResolution = simulation.partialPixelResolution;
+            
+            beamCharacterization = simulation.scan.beamCharacterization;
+            
+            phantomData = simulation.phantom.dataSet.data;
+            voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
+            phantomLocationInM = simulation.phantom.getLocationInM();
+            
+            sourceDirectionUnitVector = []; %unneeded
+            displayDetectorRayTrace = false;
+            axesHandle = []; % unneeded
+            
+            numParallelNumTraces = ...
+                parallelForSlices * numSlices +...
+                parallelForAngles * numSlices +...
+                parallelForPerAngleTranslation * totalNumSteps +...
+                parallelForDetector * totalNumDetectors;
+            numNonParallelNumTraces = ...
+                ~parallelForSlices * numSlices +...
+                ~parallelForAngles * numSlices +...
+                ~parallelForPerAngleTranslation * totalNumSteps +...
+                ~parallelForDetector * totalNumDetectors;
+            
+            indexingLevels = [numSlices, numAngles, numZSteps, numXYSteps, zNumDetectors, xyNumDetectors];
+            parallelFlags = [...
+                parallelForSlices,...
+                parallelForAngles,...
+                parallelForPerAngleTranslation,...
+                parallelForPerAngleTranslation,...
+                parallelForDetector,...
+                parallelForDetector];
+            
+            for i=1:numNonParallelNumTraces
+                
+                nonParallelIndices = getIndices(i, indexingLevels, ~parallelFlags);
+                
+                detectorData = zeros(numParallelNumTraces,1);
+                
+                parfor j=1:numParallelNumTraces
+                    parallelIndices = getIndices(j, indexingLevels, parallelFlags);                    
+                    
+                    indices = nonParallelIndices + parallelIndices;
+                    
+                    sliceIndex = indices(1);
+                    angleIndex = indices(2);
+                    zStepIndex = indices(3);
+                    xyStepIndex = indices(4);
+                    zDetectorIndex = indices(5);
+                    xyDetectorIndex = indices(6);
+                    
+                    [perAngleXY, perAngleZ] = simulation.scan.getPerAnglePositionInM(xyStep, zStep);
+                    
+                    diameter = [];
+                    
+                    [...
+                        sourceStartBoxCoords,...
+                        sourceEndBoxCoords,...
+                        sourceDirectionUnitVector,...
+                        perAngleShiftUsed] = ...
+                        simulation.source.getSourcePosition(...
+                        slicePosition,...
+                        angle,...
+                        perAngleXY,...
+                        perAngleZ,...
+                        diameter);
+                    
+                    [xCoords, yCoords, zCoords] = getAllDetectorCoords(simulation.detector, slicePosition, angle, perAngleXY, perAngleZ);
+                    
+                    clockwisePosZ = [xCoords(zDetector,xyDetector), yCoords(zDetector,xyDetector), zCoords(zDetector,xyDetector)];
+                    clockwiseNegZ = [xCoords(zDetector+1,xyDetector), yCoords(zDetector+1,xyDetector), zCoords(zDetector+1,xyDetector)];
+                    counterClockwisePosZ = [xCoords(zDetector,xyDetector+1), yCoords(zDetector,xyDetector+1), zCoords(zDetector,xyDetector+1)];
+                    counterClockwiseNegZ = [xCoords(zDetector+1,xyDetector+1), yCoords(zDetector+1,xyDetector+1), zCoords(zDetector+1,xyDetector+1)];
+                    
+                    detectorCornerCoords = [clockwisePosZ; clockwiseNegZ; counterClockwisePosZ; counterClockwiseNegZ];
+                    
+                    
+                    
+                    [detectorData, ~, ~] = ...
+                        runBeamTrace(...
+                        axesHandle,...
+                        sourceStartBoxCoords,...
+                        sourceEndBoxCoords,...
+                        sourceDirectionUnitVector,...
+                        detectorCornerCoords,...
+                        phantomData,...
+                        voxelDimsInM,...
+                        phantomLocationInM,...
+                        beamCharacterization,...
+                        scatteringNoiseLevel,...
+                        detectorNoiseLevel,...
+                        partialPixel,...
+                        partialPixelResolution,...
+                        displayDetectorRayTrace);
+                end
+                
+                writeDetectorDataToDisk(detectorData);
+            end
+            
+            % DISTRIBUTE INFORMATION BACK
+            
+            % END THE TIMER!
+            
+            % WRITE RESULTS TO DISK
+            
+            % TEAR-DOWN
+            newString = ['Simulation Run Complete (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            app.StatusOutputLamp.Color = [0 1 0]; % green
+        end
+        
+        function data = runScanSimulationHighPerformanceOnGPU(simulation, app, savePath)
+            
+            
+        end
+        
     end
     
 end
 
+% HELPER FUNCTIONS %
+
+function indices = getIndices(index, indexingLevels, useFlags)
+    dims = ~useFlags + useFlags.*indexingLevels; % dim of 1 at unused levels
+
+    [indices(1), indices(2), indices(3), indices(4), indices(5), indices(6)] = ind2sub(dims, index);
+end

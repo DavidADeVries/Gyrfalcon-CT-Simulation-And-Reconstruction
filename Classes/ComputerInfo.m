@@ -47,6 +47,13 @@ classdef ComputerInfo
             info.systemMemory = system;
         end
         
+        function size = getMaxArraySize(info)
+            maxNumBytes = info.userMemory.MaxPossibleArrayBytes;
+            maxNumDoubles = maxNumBytes ./ 8;
+            
+            size = maxNumDoubles;
+        end
+        
         function string = getSummaryString(info)
             str0 = 'Computer Information';
             
