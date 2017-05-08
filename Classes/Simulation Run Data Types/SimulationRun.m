@@ -162,11 +162,11 @@ classdef SimulationRun < ProcessingRun
             simulationRun = simulationRun.createSaveDir();
         end
         
-        function simulationRun = endRun(simulationRun, data)
+        function simulationRun = endRun(simulationRun)
             simulationRun = simulationRun.endProcessingRun();
             
             % SimulationRun specific
-            simulationRun.sliceData = data;
+            simulationRun.sliceData = [];
         end
         
         function run = clearBeforeSave(run)

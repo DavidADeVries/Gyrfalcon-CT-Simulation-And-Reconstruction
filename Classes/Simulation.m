@@ -385,7 +385,9 @@ classdef Simulation < GyrfalconObject
             [scanGeometry, errorMsg] = boolLogicForFindScanGeometry(simulation);
         end
         
-        function data = runScanSimulation(simulation, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, app, savePath)
+        function simulationRun = runScanSimulation(simulation, simulationRun, axesHandle, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, app)
+            savePath = simulationRun.savePath;
+            
             slices = simulation.scan.getSlicesInM();
             
             numSlices = length(slices);
@@ -418,6 +420,9 @@ classdef Simulation < GyrfalconObject
                 detectorImageHandle = [];
             end
             
+            
+            simulationRun = simulationRun.startRun();
+            
             newString = ['Simulation Run Start (', convertTimestampToString(now), ')'];
             newLine = true;
             
@@ -443,7 +448,9 @@ classdef Simulation < GyrfalconObject
                 
                 data{i} = SliceData(sliceData, slicePosition);
                 
-            end   
+            end
+              
+            simulationRun = simulationRun.endRun();
             
             newString = ['Simulation Run Complete (', convertTimestampToString(now), ')'];
             newLine = true;
@@ -723,7 +730,7 @@ classdef Simulation < GyrfalconObject
                 displayDetectorRayTrace);
         end
         
-        function data = runScanSimulationHighPerformanceOnCPUs(simulation, simulationRun, app, savePath, numCPUs)
+        function simulationRun = runScanSimulationHighPerformanceOnCPUs(simulation, simulationRun, app, savePath, numCPUs)
             % SET-UP
             newString = ['Simulation Run Start (', convertTimestampToString(now), ')'];
             newLine = true;
@@ -746,6 +753,7 @@ classdef Simulation < GyrfalconObject
             app = updateStatusOutput(app, newString, newLine);
             
             % START THE TIMER!
+            simulationRun = simulationRun.startRun();
             
             % GATHER INFORMATION FOR ALL BEAM TRACES
             slices = simulation.scan.getSlicesInM();            
@@ -787,7 +795,7 @@ classdef Simulation < GyrfalconObject
                         error('Not enough memory for High Performance CPU simulation');
                     end
                 else
-                    parallelForDetectors = false;
+                    parallelForDetector = false;
                     
                     if numSlices * numAngles * totalNumSteps > maxNumBeamTraces
                         if numAngles * totalNumSteps <= maxNumBeamTraces
@@ -905,21 +913,32 @@ classdef Simulation < GyrfalconObject
                 
                 detectorData = zeros(numParallelNumTraces,1);
                 
+                parallelBeamTraceIndices = repmat(nonParallelIndices, numParallelNumTraces, 6);
+                
+                % set parallel params
+                
+                for j=1:numParallelNumTraces
+                    parallelIndices = getIndices(j, indexingLevels, parallelFlags);
+                    
+                    for k=1:6
+                        if parallelFlags(k)
+                            parallelBeamTraceIndices(j,k) = parallelIndices(k);
+                        end
+                    end
+                    
+                end
+                    
+                % run parallel computations
                 parfor j=1:numParallelNumTraces
-                    parallelIndices = getIndices(j, indexingLevels, parallelFlags);                    
-                    
-                    indices = nonParallelIndices + parallelIndices;
-                    
-                    sliceIndex = indices(1);
-                    angleIndex = indices(2);
+                    indices = parallelBeamTraceIndices(j,:);                    
+                                        
+                    slicePosition = slices(indices(1));
+                    angle = angles(indices(2));
                     zStep = indices(3);
                     xyStep = indices(4);
                     zDetector = indices(5);
                     xyDetector = indices(6);
-                    
-                    slicePosition = slices(sliceIndex);
-                    angle = angles(angleIndex);
-                    
+                                        
                     [perAngleXY, perAngleZ] = simulation.scan.getPerAnglePositionInM(xyStep, zStep);
                     
                     diameter = [];
@@ -963,27 +982,35 @@ classdef Simulation < GyrfalconObject
                         displayDetectorRayTrace);
                 end
                 
-                writeDetectorDataToDisk(detectorData);
+                writeDetectorDataToDisk(detectorData, simulationRun.savePath, parallelBeamTraceIndices, parallelForDetector);
             end
-            
-            % DISTRIBUTE INFORMATION BACK
-            
+                        
             % END THE TIMER!
+            simulationRun = simulationRun.endRun();
+                        
+            % TEAR-DOWN            
             
-            % WRITE RESULTS TO DISK
+            % END PARALLEL WORKER POOL
+            newString = ['Closing Parallel Worker Pool (', num2str(numCPUs), ' cores)...'];
+            newLine = true;
             
-            % TEAR-DOWN
+            app = updateStatusOutput(app, newString, newLine);
+            
+            delete(gcp);
+            
+            % Show finish on Output Status
             newString = ['Simulation Run Complete (', convertTimestampToString(now), ')'];
             newLine = true;
             
             app = updateStatusOutput(app, newString, newLine);
             
             app.StatusOutputLamp.Color = [0 1 0]; % green
+            
         end
         
-        function data = runScanSimulationHighPerformanceOnGPU(simulation, app, savePath)
-            
-            
+        function simulationRun = runScanSimulationHighPerformanceOnGPU(simulation, simulationRun, app)
+            simulationRun = simulationRun.startRun();
+            simulationRun = simulationRun.endRun();
         end
         
     end
@@ -996,4 +1023,37 @@ function indices = getIndices(index, indexingLevels, useFlags)
     dims = ~useFlags + useFlags.*indexingLevels; % dim of 1 at unused levels
 
     [indices(1), indices(2), indices(3), indices(4), indices(5), indices(6)] = ind2sub(dims, index);
+end
+
+function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceIndices, parallelFlags, indexLevels, angles)
+    parallelForDetector = parallelFlags(5) & parallelFlags(6);
+    
+    numBeamTraces = length(detectorData);
+    numPixelsInDetector = indexLevels(5) * indexLevels(6);
+    
+    if parallelForDetector
+        numDetectorImages = numBeamTraces / numPixelsInDetector;
+        
+        for i=1:numDetectorImages
+            detectorImage = detectorData((i-1)*numPixelsInDetector+1, (i)*numPixelsInDetector);
+            
+            detectorImage = reshape(detectorImage, indexLevels(5), indexLevels(6));
+            
+            saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices, angles);
+        end
+    else
+        error('No specified action for saving Non-Parallelized Detector Calculation');
+    end
+end
+
+function [] = saveDetectorImage(detectorData, savePath, indices, angles)
+    sliceFolder = [Constants.Slice_Folder, ' ', num2str(indices(1))];
+    angleFolder = [Constants.Angle_Folder, ' ', num2str(angles(indices(2)))];
+    positionFolder = [Constants.Position_Folder, ' (', indices(3), ',' indices(4), ')'];
+    
+    fileName = [Constants.Detector_Data_Filename, Constants.Matlab_File_Extension];
+    
+    writePath = makePath(savePath, sliceFolder, angleFolder, positionFolder, fileName);
+    
+    save(writePath, Constants.Detector_Data_Var_Name);
 end

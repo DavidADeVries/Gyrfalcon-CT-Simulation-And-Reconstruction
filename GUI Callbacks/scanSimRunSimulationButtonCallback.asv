@@ -17,14 +17,18 @@ displayDetectorRayTrace = app.SimulationRunShowDetectorRayTracesCheckBox.Value;
 
 displayFreeRun = ~(displaySlices || displayAngles || displayPerAnglePosition || displayDetectorRaster || displayDetectorValues || displayDetectorRayTrace);
 
+% set simulationRun
 simulationRun = app.workspace.simulationRun;
+
 simulationRun.displayFreeRun = displayFreeRun;
+simulationRun.simulation = simulation;
 
 if ~isempty(simulationRun) && simulationRun.isValidForSave()
     simulationRun = simulationRun.startRun();
     
     simulation = simulation.calibrateAndSetPhantomData();
     
+    if ~displayFreeRun %no parallelization possible
     data = simulation.runScanSimulation(...
         app.axesHandle,...
         displaySlices,...
@@ -35,6 +39,11 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
         displayDetectorRayTrace,...
         app,...
         simulationRun.savePath);
+    elseif simulationRun.computerInfo.usedGPU
+        
+    else
+        
+    end
     
     simulationRun = simulationRun.endRun(data);
     
