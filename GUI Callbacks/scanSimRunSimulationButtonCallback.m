@@ -19,6 +19,7 @@ displayFreeRun = ~(displaySlices || displayAngles || displayPerAnglePosition || 
 
 % set simulationRun
 simulationRun = app.workspace.simulationRun;
+simulationRun = simulationRun.createFromGUI(app);
 
 simulationRun.displayFreeRun = displayFreeRun;
 simulationRun.simulation = simulation;
@@ -38,7 +39,7 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
             displayDetectorValues,...
             displayDetectorRayTrace,...
             app);
-    elseif simulationRun.computerInfo.usedGPU % GPU computation
+    elseif simulationRun.computerInfo.gpuUsed % GPU computation
         simulationRun = simulation.runScanSimulationHighPerformanceOnGPU(...
             simulationRun,...
             app);

@@ -11,6 +11,13 @@ pointDetectorCoords = roundToNanoM(pointDetectorCoords);
 sourceEndBoxCoords = roundToNanoM(sourceEndBoxCoords);
 
 if pointIsWithinSourceBeamCone(pointDetectorCoords, pointSourceCoords, sourceEndBoxCoords)
+    
+    rawDetectorValue = fastRayTrace(...
+        pointSourceCoords, pointDetectorCoords,...
+        phantomLocationInM, voxelDimsInM, phantomData,...
+        beamCharacterization);
+    
+    
     % describe line in 3 space
     [deltas, point] = createLineEquation(pointSourceCoords, pointDetectorCoords);
         
