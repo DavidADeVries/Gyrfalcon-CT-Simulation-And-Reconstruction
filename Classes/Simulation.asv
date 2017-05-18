@@ -853,98 +853,111 @@ classdef Simulation < GyrfalconObject
             
             
             
-%             indexingLevels = [numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors];
-%             parallelFlags = [...
-%                 parallelForSlices,...
-%                 parallelForAngles,...
-%                 parallelForPerAngleTranslation,...
-%                 parallelForPerAngleTranslation,...
-%                 parallelForDetector,...
-%                 parallelForDetector];
-%             
-%             multTemp = [...
-%                 parallelForSlices * numSlices,...
-%                 parallelForAngles * numAngles,...
-%                 parallelForPerAngleTranslation * zNumSteps,...
-%                 parallelForPerAngleTranslation * xyNumSteps,...
-%                 parallelForDetector * xyNumDetectors,...
-%                 parallelForDetector * zNumDetectors];
-%             
-%             numParallelNumTraces = prod(multTemp(parallelFlags));
-%             numNonParallelNumTraces = prod(multTemp(~parallelFlags));
-%             
-%             if numNonParallelNumTraces == 0
-%                 numNonParallelNumTraces = 1; %need at least 1 run (to allow the non-parallel to go)
-%             end
-%             
-%             for i=1:numNonParallelNumTraces
-%                 
-%                 nonParallelIndices = getIndices(i, indexingLevels, ~parallelFlags);
-%                                 
-%                 parallelBeamTraceIndices = repmat(nonParallelIndices, numParallelNumTraces, 1);
-%                 
-%                 % set parallel params
-%                 
-%                 for j=1:numParallelNumTraces
-%                     parallelIndices = getIndices(j, indexingLevels, parallelFlags);
-%                     
-%                     for k=1:6
-%                         if parallelFlags(k)
-%                             parallelBeamTraceIndices(j,k) = parallelIndices(k);
-%                         end
-%                     end
-%                     
-%                 end
-%                 
-%                 % copy out variables to avoid unecesary broadcasting
-% %                 source = parallel.pool.Constant(simulation.source);
-% %                 scan = parallel.pool.Constant(simulation.scan);
-% %                 detector = parallel.pool.Constant(simulation.detector);
-%                 slices = slices;
-%                 angles = angles;
-%                 
-%                 scatteringNoiseLevel = simulation.scatteringNoiseLevel;
-%                 detectorNoiseLevel = simulation.detectorNoiseLevel;
-%                 partialPixel = simulation.partialPixelModelling;
-%                 partialPixelResolution = simulation.partialPixelResolution;
-%                 
-%                 beamCharacterization = parallel.pool.Constant(simulation.scan.beamCharacterization);
-%                 
-%                 phantomData = parallel.pool.Constant(simulation.phantom.dataSet.data);
-%                 phantomDims = simulation.phantom.getDataSetDimensions();
-%                 voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
-%                 phantomLocationInM = simulation.phantom.getLocationInM();
-%                 
-%                 sourceDirectionUnitVector = []; %unneeded
-%                 displayDetectorRayTrace = false;
-%                 axesHandle = []; % unneeded
-%                 
-%                 source = simulation.source;
-%                 scan = simulation.scan;
-%                 detector = simulation.detector;
-%                 
-%                 beamCharacterization = simulation.scan.beamCharacterization;
-%                 phantomData = simulation.scan.beamCharacterization.calibratedPhantomDataSet{1};
-%                 
-%                 %ticBytes(gcp);
-%                                 
-%                 % run parallel computations
-%                 for j=1:numParallelNumTraces
-%                     
-%                     indices = parallelBeamTraceIndices(j,:);                    
-%                                         
-%                     slicePosition = slices(indices(1));
-%                     angle = angles(indices(2));
-%                     zStep = indices(3);
-%                     xyStep = indices(4);
-%                     zDetector = indices(5);
-%                     xyDetector = indices(6);
-%                           
-%                     funcCalls(j) = parfeval(poolHandle,...
-%                         @runBeamTraceHighPerformanceWrapper, 1,...
+            indexingLevels = [numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors];
+            parallelFlags = [...
+                parallelForSlices,...
+                parallelForAngles,...
+                parallelForPerAngleTranslation,...
+                parallelForPerAngleTranslation,...
+                parallelForDetector,...
+                parallelForDetector];
+            
+            multTemp = [...
+                parallelForSlices * numSlices,...
+                parallelForAngles * numAngles,...
+                parallelForPerAngleTranslation * zNumSteps,...
+                parallelForPerAngleTranslation * xyNumSteps,...
+                parallelForDetector * xyNumDetectors,...
+                parallelForDetector * zNumDetectors];
+            
+            numParallelNumTraces = prod(multTemp(parallelFlags));
+            numNonParallelNumTraces = prod(multTemp(~parallelFlags));
+            
+            if numNonParallelNumTraces == 0
+                numNonParallelNumTraces = 1; %need at least 1 run (to allow the non-parallel to go)
+            end
+            
+            for i=1:numNonParallelNumTraces
+                
+                nonParallelIndices = getIndices(i, indexingLevels, ~parallelFlags);
+                                
+                parallelBeamTraceIndices = repmat(nonParallelIndices, numParallelNumTraces, 1);
+                
+                % set parallel params
+                
+                for j=1:numParallelNumTraces
+                    parallelIndices = getIndices(j, indexingLevels, parallelFlags);
+                    
+                    for k=1:6
+                        if parallelFlags(k)
+                            parallelBeamTraceIndices(j,k) = parallelIndices(k);
+                        end
+                    end
+                    
+                end
+                
+                % copy out variables to avoid unecesary broadcasting
+%                 source = parallel.pool.Constant(simulation.source);
+%                 scan = parallel.pool.Constant(simulation.scan);
+%                 detector = parallel.pool.Constant(simulation.detector);
+                slices = slices;
+                angles = angles;
+                
+                scatteringNoiseLevel = simulation.scatteringNoiseLevel;
+                detectorNoiseLevel = simulation.detectorNoiseLevel;
+                partialPixel = simulation.partialPixelModelling;
+                partialPixelResolution = simulation.partialPixelResolution;
+                
+                beamCharacterization = parallel.pool.Constant(simulation.scan.beamCharacterization);
+                
+                phantomData = parallel.pool.Constant(simulation.phantom.dataSet.data);
+                phantomDims = simulation.phantom.getDataSetDimensions();
+                voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
+                phantomLocationInM = simulation.phantom.getLocationInM();
+                
+                sourceDirectionUnitVector = []; %unneeded
+                displayDetectorRayTrace = false;
+                axesHandle = []; % unneeded
+                
+                source = simulation.source;
+                scan = simulation.scan;
+                detector = simulation.detector;
+                
+                beamCharacterization = simulation.scan.beamCharacterization;
+                phantomData = simulation.scan.beamCharacterization.calibratedPhantomDataSet{1};
+                
+                %ticBytes(gcp);
+                                
+                % run parallel computations
+                for j=1:numParallelNumTraces
+                    
+                    indices = parallelBeamTraceIndices(j,:);                    
+                                        
+                    slicePosition = slices(indices(1));
+                    angle = angles(indices(2));
+                    zStep = indices(3);
+                    xyStep = indices(4);
+                    zDetector = indices(5);
+                    xyDetector = indices(6);
+                          
+                    funcCalls(j) = parfeval(poolHandle,...
+                        @runBeamTraceHighPerformanceWrapper, 1,...
+                        scan, source, detector,...
+                        slicePosition, angle, zStep, xyStep, zDetector, xyDetector,...
+                        phantomData,...
+                        voxelDimsInM,...
+                        phantomLocationInM,...
+                        beamCharacterization,...
+                        scatteringNoiseLevel,...
+                        detectorNoiseLevel,...
+                        partialPixel,...
+                        partialPixelResolution);
+
+%                     detectorData(j) = runBeamTraceHighPerformanceWrapper(...
 %                         scan, source, detector,...
 %                         slicePosition, angle, zStep, xyStep, zDetector, xyDetector,...
 %                         phantomData,...
+%                         phantomDims,...
 %                         voxelDimsInM,...
 %                         phantomLocationInM,...
 %                         beamCharacterization,...
@@ -952,55 +965,42 @@ classdef Simulation < GyrfalconObject
 %                         detectorNoiseLevel,...
 %                         partialPixel,...
 %                         partialPixelResolution);
-% 
-% %                     detectorData(j) = runBeamTraceHighPerformanceWrapper(...
-% %                         scan, source, detector,...
-% %                         slicePosition, angle, zStep, xyStep, zDetector, xyDetector,...
-% %                         phantomData,...
-% %                         phantomDims,...
-% %                         voxelDimsInM,...
-% %                         phantomLocationInM,...
-% %                         beamCharacterization,...
-% %                         scatteringNoiseLevel,...
-% %                         detectorNoiseLevel,...
-% %                         partialPixel,...
-% %                         partialPixelResolution);
-% 
-%                 end
-%                 
-%                 % wait for all results to come in
-%                 newString = '  Beam Traces: 0/0';
-%                 newLine = true;
-%                 
-%                 app = updateStatusOutput(app, newString, newLine);
-%                 
-%                 numComplete = 0;
-%                 detectorData = zeros(numParallelNumTraces,1);
-%                 timeout = 2;
-%                 outOfString = num2str(numParallelNumTraces);
-%                 
-%                 while numComplete < numParallelNumTraces
-%                     
-%                     [index, singleData] = fetchNext(funcCalls, timeout);
-%                     
-%                     if ~isempty(index)
-%                         detectorData(index) = singleData;
-%                         numComplete = numComplete + 1;
-%                         
-%                         if mod(numComplete,500) == 0
-%                             removeLastLineOfStatusOutput(app);
-%                             
-%                             newString = ['  Beam Traces: ', num2str(numComplete), '/', outOfString];
-%                             newLine = true;
-%                             
-%                             app = updateStatusOutput(app, newString, newLine);
-%                         end
-%                     end
-%                 end
-%                 
-% %                 tocBytes(gcp);
-%                 writeDetectorDataToDisk(detectorData, simulationRun.savePath, parallelBeamTraceIndices, parallelFlags, indexingLevels, angles);
-%             end
+
+                end
+                
+                % wait for all results to come in
+                newString = '  Beam Traces: 0/0';
+                newLine = true;
+                
+                app = updateStatusOutput(app, newString, newLine);
+                
+                numComplete = 0;
+                detectorData = zeros(numParallelNumTraces,1);
+                timeout = 2;
+                outOfString = num2str(numParallelNumTraces);
+                
+                while numComplete < numParallelNumTraces
+                    
+                    [index, singleData] = fetchNext(funcCalls, timeout);
+                    
+                    if ~isempty(index)
+                        detectorData(index) = singleData;
+                        numComplete = numComplete + 1;
+                        
+                        if mod(numComplete,500) == 0
+                            removeLastLineOfStatusOutput(app);
+                            
+                            newString = ['  Beam Traces: ', num2str(numComplete), '/', outOfString];
+                            newLine = true;
+                            
+                            app = updateStatusOutput(app, newString, newLine);
+                        end
+                    end
+                end
+                
+%                 tocBytes(gcp);
+                writeDetectorDataToDisk(detectorData, simulationRun.savePath, parallelBeamTraceIndices, parallelFlags, indexingLevels, angles);
+            end
                         
             % END THE TIMER!
             simulationRun = simulationRun.endRun();
