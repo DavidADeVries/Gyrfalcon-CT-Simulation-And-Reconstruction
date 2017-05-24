@@ -8,6 +8,8 @@ classdef GyrfalconWorkspace < GyrfalconObject
         simulationRun
         
         reconstructionRun
+        
+        simulationRunForViewing
     end
     
     methods
@@ -45,6 +47,8 @@ classdef GyrfalconWorkspace < GyrfalconObject
             reconRun = reconRun.setDefaultValues();
             
             workspace.reconstructionRun = reconRun;
+            
+            workspace.simulationRunForViewing = SimulationRun;
         end
         
         function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace)
@@ -116,6 +120,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
             app = workspace.simulation.setGUI(app);
             app = workspace.simulationRun.setGUIForScanSimulation(app);
             app = workspace.reconstructionRun.setGUI(app);
+            app = workspace.simulationRunForViewing.setGUIForScanSimulationViewer(app);
         end
         
         function workspace = createFromGUI(workspace, app)

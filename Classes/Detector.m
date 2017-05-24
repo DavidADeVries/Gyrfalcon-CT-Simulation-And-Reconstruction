@@ -101,6 +101,15 @@ classdef Detector < GyrfalconObject
         
         function detector = loadFields(detector)
         end
+        
+        function bool = isDetectorPlanarAnd2D(detector)
+            is2D1 = detector.singleDetectorDimensions(1).value > 0;
+            is2D2 = detector.singleDetectorDimensions(2).value > 0;
+            isPlanar1 = detector.singleDetectorDimensions(1).isPlanar();
+            isPlanar2 = detector.singleDetectorDimensions(2).isPlanar();
+            
+            bool = is2D1 & is2D2 * isPlanar1 & isPlanar2;
+        end
 
         function dimensions = getSingleDetectorDimensionsInM(detector)
             radiusInM = detector.getDistanceBetweenOriginAndDetectorCentrePointInM();

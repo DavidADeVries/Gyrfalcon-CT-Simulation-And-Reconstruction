@@ -17,7 +17,7 @@ function miss1Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -37,7 +37,7 @@ function miss2Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -57,7 +57,7 @@ function miss3Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -77,7 +77,7 @@ function miss4Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -97,7 +97,7 @@ function miss5Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -117,7 +117,7 @@ function miss6Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -137,7 +137,7 @@ function miss7Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -157,7 +157,7 @@ function miss8Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -177,7 +177,7 @@ function miss9Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     verifyEqual(testCase,detectorValue,100,'AbsTol',1E-9);
 end
@@ -199,7 +199,7 @@ function hit_BasicXTraversal_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.2*1));
     
@@ -221,7 +221,7 @@ function hit_BasicXTraversalOpposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.2*1));
     
@@ -243,7 +243,7 @@ function hit_BasicXTraversalLower_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.3*1 + 0.4*1));
     
@@ -265,7 +265,7 @@ function hit_BasicXTraversalOnTheLine_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.2*1));
     
@@ -287,7 +287,7 @@ function hit_BasicYTraversal_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.3*1));
     
@@ -309,7 +309,7 @@ function hit_BasicYTraversalOpposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.3*1));
     
@@ -331,7 +331,7 @@ function hit_BasicYTraversalRight_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*1 + 0.4*1));
     
@@ -353,7 +353,7 @@ function hit_BasicYTraversalOnTheLine_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*1 + 0.4*1));
     
@@ -377,7 +377,7 @@ function hit_BasicYTraversalJustOverTheLine_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.3*1));
     
@@ -402,7 +402,7 @@ function hit_BasicZTraversal_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*1 + 0.6*1));
     
@@ -426,7 +426,7 @@ function hit_BasicZTraversalOpposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*1 + 0.6*1));
     
@@ -450,7 +450,7 @@ function hit_BasicZTraversalShifted_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*1 + 0.5*1));
     
@@ -474,7 +474,7 @@ function hit_BasicZTraversalOnTheLine_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*1 + 0.6*1));
     
@@ -498,7 +498,7 @@ function hit_BasicZTraversalJustOverTheLine_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.3*1 + 0.7*1));
     
@@ -522,7 +522,7 @@ function hit_XYAngle_1VoxelHit_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*sqrt(0.5)));
     
@@ -546,7 +546,7 @@ function hit_XYAngle_1VoxelHit_Opposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*sqrt(0.5)));
     
@@ -568,7 +568,7 @@ function hit_XYAngle_1VoxelHit2_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.4*sqrt(0.5)));
     
@@ -592,7 +592,7 @@ function hit_XYAngle_1VoxelHit2_Opposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.4*sqrt(0.5)));
     
@@ -614,7 +614,7 @@ function hit_XYAngle_1VoxelHit3_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*sqrt(0.5)));
     
@@ -638,7 +638,7 @@ function hit_XYAngle_1VoxelHit3_Opposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*sqrt(0.5)));
     
@@ -660,7 +660,7 @@ function hit_XYAngle_1VoxelHit4_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.3*sqrt(0.5)));
     
@@ -684,7 +684,7 @@ function hit_XYAngle_1VoxelHit4_Opposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.3*sqrt(0.5)));
     
@@ -707,7 +707,7 @@ function hit_XYAngle_Corner2Corner_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*sqrt(2)+0.4*sqrt(2)));
     
@@ -729,7 +729,7 @@ function hit_XYAngle_Corner2Corner_Opposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.1*sqrt(2)+0.4*sqrt(2)));
     
@@ -752,7 +752,7 @@ function hit_XYAngle_Corner2Corner2_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*sqrt(2)+0.3*sqrt(2)));
     
@@ -774,7 +774,7 @@ function hit_XYAngle_Corner2Corner2_Opposite_Test(testCase)
 
     detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
         phantomLocationInM, phantomDims, voxelDimsInM,...
-        phantomData, beam);
+        phantomData, beam.rawIntensity);
     
     expected = 100*exp(-(0.2*sqrt(2)+0.3*sqrt(2)));
     

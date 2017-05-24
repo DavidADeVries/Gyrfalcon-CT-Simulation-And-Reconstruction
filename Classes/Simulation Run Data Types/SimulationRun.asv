@@ -193,11 +193,10 @@ classdef SimulationRun < ProcessingRun
                 
                 imshow(image, [], 'Parent', app.SimulationViewerAxes);
                 
-                dims = size(image);
+                dims(size(image));
                 
-                app.SimulationViewerAxes.XLim = [0 dims(2)+0.5];
-                app.SimulationViewerAxes.YLim = [0 dims(1)+0.5];
-                app.SimulationViewerAxes.BackgroundColor = [0 0 0];
+                app.SimulationViewerAxes.XLim = [0 dims(2)];
+                app.SimulationViewerAxes.YLim = [0 dims(1)];
             end            
         end
         

@@ -25,7 +25,7 @@ classdef ReconstructionRun < ProcessingRun
                 app.SimulationRunInfoStartDateTimeEditField.Value = '';
                 app.SimulationRunInfoRunTimeEditField.Value = '';
                 app.SimulationRunInfoGyrfalconVersionEditField.Value = '';
-                app.SimulationRunInfoDisplayFreeRunLamp.Color = [0.5 0.5 0.5]; % grey/out
+                app.SimulationRunInfoRunPerformanceEditField.Value = ''; 
                 
                 app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = {''};
                 app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = {''};
@@ -38,7 +38,7 @@ classdef ReconstructionRun < ProcessingRun
                 app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
                 app.SimulationRunInfoRunTimeEditField.Value = run.getRunTimeString();
                 app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.versionUsed];
-                app.SimulationRunInfoDisplayFreeRunLamp.Color = convertBoolToLampColour(run.displayFreeRun); % green/red
+                app.SimulationRunInfoRunPerformanceEditField.Value = run.performanceType.displayString; 
                 
                 app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = simulation.getScanGeometryString(scanGeometry, errorMsg);
                 app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();

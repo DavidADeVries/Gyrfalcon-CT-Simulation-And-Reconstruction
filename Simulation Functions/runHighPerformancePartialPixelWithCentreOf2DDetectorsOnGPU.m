@@ -1,54 +1,58 @@
-function [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsSimulation(simulation, simulationRun, app, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, parallelForSlices, parallelForAngles, parallelForPerAngleTranslation, parallelForDetector)
-% [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsSimulation(simulation, simulationRun, app, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, parallelForSlices, parallelForAngles, parallelForPerAngleTranslation, parallelForDetector)
+function [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsOnGPU(simulation, simulationRun, app, runIsParallel, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, optimizeForSlices, optimizeForAngles, optimizeForPerAngleTranslation, optimizeForDetector)
+% [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsOnGPU(simulation, simulationRun, app, runIsParallel, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, optimizeForSlices, optimizeForAngles, optimizeForPerAngleTranslation, optimizeForDetector)
 
 indexingLevels = [numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors];
-parallelFlags = [...
-    parallelForSlices,...
-    parallelForAngles,...
-    parallelForPerAngleTranslation,...
-    parallelForPerAngleTranslation,...
-    parallelForDetector,...
-    parallelForDetector];
+optimizeFlags = [...
+    optimizeForSlices,...
+    optimizeForAngles,...
+    optimizeForPerAngleTranslation,...
+    optimizeForPerAngleTranslation,...
+    optimizeForDetector,...
+    optimizeForDetector];
 
 multTemp = [...
-    parallelForSlices * numSlices,...
-    parallelForAngles * numAngles,...
-    parallelForPerAngleTranslation * zNumSteps,...
-    parallelForPerAngleTranslation * xyNumSteps,...
-    parallelForDetector * xyNumDetectors,...
-    parallelForDetector * zNumDetectors];
+    optimizeForSlices * numSlices,...
+    optimizeForAngles * numAngles,...
+    optimizeForPerAngleTranslation * zNumSteps,...
+    optimizeForPerAngleTranslation * xyNumSteps,...
+    optimizeForDetector * xyNumDetectors,...
+    optimizeForDetector * zNumDetectors];
 
-numParallelNumTraces = prod(multTemp(parallelFlags));
-numNonParallelNumTraces = prod(multTemp(~parallelFlags));
+numTracesInOptimizedCalc = prod(multTemp(optimizeFlags));
+numOfOptimizedCalcs = prod(multTemp(~optimizeFlags)); %these will be either run in sequence or distributed across parallel workers
 
-numCPUs = simulationRun.numCPUs;
-
-if numNonParallelNumTraces == 0
-    numNonParallelNumTraces = 1; %need at least 1 run (to allow the non-parallel to go)
+if numOfOptimizedCalcs == 0
+    numOfOptimizedCalcs = 1; %need at least 1 run (to allow the non-parallel to go)
 end
 
-if numCPUs == 1 % non-parallelized
-    for i=1:numNonParallelNumTraces
-        
+% RUN SIMULATION!
+
+if runIsParallel % parallelize run; parallel pool is already online    
+    parfor i=1:numOfOptimizedCalcs
+        runOptimizedRayTraceCalculation(i,...
+            indexingLevels, optimizeFlags, numTracesInOptimizedCalc,...
+            scatteringNoiseLevel, detectorNoiseLevel,...
+            phantomDims, voxelDimsInM, phantomLocationInM,...
+            rawIntensity, calibratedPhantomDataSet,...
     end
-else
-    parfor i=1:numNonParallelNumTraces
+else % single processor run, though it is heavily optimized
+    for i=1:numOfOptimizedCalcs
         
     end
 end
 
-for i=1:numNonParallelNumTraces
-    nonParallelIndices = getIndices(i, indexingLevels, ~parallelFlags);
+for i=1:numOfOptimizedCalcs
+    nonParallelIndices = getIndices(i, indexingLevels, ~optimizeFlags);
     
-    parallelBeamTraceIndices = repmat(nonParallelIndices, numParallelNumTraces, 1);
+    parallelBeamTraceIndices = repmat(nonParallelIndices, numTracesInOptimizedCalc, 1);
     
     % set parallel params
     
-    for j=1:numParallelNumTraces
-        parallelIndices = getIndices(j, indexingLevels, parallelFlags);
+    for j=1:numTracesInOptimizedCalc
+        parallelIndices = getIndices(j, indexingLevels, optimizeFlags);
         
         for k=1:6
-            if parallelFlags(k)
+            if optimizeFlags(k)
                 parallelBeamTraceIndices(j,k) = parallelIndices(k);
             end
         end
@@ -79,29 +83,63 @@ for i=1:numNonParallelNumTraces
     
     rawIntensity = beamCharacterization.rawIntensity;
     roundOffError = Constants.Round_Off_Error_Bound;
+       
     
-    fn = @(sourceCoordsX, sourceCoordsY, sourceCoordsZ, detectorCoordsX, detectorCoordsY, detectorCoordsZ)...
-        fastRayTraceForGPU(...
-        sourceCoordsX, sourceCoordsY, sourceCoordsZ,...
-        detectorCoordsX, detectorCoordsY, detectorCoordsZ,...
-        phantomLocationInM, phantomDims, voxelDimsInM,...
-        calibratedPhantomData, rawIntensity,...
-        roundOffError);
+    xVoxelLowBounds = linspace(phantomLocationInM(1), phantomLocationInM(1) + phantomDims(1)*voxelDimsInM(1), phantomDims(1));
+        
+    yVoxelLowBounds = linspace(phantomLocationInM(2) - (phantomDims(2)+1)*voxelDimsInM(2), phantomLocationInM(2) - voxelDimsInM(2), phantomDims(2));
+        
+    zVoxelLowBounds = linspace(phantomLocationInM(3) - (phantomDims(3)+1)*voxelDimsInM(3), phantomLocationInM(3) - voxelDimsInM(3), phantomDims(3));
+        
+    [lowX, lowY, lowZ] = meshgrid(xVoxelLowBounds, yVoxelLowBounds, zVoxelLowBounds);
     
-    pointSourceCoords = gpuArray(pointSourceCoords);
-    pointDetectorCoords = gpuArray(pointDetectorCoords);
+    lowX = gpuArray(lowX);
+    lowY = gpuArray(lowY);
+    lowZ = gpuArray(lowZ);
     
-    detectorData = arrayfun(fn,...
+    voxelDimsInM = gpuArray(voxelDimsInM);
+    
+%     pointSourceCoords = gpuArray(pointSourceCoords);
+%     pointDetectorCoords = gpuArray(pointDetectorCoords);
+    
+    phantomData = gpuArray(calibratedPhantomData);
+    
+%     numTraces = length(pointDetectorCoords);
+%     detectorData = zeros(numTraces,1);
+    
+    wrapper = @(PSCX, PSCY, PSCZ, PDCX, PDCY, PDCZ) rasterOnGPU(...
+        [PSCX, PSCY, PSCY], [PDCX, PDCY, PDCZ],...
+        lowX, lowY, lowZ, voxelDimsInM, phantomData);
+    
+    detectorData = arrayfun(wrapper,...
         pointSourceCoords(:,1), pointSourceCoords(:,2), pointSourceCoords(:,3),...
         pointDetectorCoords(:,1), pointDetectorCoords(:,2), pointDetectorCoords(:,3));
-               
-    detectorData = gather(detectorData);
     
-    writeDetectorDataToDisk(detectorData, simulationRun.savePath, parallelBeamTraceIndices, parallelFlags, indexingLevels, angles);
+%     for j=1:numTraces
+%         rasterResults = arrayfun(@fastRayTraceForGPU,...
+%             pointSourceCoords(j,1), pointSourceCoords(j,2), pointSourceCoords(j,3),...
+%             pointDetectorCoords(j,1), pointDetectorCoords(j,2), pointDetectorCoords(j,3),...
+%             lowX, lowY, lowZ,...
+%             voxelDimsInM(1), voxelDimsInM(2), voxelDimsInM(3));
+%         detectorData(j) = gather(sum(sum(sum(rasterResults .* phantomData))));
+%         disp(j);
+%     end
+
+    detectorData = rawIntensity .* exp(-detectorData);
+    
+    writeDetectorDataToDisk(detectorData, simulationRun.savePath, parallelBeamTraceIndices, optimizeFlags, indexingLevels, angles);
 end
 
 end
 
+function detectorData = rasterOnGPU(pointSourceCoords, pointDetectorCoords, lowX, lowY, lowZ, voxelDimsInM, phantomData)
+    rasterResults = arrayfun(@fastRayTraceForGPU,...
+            pointSourceCoords(1), pointSourceCoords(2), pointSourceCoords(3),...
+            pointDetectorCoords(1), pointDetectorCoords(2), pointDetectorCoords(3),...
+            lowX, lowY, lowZ,...
+            voxelDimsInM(1), voxelDimsInM(2), voxelDimsInM(3));
+        detectorData = gather(sum(sum(sum(rasterResults .* phantomData))));
+end
 
 function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCoords(indices, sourcePositionInM, detectorPositionInM, slicesInM, anglesInDeg, perAngleStepDimsInM, numPerAngleSteps, detectorDims, detectorPixelDimsInM, detectorMovesWithScanAngle, detectorMovesWithPerAngleSteps)
                 

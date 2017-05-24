@@ -3,54 +3,72 @@ function scanSimRunSimulationButtonCallback(app)
 % using the current simulation parameters specified by the GUI a simulation
 % is run
 
-simulation = app.workspace.simulation;
+workspace = app.workspace.createFromGUI(app);
+simulation = workspace.simulation;
 
-simulation = simulation.createFromGUI(app);
-
-displaySlices = app.SimulationRunShowSlicesCheckBox.Value;
-displayAngles = app.SimulationRunShowAnglesCheckBox.Value;
-displayPerAnglePosition = app.SimulationRunShowPerAngleRasterCheckBox.Value;
-displayDetectorRaster = app.SimulationRunShowDetectorRasterCheckBox.Value;
-
-displayDetectorValues = app.SimulationRunShowDetectorValuesCheckBox.Value;
-displayDetectorRayTrace = app.SimulationRunShowDetectorRayTracesCheckBox.Value;
-
-displayFreeRun = ~(displaySlices || displayAngles || displayPerAnglePosition || displayDetectorRaster || displayDetectorValues || displayDetectorRayTrace);
 
 % set simulationRun
-simulationRun = app.workspace.simulationRun;
-simulationRun = simulationRun.createFromGUI(app);
+simulationRun = workspace.simulationRun;
 
-simulationRun.displayFreeRun = displayFreeRun;
 simulationRun.simulation = simulation;
 
 if ~isempty(simulationRun) && simulationRun.isValidForSave()
     
     simulation = simulation.calibrateAndSetPhantomData();
     
-    if ~displayFreeRun %no parallelization possible
-        simulationRun = simulation.runScanSimulation(...
+    switch simulationRun.performanceType
+        case SimulationRunPerformanceTypes.low
+            displaySlices = app.SimulationRunShowSlicesCheckBox.Value;
+            displayAngles = app.SimulationRunShowAnglesCheckBox.Value;
+            displayPerAnglePosition = app.SimulationRunShowPerAngleRasterCheckBox.Value;
+            displayDetectorRaster = app.SimulationRunShowDetectorRasterCheckBox.Value;
+            
+            displayDetectorValues = app.SimulationRunShowDetectorValuesCheckBox.Value;
+            displayDetectorRayTrace = app.SimulationRunShowDetectorRayTracesCheckBox.Value;
+            
+            simulationRun = simulation.runScanSimulation(...
+                simulationRun,...
+                app.axesHandle,...
+                displaySlices,...
+                displayAngles,...
+                displayPerAnglePosition,...
+                displayDetectorRaster,...
+                displayDetectorValues,...
+                displayDetectorRayTrace,...
+                app);
+        case SimulationRunPerformanceTypes.high
+            simulationRun = simulation.runScanSimulationHighPerformanceOnCPU(...
             simulationRun,...
-            app.axesHandle,...
-            displaySlices,...
-            displayAngles,...
-            displayPerAnglePosition,...
-            displayDetectorRaster,...
-            displayDetectorValues,...
-            displayDetectorRayTrace,...
             app);
-    elseif simulationRun.computerInfo.gpuUsed % GPU computation
-        simulationRun = simulation.runScanSimulationHighPerformanceOnGPU(...
+        case SimulationRunPerformanceTypes.highWithMultipleCPUs
+            simulationRun = simulation.runScanSimulationHighPerformanceOnCPU(...
             simulationRun,...
-            app);
-    else % parallelized CPU computation        
-        simulationRun = simulation.runScanSimulationHighPerformanceOnCPU(...
-            simulationRun,...
-            app);
+            app);            
+        case SimulationRunPerformanceTypes.highWithGPU
+            error('Run performance type of "High with GPU" is invalid in this release. No simulation can be run.');
+        otherwise
+            error('No run performance selected. No simulation can be run.');
     end
-    
-    simulationRun.clearBeforeSave();
+        
+    simulationRun = simulationRun.clearBeforeSave();
     simulationRun.save();
+    
+    % transfer the simulation run to the simulation run for viewing
+    workspace.simulationRunForViewing = simulationRun;
+    
+    % reset simulationRun for running simulations
+    workspace.simulationRun = SimulationRun;
+    workspace.simulationRun = workspace.simulationRun.setDefaultValues;
+    
+    % set GUI
+    workspace.statusOutput = app.StatusOutputTextArea.Value;
+    
+    resetScanSimulationViewerListBoxes(app)
+    app = workspace.setGUI(app);
+    
+    app.TabGroup.SelectedTab = app.ScanSimulationViewerTab;
+    
+    app.workspace = workspace;
 end
 
 

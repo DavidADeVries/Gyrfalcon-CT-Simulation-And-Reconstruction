@@ -1,8 +1,7 @@
-function rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, beamCharacterization)
-% rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, beamCharacterization)
+function rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, startingIntensity)
+% rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, startingIntensity)
 
 rawDetectorValue = [];
-startingIntensity = beamCharacterization.rawIntensity;
 
 bounds1 = [phantomLocationInM(1), phantomLocationInM(2:3) - voxelDimsInM(2:3).*phantomDims(2:3)];
 bounds2 = [phantomLocationInM(1)+voxelDimsInM(1)*phantomDims(1), phantomLocationInM(2:3)];
@@ -66,12 +65,21 @@ if isempty(rawDetectorValue)
     radonSum = 0;
     
     unroundedVals = startingPoint ./ voxelDimsInM;
+    unroundedVals = [1 -1 -1].*unroundedVals;
+    
+    % first need to kill off any rounding errors
+    unroundedVals = round(unroundedVals, Constants.Round_Off_Level);
+    
+    % no round to get lattice/index values
     floorVals = floor(unroundedVals);
     ceilVals = ceil(unroundedVals);
     
     isDeltaNeg = deltas < 0;
     
-    lastLattices = [1 -1 -1] .* (isDeltaNeg.* ceilVals + ~isDeltaNeg .* floorVals);
+    selectCeiling = ~isDeltaNeg;
+    selectCeiling(1) = ~selectCeiling(1);
+    
+    lastLattices =  selectCeiling.* ceilVals + ~selectCeiling .* floorVals;
     
     % useful conversion to go from the lastLattice points to the index
     latticeToIndex = isDeltaNeg;
@@ -83,27 +91,33 @@ if isempty(rawDetectorValue)
     
     while any(abs(currentPoint - endingPoint) > Constants.Round_Off_Error_Bound)
         currentIndices = lastLattices + latticeToIndex;
-                
-        attenuation = phantomData(currentIndices(2), currentIndices(1), currentIndices(3));
         
-        nextPoints = [1, -1, -1] .* ((lastLattices + nextPointFactors)) .* voxelDimsInM; % finds next intersection point with part of the voxel grids for x,y,z
+        try
+        attenuation = phantomData(currentIndices(2), currentIndices(1), currentIndices(3));
+        catch e
+            disp(e);
+        end
+        
+        nextLattices = lastLattices + nextPointFactors;
+        
+        nextPoints = [1, -1, -1] .* ((nextLattices)) .* voxelDimsInM; % finds next intersection point with part of the voxel grids for x,y,z
                 
         tValsNeeded = (nextPoints - currentPoint) ./ deltas; % finds the t needed to reach these
         tValsNeeded(isDelta0) = Inf;
         
         if tValsNeeded(1) <= tValsNeeded(2) && tValsNeeded(1) <= tValsNeeded(3) % choose the lowest t
             t = tValsNeeded(1);
-            lastLattices(1) = lastLattices(1) + nextPointFactors(1);
+            lastLattices(1) = nextLattices(1);
         end
         
         if tValsNeeded(2) <= tValsNeeded(1) && tValsNeeded(2) <= tValsNeeded(3)
             t = tValsNeeded(2);
-            lastLattices(2) = lastLattices(2) + nextPointFactors(2);
+            lastLattices(2) = nextLattices(2);
         end
         
         if tValsNeeded(3) <= tValsNeeded(1) && tValsNeeded(3) <= tValsNeeded(2)
             t = tValsNeeded(3);
-            lastLattices(3) = lastLattices(3) + nextPointFactors(3);
+            lastLattices(3) = nextLattices(3);
         end
         
         shift = t.*deltas;

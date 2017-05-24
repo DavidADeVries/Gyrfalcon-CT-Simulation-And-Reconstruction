@@ -68,9 +68,9 @@ classdef Constants
         
         Slice_Folder = 'Slice';
         Angle_Folder = 'Angle';
-        Position_Folder = 'Position';
+        Position_Filename = 'Position';
         
-        Detector_Data_Filename = 'DetectorData';
+        Detector_Data_Filename = 'Detector Data';
         Detector_Data_Var_Name = 'detectorData';
         
         Recon_Slices_Folder_Name = 'Slices';
@@ -83,6 +83,7 @@ classdef Constants
         FBP_Recon_Videos_File_Name = 'Slice Video';
         
         Round_Off_Error_Bound = 1E-9; %1nm
+        Round_Off_Level = 10;
     end
     
     methods

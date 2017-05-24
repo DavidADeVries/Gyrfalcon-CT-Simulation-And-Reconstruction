@@ -1,4 +1,4 @@
-function [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsSimulation(simulation, simulationRun, app, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, parallelForSlices, parallelForAngles, parallelForPerAngleTranslation, parallelForDetector)
+function [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsSimulationOnGPU(simulation, simulationRun, app, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, parallelForSlices, parallelForAngles, parallelForPerAngleTranslation, parallelForDetector)
 % [] = runHighPerformancePartialPixelWithCentreOf2DDetectorsSimulation(simulation, simulationRun, app, slices, angles, numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors, parallelForSlices, parallelForAngles, parallelForPerAngleTranslation, parallelForDetector)
 
 indexingLevels = [numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors];
@@ -21,20 +21,8 @@ multTemp = [...
 numParallelNumTraces = prod(multTemp(parallelFlags));
 numNonParallelNumTraces = prod(multTemp(~parallelFlags));
 
-numCPUs = simulationRun.numCPUs;
-
 if numNonParallelNumTraces == 0
     numNonParallelNumTraces = 1; %need at least 1 run (to allow the non-parallel to go)
-end
-
-if numCPUs == 1 % non-parallelized
-    for i=1:numNonParallelNumTraces
-        
-    end
-else
-    parfor i=1:numNonParallelNumTraces
-        
-    end
 end
 
 for i=1:numNonParallelNumTraces
@@ -79,23 +67,38 @@ for i=1:numNonParallelNumTraces
     
     rawIntensity = beamCharacterization.rawIntensity;
     roundOffError = Constants.Round_Off_Error_Bound;
+       
     
-    fn = @(sourceCoordsX, sourceCoordsY, sourceCoordsZ, detectorCoordsX, detectorCoordsY, detectorCoordsZ)...
-        fastRayTraceForGPU(...
-        sourceCoordsX, sourceCoordsY, sourceCoordsZ,...
-        detectorCoordsX, detectorCoordsY, detectorCoordsZ,...
-        phantomLocationInM, phantomDims, voxelDimsInM,...
-        calibratedPhantomData, rawIntensity,...
-        roundOffError);
+    xVoxelLowBounds = linspace(phantomLocationInM(1), phantomLocationInM(1) + phantomDims(1)*phantomVoxelDimsInM(1), phantomDims(1));
+        
+    yVoxelLowBounds = linspace(phantomLocationInM(2) - (phantomDims(2)+1)*phantomVoxelDimsInM(2), phantomLocationInM(2) - phantomVoxelDimsInM(2), phantomDims(2));
+        
+    zVoxelLowBounds = linspace(phantomLocationInM(3) - (phantomDims(3)+1)*phantomVoxelDimsInM(3), phantomLocationInM(2) - phantomVoxelDimsInM(2), phantomDims(2));
+        
+    [lowX, lowY, lowZ] = meshgrid(xVoxelLowBounds, yVoxelLowBounds, zVoxelLowBounds);
     
-    pointSourceCoords = gpuArray(pointSourceCoords);
-    pointDetectorCoords = gpuArray(pointDetectorCoords);
+    lowX = gpuArray(lowX);
+    lowY = gpuArray(lowY);
+    lowZ = gpuArray(lowZ);
     
-    detectorData = arrayfun(fn,...
-        pointSourceCoords(:,1), pointSourceCoords(:,2), pointSourceCoords(:,3),...
-        pointDetectorCoords(:,1), pointDetectorCoords(:,2), pointDetectorCoords(:,3));
-               
-    detectorData = gather(detectorData);
+%     pointSourceCoords = gpuArray(pointSourceCoords);
+%     pointDetectorCoords = gpuArray(pointDetectorCoords);
+    
+    phantomData = gpuArray(phantomData);
+    
+    numTraces = length(pointDetectorCoords);
+    detectorData = zeros(numTraces,1);
+    
+    for j=1:numTraces
+        rasterResults = arrayfun(@fastRayTraceForGPU,...
+            pointSourceCoords(j,1), pointSourceCoords(j,2), pointSourceCoords(j,3),...
+            pointDetectorCoords(j,1), pointDetectorCoords(j,2), pointDetectorCoords(j,3),...
+            lowX, lowY, lowZ,...
+            phantomVoxelDimsInM(1), phantomVoxelDimsInM(2), phantomVoxelDimsInM(3));
+        detectorData(i) = gather(sum(sum(sum(rasterResults .* phantomData))));
+    end
+
+    detectorData = rawIntensity .* exp(-detectorData));
     
     writeDetectorDataToDisk(detectorData, simulationRun.savePath, parallelBeamTraceIndices, parallelFlags, indexingLevels, angles);
 end

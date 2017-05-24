@@ -391,6 +391,10 @@ classdef Scan < GyrfalconObject
             scan.beamCharacterization = scan.beamCharacterization.createFromGUI(app);
         end
         
+        function resolutionInM = getPerAngleTranslationResolutionInM(scan)
+            resolutionInM = scan.perAngleTranslationUnits.convertToM(scan.perAngleTranslationResolution);
+        end
+        
     end
     
 end
