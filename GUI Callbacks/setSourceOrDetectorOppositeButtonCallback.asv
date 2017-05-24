@@ -1,0 +1,19 @@
+function [] = setSourceOrDetectorOppositeButtonCallback(app, setSource)
+% ] = setSourceOrDetectorOppositeButtonCallback(app, setSource)
+
+if setSource
+    x = app.DetectorLocationXEditField.Value;
+    y = app.DetectorLocationYEditField.Value;
+    
+    app.SourceLocationXEditField.Value = -x;
+    app.SourceLocationYEditField.Value = -y;
+else    
+    x = app.DetectorLocationXEditField.Value;
+    y = app.DetectorLocationYEditField.Value;
+    
+    app.SourceLocationXEditField.Value = -x;
+    app.SourceLocationYEditField.Value = -y;
+end
+
+end
+
