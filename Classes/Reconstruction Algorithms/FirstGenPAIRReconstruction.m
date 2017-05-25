@@ -1,4 +1,4 @@
-classdef FirstGenPAIRReconstruction < ProcessingRun
+classdef FirstGenPAIRReconstruction < Reconstruction
     % FirstGenPAIRReconstruction
     
     properties
@@ -14,11 +14,20 @@ classdef FirstGenPAIRReconstruction < ProcessingRun
     
     methods
         
-        function app = setGUI(recon, app)
+        function app = setGUI(recon, app)            
+            % set visible tab
+            hideAllAlgorithmSettingsTabs(app);
+            
+            tabHandle = recon.getSettingsTabHandle(app);
+            tabHandle.Parent = app.ReconstructionAlgorithmSettingsTabGroup;
         end
         
-        function strings = getSettingsString(recon)            
-            strings = {'No Settings'};           
+        function string = getNameString(recon)
+            string = '1st Gen. PAIR';
+        end
+              
+        function recon = createFromGUIForSubClass(recon, app)
+            % nothing yet
         end
         
     end

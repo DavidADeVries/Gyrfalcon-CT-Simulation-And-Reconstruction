@@ -474,7 +474,7 @@ classdef Simulation < GyrfalconObject
                 
                 detectorSizeString = ['Detector Size: ', num2str(detectorDims(1)), 'x', num2str(detectorDims(2))];
                 
-                perAngleDims = simulation.perAngleTranslationResolution;
+                perAngleDims = simulation.scan.perAngleTranslationResolution;
                 
                 perAngleString = ['Per Angle Translation Steps: ', num2str(perAngleDims(1)), 'x', num2str(perAngleDims(2))];
                 

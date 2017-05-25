@@ -18,9 +18,9 @@ if ~all(fileName == 0) % have a selection
         if isa(simulationRun, class(SimulationRun)) % we're good!
             app.workspace.simulationRunForViewing = simulationRun;
             
-            resetScanSimulationViewerListBoxes(app);
-            
             app = app.workspace.simulationRunForViewing.setGUIForScanSimulationViewer(app);
+            
+            resetScanSimulationViewerListBoxes(app);
         else
             errordlg('The selected file was not a Simulation Run file and so could not be opened.', 'Invalid File');
         end

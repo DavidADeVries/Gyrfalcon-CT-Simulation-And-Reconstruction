@@ -31,14 +31,8 @@ classdef ComputerInfo
             
             if parallelComputingToolboxInstalled()
                 info.gpuDevice = gpuDevice;
-                info.gpuUsed = true;
-                
-                info.numCoresUsed = info.cpuNumCores;
             else
                 info.gpuDevice = [];
-                info.gpuUsed = false;
-                
-                info.numCoresUsed = 1;
             end
             
             [user,system] = memory;

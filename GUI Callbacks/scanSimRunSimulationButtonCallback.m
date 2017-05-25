@@ -63,8 +63,8 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
     % set GUI
     workspace.statusOutput = app.StatusOutputTextArea.Value;
     
-    resetScanSimulationViewerListBoxes(app)
     app = workspace.setGUI(app);
+    resetScanSimulationViewerListBoxes(app)
     
     app.TabGroup.SelectedTab = app.ScanSimulationViewerTab;
     

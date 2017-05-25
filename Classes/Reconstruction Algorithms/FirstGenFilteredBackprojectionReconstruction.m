@@ -32,26 +32,27 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
             
         end
         
+        function recon = createFromGUIForSubClass(recon, app)
+            recon.filterType = app.Gen1FBP_FilterTypeDropDown.Value;
+            recon.applyRampFilter = app.Gen1FBP_ApplyRampRamLakFilterCheckBox.Value;
+            recon.applyBandlimiting = app.Gen1FBP_ApplyBandlimitingofHighFrequenciesCheckBox.Value;
+            recon.saveSinogramsAndVideos = app.Gen1FBP_SaveSinogramsandReconstructionVideosCheckBox.Value;
+            recon.interpolationType = app.Gen1FBP_InterpolationTypeDropDown.Value;
+        end
+        
         function app = setGUI(recon, app)
+            % set visible tab
+            hideAllAlgorithmSettingsTabs(app);
+            
+            tabHandle = recon.getSettingsTabHandle(app);
+            tabHandle.Parent = app.ReconstructionAlgorithmSettingsTabGroup;
+            
+            % set settings
             app.Gen1FBP_FilterTypeDropDown.Value = recon.filterType;
             app.Gen1FBP_ApplyRampRamLakFilterCheckBox.Value = recon.applyRampFilter;
             app.Gen1FBP_ApplyBandlimitingofHighFrequenciesCheckBox.Value = recon.applyBandlimiting;
             app.Gen1FBP_SaveSinogramsandReconstructionVideosCheckBox.Value = recon.saveSinogramsAndVideos;
             app.Gen1FBP_InterpolationTypeDropDown.Value = recon.interpolationType;
-        end
-        
-        function strings = getSettingsString(recon)
-            str1 = ['Filter Type: ', recon.filterType.displayString];
-            str2 = ['Apply Ramp Filter: ', convertBoolToYesNo(recon.applyRampFilter)];
-            str3 = ['Apply Bandlimiting: ', convertBoolToYesNo(recon.applyBandlimiting)];
-            str4 = ['Interpolation Type: ', recon.interpolationType.displayString];
-            str5 = ['Save Sinograms and Recon Videos: ', convertBoolToYesNo(recon.saveSinogramsAndVideos)];
-
-            strings1 = {str1 str2 str3 str4 str5};
-            
-            strings2 = recon.getReconstructionSettingsString();
-            
-            strings = [strings1, {''}, strings2];
         end
         
         function [filterTypes, filterTypeStrings] = getFilterTypes(recon)

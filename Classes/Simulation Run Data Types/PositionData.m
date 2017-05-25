@@ -67,10 +67,8 @@ classdef PositionData
 %             end
         end
         
-        function positionData = loadData(positionData, basePath)
-            fileName = [Constants.Detector_Data_Filename, Constants.Matlab_File_Extension];
-            
-            loadedData = load(makePath(basePath, fileName));
+        function positionData = loadData(positionData, loadPath)            
+            loadedData = load(loadPath);
 
             positionData.detectorData = loadedData.(Constants.Detector_Data_Var_Name);
         end

@@ -40,9 +40,10 @@ classdef AngleData
             
             for xy=1:numPositions(1) %in xy
                 for z=1:numPositions(2) % in z
-                    positionFolder = [Constants.Position_Folder, ' (', num2str(z), ',', num2str(xy), ')'];
+                    positionName = makePositionName(z, xy);
+                    positionFileName = makePositionFileName(positionName);
                     
-                    path = makePath(basePath, positionFolder);
+                    path = makePath(basePath, positionFileName);
                     
                     data = PositionData;
                     

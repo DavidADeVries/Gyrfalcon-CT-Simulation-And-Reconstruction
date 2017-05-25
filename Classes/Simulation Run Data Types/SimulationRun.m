@@ -43,7 +43,7 @@ classdef SimulationRun < ProcessingRun
             sliceData = cell(1, numSlices);
             
             for i=1:numSlices
-                sliceFolder = [Constants.Slice_Folder, ' ', num2str(i)];
+                sliceFolder = makeSliceFolderName(i);
                 
                 path = makePath(basePath, sliceFolder);
                 
@@ -95,47 +95,7 @@ classdef SimulationRun < ProcessingRun
             
             run.notes = app.SimulationRunNotesTextArea.Value;
         end
-        
-        function app = setGUIForDatasetReconstruction(run, app)
-            if isempty(run.getPath())
-                setString(app.simulationRunPathText, 'No Simulation Run Selected');
                 
-                set(app.simulationRunShowSimulationInControlPanelToggleButton, 'Enable', 'off', 'Value', 0);
-            else
-                setString(app.simulationRunPathText, run.saveFileName);
-                
-                set(app.simulationRunShowSimulationInControlPanelToggleButton, 'Enable', 'on');
-            end
-            
-            if isempty(run.startTimestamp)
-                setString(app.simulationRunStartText, '');
-                setString(app.simulationRunRunTimeText, '');
-            else
-                startText = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
-                
-                runTimeText = run.getRunTimeString();
-                
-                setString(app.simulationRunStartText, startText);
-                setString(app.simulationRunRunTimeText, runTimeText);
-            end
-            
-            if isempty(run.versionUsed)
-                setString(app.simulationRunGyrfalconVersionText, '');
-            else
-                setString(app.simulationRunGyrfalconVersionText, ['v', run.versionUsed]);
-            end
-            
-            app.SimulationRunInfoRunPerformanceEditField.Value = run.performanceType.displayString;
-            
-            if isempty(run.computerInfo)
-                setString(app.simulationRunComputerInfoText, '');
-            else
-                setString(app.simulationRunComputerInfoText, run.computerInfo.getSummaryString());
-            end
-            
-            setString(app.simulationRunNotesText, run.notes);
-        end
-        
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())
                 app.SimulationViewerFilePathLabel.Text = 'No Simulation Run Selected';
@@ -264,7 +224,7 @@ classdef SimulationRun < ProcessingRun
                 sliceNames{i} = makeSliceFolderName(i);
             end
             
-            for i=1:numSlices
+            for i=1:numAngles
                 angleNames{i} = makeAngleFolderName(angles(i));
             end
             

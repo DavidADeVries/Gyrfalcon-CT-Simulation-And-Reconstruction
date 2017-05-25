@@ -37,7 +37,7 @@ classdef SliceData
             angleData = cell(1, numAngles);
                         
             for i=1:numAngles
-                angleFolder = [Constants.Angle_Folder, ' ', num2str(angles(i))];
+                angleFolder = makeAngleFolderName(angles(i));
                 
                 path = makePath(basePath, angleFolder);
                 

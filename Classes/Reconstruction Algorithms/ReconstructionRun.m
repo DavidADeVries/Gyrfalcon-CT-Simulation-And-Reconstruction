@@ -8,11 +8,38 @@ classdef ReconstructionRun < ProcessingRun
         
         reconPhantomDataSet %reconDataSet but interpolated to size of phantom data set (NaN at voxels if reconDataSet smaller than phantom)
         
+        performanceType
     end
     
     methods
-        function run = createFromGUI(run, handles)
+        function run = createFromGUI(run, app)
+            if app.ReconstructionRunHighPerformanceButton.Value
+                run.performanceType = ReconstructionRunPerformanceTypes.high;
+            elseif app.ReconstructionRunHighWithMultipleCPUsButton.Value
+                run.performanceType = ReconstructionRunPerformanceTypes.highWithMultipleCPUs;
+            elseif app.ReconstructionRunHighWithGPUButton.Value
+                run.performanceType = ReconstructionRunPerformanceTypes.highWithGPU;
+            else
+                error('Invalid performace type!');
+            end
             
+            if run.performanceType == ReconstructionRunPerformanceTypes.highWithMultipleCPUs
+                run.computerInfo.numCoresUsed = app.ReconstructionRunNumCPUsEditField.Value;
+            else
+                run.computerInfo.numCoresUsed = 1;
+            end
+            
+            if run.performanceType == ReconstructionRunPerformanceTypes.highWithGPU
+                run.computerInfo.gpuUsed = true;
+            else
+                run.computerInfo.gpuUsed = false;
+            end
+            
+            run.notes = app.ReconstructionRunNotesTextArea.Value;
+            
+            if ~isa(run.reconstruction, class(Reconstruction))
+                run.reconstruction = run.reconstruction.createFromGUI(app);
+            end
         end
         
         function app = setGUI(run, app)
@@ -35,14 +62,14 @@ classdef ReconstructionRun < ProcessingRun
             else                
                 app.SimulationRunInfoLoadPathLabel.Text = run.simulationRun.getPath();
                 
-                app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
-                app.SimulationRunInfoRunTimeEditField.Value = run.getRunTimeString();
-                app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.versionUsed];
-                app.SimulationRunInfoRunPerformanceEditField.Value = run.performanceType.displayString; 
+                app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.simulationRun.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
+                app.SimulationRunInfoRunTimeEditField.Value = run.simulationRun.getRunTimeString();
+                app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.simulationRun.versionUsed];
+                app.SimulationRunInfoRunPerformanceEditField.Value = run.simulationRun.performanceType.displayString; 
                 
-                app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = simulation.getScanGeometryString(scanGeometry, errorMsg);
-                app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
-                app.SimulationRunInfoNotesTextArea.Value = run.notes;
+                app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = run.simulationRun.simulation.getScanGeometryString(scanGeometry, errorMsg);
+                app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.simulationRun.computerInfo.getSummaryString();
+                app.SimulationRunInfoNotesTextArea.Value = run.simulationRun.notes;
                 
                 %app.SimulationRunInfoLoadSimulationButton.Enable = 'on'; %TODO
             end
@@ -51,7 +78,7 @@ classdef ReconstructionRun < ProcessingRun
             savePath = run.getPath();
             
             if isempty(savePath)
-                app.ReconstructionRunSavePathLabel.Text = 'Select path...';
+                app.ReconstructionRunSavePathLabel.Text = 'Select save path...';
             else
                 app.ReconstructionRunSavePathLabel.Text = savePath;
             end
@@ -75,12 +102,8 @@ classdef ReconstructionRun < ProcessingRun
                 
                 app.DataSetReconRunReconstructionButton.Enable = 'on';
                 
-                % set visible tab
-                hideAllAlgorithmSettingsTabs(app);
-                
-                tabHandle = run.reconstruction.getSettingsTabHandle(app);
-                tabHandle.Parent = app.ReconstructionAlgorithmSettingsTabGroup;
-                
+                % set recon type specific GUI elements, including selecting
+                % tab
                 app = run.reconstruction.setGUI(app);
             end
             
@@ -107,17 +130,7 @@ classdef ReconstructionRun < ProcessingRun
             
             % interpolation type drop-down
             app.ReconstructionRun3DInterpolationTypeDropDown.Value = run.reconstruction.reconDataSetInterpolationType;
-            
-            % set computerInfo
-            
-            % use GPU checkbox
-            app.ReconstructionRunUseGPUCheckBox.Value = run.computerInfo.gpuUsed;
-            
-            if isempty(run.computerInfo.gpuDevice)
-                app.ReconstructionRunUseGPUCheckBox.Enable = 'off';
-            else
-                app.ReconstructionRunUseGPUCheckBox.Enable = 'on';
-            end
+                        
             
             % number of CPUs
             app.ReconstructionRunNumCPUsEditField.Value = run.computerInfo.numCoresUsed;
@@ -125,6 +138,8 @@ classdef ReconstructionRun < ProcessingRun
             
             numCPUsAvailableString = ['/' num2str(run.computerInfo.cpuNumCores)];
             app.ReconstructionRunNumCPUsAvailableLabel.Text = numCPUsAvailableString;
+            
+            app = setReconstructionRunComponentEnableFromPerformanceType(app, run.performanceType);
             
             % notes
             app.ReconstructionRunNotesTextArea.Value = run.notes;
@@ -143,40 +158,18 @@ classdef ReconstructionRun < ProcessingRun
             run.reconstruction = Reconstruction();
             run.simulationRun = [];
             
+            run.performanceType = ReconstructionRunPerformanceTypes.high;
+            
             run.notes = '';
         end
         
+        function currentFolder = getCurrentSaveFolder(run)
+            currentFolder = getLastItemFromPath(run.savePath);
+        end
+        
         function [] = runReconstruction(run, app)
-            % get save path
-            savePath = run.simulationRun.savePath;
             
-            lastReconNumber = getLastReconNumber(savePath);
-            numStr = num2str(lastReconNumber+1);
-            algoStr = run.reconstruction.getNameString();
             
-            defaultName = [Constants.Reconstruction_Folder_Name, ' ', numStr, ' (', algoStr, ')'];
-            
-            answer = {''}; % this is NOT empty
-            validFolder = false;
-            folderName = '';
-            
-            while ~isempty(answer) && ~validFolder % keep looping till folder found or cancelled
-                prompt = ...
-                    {['The reconstruction results will be save with the Simulation Run at ',...
-                    savePath,...
-                    '. Please enter the name of the subdirectory to save the reconstruction to.']};
-                dialogTitle = 'Reconstruction Title';
-                numLines = 1;
-                defaultAns = {defaultName};
-                
-                answer = inputdlg(prompt, dialogTitle, numLines, defaultAns);
-                
-                if ~isempty(answer) % not cancelled
-                    folderName = answer{1};
-                    
-                    validFolder = ~isStrInCellArray(getFolders(savePath), folderName);
-                end
-            end
             
             if ~isempty(answer) && validFolder
                 
@@ -276,68 +269,3 @@ function [] = setAlgorithmSelectionPopupMenu(handle, scanGeometry, choice)
     handle.Value = choices{index};
 end
 
-function [choice] = getChoiceFromAlgorithmSelectionPopupMenu(handle, scanGeometry)
-    choice = handle.Value;
-end
-
-function lastReconNumber = getLastReconNumber(path)
-    
-folders = getFolders(path);
-
-lastReconNumber = 0;
-
-prefixLen = length(Constants.Reconstruction_Folder_Name);
-
-for i=1:length(folders)
-    folderName = folders{i};
-    
-    indices = strfind(folderName, Constants.Reconstruction_Folder_Name);
-    
-    if ~isempty(indices)
-        index = indices(1);
-        
-        searchStart = index + prefixLen;
-        
-        num = searchStringForNumber(folderName(searchStart:end));
-        
-        if ~isempty(num) && num > lastReconNumber
-            lastReconNumber = num;
-        end
-    end
-end
-
-end
-
-function num = searchStringForNumber(string)
-
-num = [];
-
-digits = [];
-digitCounter = 1;
-started = false;
-
-for i=1:length(string)
-    c = string(i);
-    
-    if isstrprop(c, 'digit')
-        digits(digitCounter) = str2double(c);
-        
-        digitCounter = digitCounter + 1;
-        started = true;
-    elseif started
-        break;
-    end
-end
-
-if digitCounter > 1
-    num = 0;
-    power = 0;
-    
-    for i=length(digits):-1:1
-        num = num + digits(i)*10^power;
-        
-        power = power + 1;
-    end
-end
-
-end

@@ -22,6 +22,46 @@ classdef Reconstruction
             
         end
         
+        function recon = transferReconstructionValues(recon, oldRecon)
+            recon.reconDataSetSlices = oldRecon.reconDataSetSlices;
+            recon.reconDataSet = oldRecon.reconDataSet;
+            recon.reconSliceDimensions = oldRecon.reconSliceDimensions;
+            recon.reconSliceVoxelDimensionsInM = oldRecon.reconSliceVoxelDimensionsInM;
+            recon.reconSliceLocationInM = oldRecon.reconSliceLocationInM;
+            recon.reconDataSetDimensions = oldRecon.reconDataSetDimensions;
+            recon.reconDataSetVoxelDimensionsInM = oldRecon.reconDataSetVoxelDimensionsInM;
+            recon.reconDataSetLocationInM = oldRecon.reconDataSetLocationInM;
+            recon.reconDataSetInterpolationType = oldRecon.reconDataSetInterpolationType;
+        end
+        
+        function recon = createFromGUI(recon, app)
+            x = app.ReconstructionRunSliceDimsXEditField.Value;
+            y = app.ReconstructionRunSliceDimsYEditField.Value;
+            
+            recon.reconSliceDimensions = [x, y];
+            
+            x = app.ReconstructionRunSlicePixelDimsXEditField.Value;
+            y = app.ReconstructionRunSlicePixelDimsYEditField.Value;
+            
+            recon.reconSliceVoxelDimensionsInM = [x, y];
+            
+            x = app.ReconstructionRunDataSetDimsXEditField.Value;
+            y = app.ReconstructionRunDataSetDimsYEditField.Value;
+            z = app.ReconstructionRunDataSetDimsZEditField.Value;
+            
+            recon.reconDataSetDimensions = [x, y, z];
+            
+            x = app.ReconstructionRunDataSetVoxelDimsXEditField.Value;
+            y = app.ReconstructionRunDataSetVoxelDimsYEditField.Value;
+            z = app.ReconstructionRunDataSetVoxelDimsZEditField.Value;
+            
+            recon.reconDataSetVoxelDimensionsInM = [x, y, z];
+            
+            recon.reconDataSetInterpolationType = app.ReconstructionRun3DInterpolationTypeDropDown.Value;
+            
+            recon = recon.createFromGUIForSubClass(app);
+        end
+        
         function recon = setReconDataSetDefaults(recon, phantom)
             % set defaults for the reconDataSet based on the phantom
             % dimensions
@@ -36,6 +76,17 @@ classdef Reconstruction
             
             recon.reconDataSetDimensions = dims;
             recon.reconDataSetVoxelDimensionsInM = voxelDimsInM;
+        end
+        
+        function savePath = getSavePath(recon, simulationRunSavePath)
+            
+            lastReconNumber = getLastReconNumber(simulationRunSavePath);
+            numStr = num2str(lastReconNumber+1);
+            algoStr = recon.getNameString();
+            
+            defaultName = [Constants.Reconstruction_Folder_Name, ' ', numStr, ' (', algoStr, ')'];
+            
+            savePath = makePath(simulationRunSavePath, defaultName);
         end
         
         function strings = getReconstructionSettingsString(recon)
@@ -133,4 +184,66 @@ function string = makeDimensionString(dims)
             string = [string num2str(dims(i)) ' x '];
         end
     end
+end
+
+function lastReconNumber = getLastReconNumber(path)
+    
+folders = getFolders(path);
+
+lastReconNumber = 0;
+
+prefixLen = length(Constants.Reconstruction_Folder_Name);
+
+for i=1:length(folders)
+    folderName = folders{i};
+    
+    indices = strfind(folderName, Constants.Reconstruction_Folder_Name);
+    
+    if ~isempty(indices)
+        index = indices(1);
+        
+        searchStart = index + prefixLen;
+        
+        num = searchStringForNumber(folderName(searchStart:end));
+        
+        if ~isempty(num) && num > lastReconNumber
+            lastReconNumber = num;
+        end
+    end
+end
+
+end
+
+function num = searchStringForNumber(string)
+
+num = [];
+
+digits = [];
+digitCounter = 1;
+started = false;
+
+for i=1:length(string)
+    c = string(i);
+    
+    if isstrprop(c, 'digit')
+        digits(digitCounter) = str2double(c);
+        
+        digitCounter = digitCounter + 1;
+        started = true;
+    elseif started
+        break;
+    end
+end
+
+if digitCounter > 1
+    num = 0;
+    power = 0;
+    
+    for i=length(digits):-1:1
+        num = num + digits(i)*10^power;
+        
+        power = power + 1;
+    end
+end
+
 end

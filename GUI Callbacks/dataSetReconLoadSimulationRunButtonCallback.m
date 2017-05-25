@@ -21,9 +21,7 @@ if ~all(fileName == 0) % have a selection
             delete(h);
             
             workspace = app.workspace.createFromGUI(app);
-            
-            workspace.simulationRun = simulationRun;
-            
+                        
             scanGeometry = simulationRun.simulation.findScanGeometry();
             
             if ~isempty(scanGeometry)
@@ -32,6 +30,11 @@ if ~all(fileName == 0) % have a selection
                 choice = choice.setReconDataSetDefaults(simulationRun.simulation.phantom);
                 
                 reconRun = ReconstructionRun;
+                
+                reconRun = reconRun.setDefaultValues();
+                
+                savePath = choice.getSavePath(simulationRun.savePath);                
+                reconRun.savePath = savePath;
                 
                 reconRun.reconstruction = choice;
                 reconRun.simulationRun = simulationRun;
