@@ -6,7 +6,7 @@ photonBeam = PhotonBeam;
 
 photonBeam.saveInSeparateFile = true;
 
-photonBeam = photonBeam.load();
+photonBeam = photonBeam.load(app.settings.Simulation_Save_Path);
 
 if ~isempty(photonBeam)
     % update handles

@@ -36,6 +36,8 @@ InterpolationTypes.setDropDown(app.Gen1FBP_InterpolationTypeDropDown);
 app.workspace = GyrfalconWorkspace;
 app.workspace = app.workspace.setDefaultValues();
 
+% gets settings loaded up
+Settings.load(app);
 
 % **********************
 % *** INITIALIZE GUI ***

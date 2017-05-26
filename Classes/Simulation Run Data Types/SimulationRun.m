@@ -151,7 +151,7 @@ classdef SimulationRun < ProcessingRun
                 
                 image = run.loadImageForScanSimulationViewer(app);
                 
-                imshow(image, [], 'Parent', app.SimulationViewerAxes);
+                imshow(-image, [], 'Parent', app.SimulationViewerAxes);
                 
                 dims = size(image);
                 

@@ -266,13 +266,13 @@ classdef Simulation < GyrfalconObject
             bool = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
         end
         
-        function [saved, simulationForGUI, simulationForParent, simulationForSaving] = saveChildrenObjects(simulation)
+        function [saved, simulationForGUI, simulationForParent, simulationForSaving] = saveChildrenObjects(simulation, defaultSavePath)
             simulationForGUI = simulation;
             simulationForParent = simulation;
             simulationForSaving = simulation;
             
             if ~isempty(simulation.phantom)
-                [saved, phantomForGUI, phantomForParent, ~] = simulation.phantom.saveAsIfChanged();
+                [saved, phantomForGUI, phantomForParent, ~] = simulation.phantom.saveAsIfChanged(defaultSavePath);
                 
                 if saved
                     simulationForGUI.phantom = phantomForGUI;
@@ -285,7 +285,7 @@ classdef Simulation < GyrfalconObject
             
             if saved
                 if ~isempty(simulation.source)
-                    [saved, sourceForGUI, sourceForParent, ~] = simulation.source.saveAsIfChanged();
+                    [saved, sourceForGUI, sourceForParent, ~] = simulation.source.saveAsIfChanged(defaultSavePath);
                     
                     if saved
                         simulationForGUI.source = sourceForGUI;
@@ -299,7 +299,7 @@ classdef Simulation < GyrfalconObject
             
             if saved
                 if ~isempty(simulation.detector)
-                    [saved, detectorForGUI, detectorForParent, ~] = simulation.detector.saveAsIfChanged();
+                    [saved, detectorForGUI, detectorForParent, ~] = simulation.detector.saveAsIfChanged(defaultSavePath);
                     
                     if saved
                         simulationForGUI.detector = detectorForGUI;
@@ -313,7 +313,7 @@ classdef Simulation < GyrfalconObject
             
             if saved
                 if ~isempty(simulation.scan)
-                    [saved, scanForGUI, scanForParent, ~] = simulation.scan.saveAsIfChanged();
+                    [saved, scanForGUI, scanForParent, ~] = simulation.scan.saveAsIfChanged(defaultSavePath);
                     
                     if saved
                         simulationForGUI.scan = scanForGUI;
@@ -364,11 +364,11 @@ classdef Simulation < GyrfalconObject
             end
         end
         
-        function simulation = loadFields(simulation)
-            simulation.phantom = simulation.phantom.load();
-            simulation.detector = simulation.detector.load();
-            simulation.source = simulation.source.load();
-            simulation.scan = simulation.scan.load();
+        function simulation = loadFields(simulation, defaultLoadPath)
+            simulation.phantom = simulation.phantom.load(defaultLoadPath);
+            simulation.detector = simulation.detector.load(defaultLoadPath);
+            simulation.source = simulation.source.load(defaultLoadPath);
+            simulation.scan = simulation.scan.load(defaultLoadPath);
         end    
         
         function simulation = calibrateAndSetPhantomData(simulation)

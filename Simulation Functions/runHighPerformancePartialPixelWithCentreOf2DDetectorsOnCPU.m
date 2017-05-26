@@ -74,7 +74,8 @@ end
 function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCoords(indices, sourcePositionInM, detectorPositionInM, slicesInM, anglesInDeg, perAngleStepDimsInM, numPerAngleSteps, detectorDims, detectorPixelDimsInM, detectorMovesWithScanAngle, detectorMovesWithPerAngleSteps)
                 
         % pre-allocate
-        numCoords = length(indices);
+        dims = size(indices);
+        numCoords = dims(1);
         
         pointSourceCoords = zeros(numCoords,3);
         pointDetectorCoords = zeros(numCoords,3);
@@ -115,8 +116,8 @@ function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCo
         
         % detector placement (for planar 2D detectors only)
         % gives location of detector centre
-        pointDetectorCoords(:,2) = pointDetectorCoords(:,2) + ( (indices(:,6)-detectorDims(1)/2) * detectorPixelDimsInM(1) );
-        pointDetectorCoords(:,3) = pointDetectorCoords(:,3) + ( (indices(:,5)-detectorDims(2)/2) * detectorPixelDimsInM(2) );
+        pointDetectorCoords(:,2) = pointDetectorCoords(:,2) + ( (indices(:,6)-(detectorDims(1)/2)-0.5) * detectorPixelDimsInM(1) );
+        pointDetectorCoords(:,3) = pointDetectorCoords(:,3) + ( (indices(:,5)-(detectorDims(2)/2)-0.5) * detectorPixelDimsInM(2) );
         
         rotateAngles = detectorAngleInDeg;
         

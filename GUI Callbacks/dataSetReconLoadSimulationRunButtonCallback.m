@@ -3,7 +3,7 @@ function [] = dataSetReconLoadSimulationRunButtonCallback(app)
 
 filterSpec = '*.mat';
 dialogTitle = 'Open Simulation Run...';
-defaultName = Constants.object_save_directory;
+defaultName = app.settings.Simulation_And_Reconstruction_Run_Save_Path;
 
 [fileName, pathName, ~] = uigetfile(filterSpec, dialogTitle, defaultName);
 

@@ -78,9 +78,9 @@ classdef ReconstructionRun < ProcessingRun
             savePath = run.getPath();
             
             if isempty(savePath)
-                app.ReconstructionRunSavePathLabel.Text = 'Select save path...';
+                app.ReconstructionRunSavePathEditField.Value = 'Select save path...';
             else
-                app.ReconstructionRunSavePathLabel.Text = savePath;
+                app.ReconstructionRunSavePathEditField.Value = savePath;
             end
             
             if isempty(scanGeometry)
@@ -168,53 +168,40 @@ classdef ReconstructionRun < ProcessingRun
         end
         
         function [] = runReconstruction(run, app)
+            run = run.createFromGUI(app);
+            
+            % set status string with recon running
+            
+            newString = ['Reconstruction Run Start (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            % run the recon
+            run = run.startProcessingRun(); % set start time
+            run.reconstruction = ...
+                run.reconstruction.runReconstruction(run.simulationRun, app);
+            run = run.endProcessingRun(); % set end time
+            
+            % set status string complete
+            
+            newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
             
             
+            % perform the recon of the 3D data-set from recon'ed
+            % slices
             
-            if ~isempty(answer) && validFolder
-                
-                reconSavePath = makePath(savePath, folderName);
-                run.savePath = reconSavePath;
-                run.saveFileName = [Constants.Reconstruction_Run_File_Name, Constants.Matlab_File_Extension];
-                
-                % set run conditions (CPU, GPU, notes)
-                [cancel, run] = run.collectSettings();
-                
-                if ~cancel
-                    % set status string with recon running
-                    
-                    newString = ['Reconstruction Run Start (', convertTimestampToString(now), ')'];
-                    newLine = true;
-                    
-                    app = updateStatusOutput(app, newString, newLine);
-                    
-                    % run the recon
-                    run = run.startProcessingRun(); % set start time
-                    run.reconstruction = ...
-                        run.reconstruction.runReconstruction(run.simulationRun, app);
-                    run = run.endProcessingRun(); % set end time
-                    
-                    % set status string complete
-                    
-                    newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
-                    newLine = true;
-                    
-                    app = updateStatusOutput(app, newString, newLine);
-                    
-                    
-                    % perform the recon of the 3D data-set from recon'ed
-                    % slices
-                    
-                    run.reconstruction = run.reconstruction.reconFullDataSet(run.simulationRun.simulation);
-                    
-                    % compare to the original phantom
-                    
-                    run = run.calculateReconPhantomDataSet();
-                    
-                    % save files
-                    run.saveReconstructionValues();
-                end
-            end
+            run.reconstruction = run.reconstruction.reconFullDataSet(run.simulationRun.simulation);
+            
+            % compare to the original phantom
+            
+            run = run.calculateReconPhantomDataSet();
+            
+            % save files
+            run.saveReconstructionValues();                
         end
         
         function run = calculateReconPhantomDataSet(run)

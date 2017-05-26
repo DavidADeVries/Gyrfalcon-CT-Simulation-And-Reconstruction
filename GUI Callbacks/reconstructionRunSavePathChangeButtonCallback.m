@@ -34,7 +34,7 @@ if ~isempty(answer) && validFolder % didn't cancel
     
     reconRun.savePath = savePath;
     
-    app.ReconstructionRunSavePathLabel.text = savePath;
+    app.ReconstructionRunSavePathEditField.Value = savePath;
     
     app.workspace.reconstructionRun = reconRun;
 end

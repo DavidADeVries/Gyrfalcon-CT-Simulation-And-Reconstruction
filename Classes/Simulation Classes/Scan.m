@@ -105,13 +105,13 @@ classdef Scan < GyrfalconObject
             name = 'Scan';
         end
         
-        function [saved, scanForGUI, scanForParent, scanForSaving] = saveChildrenObjects(scan)
+        function [saved, scanForGUI, scanForParent, scanForSaving] = saveChildrenObjects(scan, defaultSavePath)
             scanForGUI = scan;
             scanForParent = scan;
             scanForSaving = scan;
             
             if ~isempty(scan.beamCharacterization)
-                [saved, beamForGUI, beamForParent, ~] = scan.beamCharacterization.saveAsIfChanged();
+                [saved, beamForGUI, beamForParent, ~] = scan.beamCharacterization.saveAsIfChanged(defaultSavePath);
                 
                 if saved
                     scanForGUI.beamCharacterization = beamForGUI;
@@ -123,8 +123,8 @@ classdef Scan < GyrfalconObject
             end
         end
         
-        function scan = loadFields(scan)
-            scan.beamCharacterization = scan.beamCharacterization.load();
+        function scan = loadFields(scan, defaultLoadPath)
+            scan.beamCharacterization = scan.beamCharacterization.load(defaultLoadPath);
         end   
                        
         function source = setDefaultValues(source)

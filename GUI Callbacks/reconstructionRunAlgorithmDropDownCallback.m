@@ -19,7 +19,7 @@ app.workspace.reconstructionRun.reconstruction = newRecon;
 savePath = newRecon.getSavePath(app.workspace.reconstructionRun.simulationRun.savePath);                
 app.workspace.reconstructionRun.savePath = savePath;
 
-app.ReconstructionRunSavePathLabel.Text = savePath;
+app.ReconstructionRunSavePathEditField.Value = savePath;
 
 end
 

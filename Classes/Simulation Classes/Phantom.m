@@ -94,13 +94,13 @@ classdef Phantom < GyrfalconObject
             phantom.location = [0,0,0];
         end
         
-        function [saved, phantomForGUI, phantomForParent, phantomForSaving] = saveChildrenObjects(phantom)
+        function [saved, phantomForGUI, phantomForParent, phantomForSaving] = saveChildrenObjects(phantom, defaultSavePath)
             phantomForGUI = phantom;
             phantomForParent = phantom;
             phantomForSaving = phantom;
             
             if ~isempty(phantom.dataSet)
-                [saved, dataSetForGUI, dataSetForParent, ~] = phantom.dataSet.saveAsIfChanged();
+                [saved, dataSetForGUI, dataSetForParent, ~] = phantom.dataSet.saveAsIfChanged(defaultSavePath);
                 
                 if saved
                     phantomForGUI.dataSet = dataSetForGUI;
@@ -112,8 +112,8 @@ classdef Phantom < GyrfalconObject
             end
         end
         
-        function phantom = loadFields(phantom)
-            phantom.dataSet = phantom.dataSet.load();
+        function phantom = loadFields(phantom, defaultLoadPath)
+            phantom.dataSet = phantom.dataSet.load(defaultLoadPath);
         end        
         
         function name = defaultName(phantom)

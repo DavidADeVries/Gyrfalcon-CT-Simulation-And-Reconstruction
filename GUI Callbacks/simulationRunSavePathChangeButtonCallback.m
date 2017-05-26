@@ -5,7 +5,7 @@ simulationRun = app.workspace.simulationRun;
 
 simulationRun = simulationRun.createFromGUI(app);
 
-[cancel, simulationRun] = simulationRun.collectSavePathAndFilename();
+[cancel, simulationRun] = simulationRun.collectSavePathAndFilename(app.settings.Simulation_And_Reconstruction_Run_Save_Path);
 
 if ~cancel
     app.workspace.simulationRun = simulationRun;

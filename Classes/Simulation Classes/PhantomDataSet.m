@@ -24,7 +24,7 @@ classdef PhantomDataSet < GyrfalconObject
             dataSet.data = [];
         end
         
-        function [saved, dataSetForGUI, dataSetForParent, dataSetForSaving] = saveChildrenObjects(dataSet)
+        function [saved, dataSetForGUI, dataSetForParent, dataSetForSaving] = saveChildrenObjects(dataSet, defaultSavePath)
             dataSetForGUI = dataSet;
             dataSetForParent = dataSet;
             dataSetForSaving = dataSet;
@@ -32,7 +32,7 @@ classdef PhantomDataSet < GyrfalconObject
             saved = true;
         end
         
-        function dataSet = loadFields(dataSet)
+        function dataSet = loadFields(dataSet, defaultLoadPath)
         end
         
         

@@ -10,7 +10,9 @@ workspace = workspace.createFromGUI(app);
 
 workspace.saveInSeparateFile = true;
 
-[saved, workspace, ~,~] = workspace.saveAs();
+defaultSavePath = app.settings.Simulation_Save_Path;
+
+[saved, workspace, ~,~] = workspace.saveAs(defaultSavePath);
 
 if saved
     app.workspace = workspace;

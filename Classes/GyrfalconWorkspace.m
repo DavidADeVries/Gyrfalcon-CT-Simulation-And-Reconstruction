@@ -51,13 +51,13 @@ classdef GyrfalconWorkspace < GyrfalconObject
             workspace.simulationRunForViewing = SimulationRun;
         end
         
-        function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace)
+        function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace, defaultSavePath)
             workspaceForGUI = workspace;
             workspaceForParent = workspace;
             workspaceForSaving = workspace;
             
             if ~isempty(workspace.simulation)
-                [saved, simulationForGUI, simulationForParent, ~] = workspace.simulation.saveAsIfChanged();
+                [saved, simulationForGUI, simulationForParent, ~] = workspace.simulation.saveAsIfChanged(defaultSavePath);
                 
                 if saved
                     workspaceForGUI.simulation = simulationForGUI;

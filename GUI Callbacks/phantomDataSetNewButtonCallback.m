@@ -2,7 +2,7 @@ function [] = phantomDataSetNewButtonCallback(app)
 % [] = phantomDataSetNewButtonCallback(app)
 % callback function that creates a new phantom data set
 
-dataSet = createNewDataSet();
+dataSet = createNewDataSet(app);
   
 if ~isempty(dataSet)
     % update handles
@@ -15,7 +15,7 @@ end
 
 % HELPER FUNCTIONS
 
-function dataSet = createNewDataSet()    
+function dataSet = createNewDataSet(app)    
     title = 'Create Shepp-Logan Phantom Data Set';
 
     questions = {'Please enter the x/y dimension (will be square!):', 'Please enter the z dimension (will create round phantom):'};
@@ -58,7 +58,7 @@ function dataSet = createNewDataSet()
         
         dataSet.saveInSeparateFile = true;
         
-        [saved,dataSet,~,~] = dataSet.saveAs();
+        [saved,dataSet,~,~] = dataSet.saveAs(app.settings.Simulation_Save_Path);
         
         if ~saved
             dataSet.saveInSeparateFile = false;

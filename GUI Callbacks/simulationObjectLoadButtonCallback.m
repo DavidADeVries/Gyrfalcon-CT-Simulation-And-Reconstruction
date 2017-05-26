@@ -17,10 +17,12 @@ elseif strcmp(className, 'PhantomDataSet')
     object = PhantomDataSet;
 end
 
-object = object.load();
+defaultLoadPath = app.settings.Simulation_Save_Path;
+
+object = object.load(defaultLoadPath);
 
 if ~isempty(object)
-    object = object.loadFields();
+    object = object.loadFields(defaultLoadPath);
     
     workspace = app.workspace.createFromGUI(app);
     

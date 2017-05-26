@@ -73,7 +73,7 @@ classdef PhotonBeam < GyrfalconObject
             photonBeam.calibratedPhantomDataSet = {};
         end
         
-        function [saved, beamForGUI, beamForParent, beamForSaving] = saveChildrenObjects(beam)
+        function [saved, beamForGUI, beamForParent, beamForSaving] = saveChildrenObjects(beam, defaultSavePath)
             beamForGUI = beam;
             beamForParent = beam;
             beamForSaving = beam;
@@ -81,7 +81,7 @@ classdef PhotonBeam < GyrfalconObject
             saved = true;
         end
         
-        function photonBeam = loadFields(photonBeam)
+        function photonBeam = loadFields(photonBeam, defaultLoadPath)
             %calibratedPhantomDataSet will be calculated as needed
         end 
         

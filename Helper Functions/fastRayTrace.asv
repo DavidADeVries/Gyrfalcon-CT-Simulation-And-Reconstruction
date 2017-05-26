@@ -95,7 +95,7 @@ if isempty(rawDetectorValue)
         tValsNeeded(isDelta0) = Inf;
         tValsNeeded = round(tValsNeeded, Constants.Round_Off_Level);
         
-        onLattice = [false false false];
+        onLattice = [false  0];
         
         if tValsNeeded(1) <= tValsNeeded(2) && tValsNeeded(1) <= tValsNeeded(3) % choose the lowest t
             t = tValsNeeded(1);
@@ -117,9 +117,8 @@ if isempty(rawDetectorValue)
         
         shift = t.*deltas;
         
-        currentPoint = currentPoint + shift; 
-        onLatticePoints = [1, -1, -1] .* lastLattices .* voxelDimsInM;
-        currentPoint(onLattice) = onLatticePoints(onLattice); % reduces compounding rounding errors as much as possible
+        currentPoint = currentPoint + shift;
+        currentPoint(onLattice) = [1, -1, -1] .* lastLattices .* voxelDimsInM; % reduces compounding rounding errors as much as possible
         
         radonSum = radonSum + norm(shift) .* attenuation;
     end

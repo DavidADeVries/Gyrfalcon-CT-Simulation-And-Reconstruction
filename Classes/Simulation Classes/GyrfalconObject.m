@@ -124,12 +124,12 @@ classdef GyrfalconObject
               
         end
         
-        function [saved, objectForGUI, objectForParent, objectForSaving] = save(object)            
+        function [saved, objectForGUI, objectForParent, objectForSaving] = save(object, defaultSavePath)            
             if object.saveInSeparateFile
                 if isempty(object.getPath())
-                    [saved, objectForGUI, objectForParent] = saveAs(object);
+                    [saved, objectForGUI, objectForParent] = saveAs(object, defaultSavePath);
                 else
-                    [saved, objectForGUI, objectForParent, objectForSaving] = object.saveChildrenObjects();
+                    [saved, objectForGUI, objectForParent, objectForSaving] = object.saveChildrenObjects(defaultSavePath);
                     
                     if saved
                         % set objectForParent
@@ -145,7 +145,7 @@ classdef GyrfalconObject
                     end
                 end
             else
-                [saved, objectForGUI, objectForParent, objectForSaving] = object.saveChildrenObjects();
+                [saved, objectForGUI, objectForParent, objectForSaving] = object.saveChildrenObjects(defaultSavePath);
                 
                 if saved
                     % set objectForParent
@@ -159,7 +159,7 @@ classdef GyrfalconObject
             end
         end
         
-        function object = load(object)
+        function object = load(object, defaultLoadPath)
             path = object.getPath();
             
             error = false;
@@ -174,7 +174,7 @@ classdef GyrfalconObject
                         if strcmp(class(newObject), class(object))
                             object = newObject;
                             
-                            object = object.loadFields();
+                            object = object.loadFields(defaultLoadPath);
                         else
                             string = ['File found at:', path, ' does not contain a ', class(object), ' object. Please find the proper file.'];
                             title = 'Invalid File Found';
@@ -205,7 +205,7 @@ classdef GyrfalconObject
             else
                 if ~object.saveInSeparateFile
                     % no error, just linked up with parent object
-                    object = object.loadFields();
+                    object = object.loadFields(defaultLoadPath);
                     
                     error = false;
                 else
@@ -218,7 +218,7 @@ classdef GyrfalconObject
                 
                 className = class(object);
                 dialogTitle = ['Find ', className, ' File'];
-                defaultName = Constants.object_save_directory;
+                defaultName = defaultLoadPath;
                 
                 [fileName, pathName, ~] = uigetfile(filterSpec, dialogTitle, defaultName);
                 
@@ -226,20 +226,20 @@ classdef GyrfalconObject
                     object.savePath = pathName;
                     object.saveFileName = fileName;
                     
-                    object = object.load();
+                    object = object.load(defaultLoadPath);
                 else
                     object = [];
                 end
             end
         end
         
-        function [saved, objectForGUI, objectForSaving, objectForParent] = saveAs(object)
+        function [saved, objectForGUI, objectForSaving, objectForParent] = saveAs(object, defaultSavePath)
             if object.saveInSeparateFile()
                 className = class(object);
                 
                 filterSpec = '*.mat';
                 dialogTitle = ['Save ', className, '...'];
-                defaultName = makePath(Constants.object_save_directory, object.defaultName());
+                defaultName = makePath(defaultSavePath, object.defaultName());
                 
                 [fileName, pathName] = uiputfile(filterSpec, dialogTitle, defaultName);
                 
@@ -248,7 +248,7 @@ classdef GyrfalconObject
                     object.saveFileName = fileName;
                     object.saveInSeparateFile = true;
                     
-                    [saved, objectForGUI, objectForSaving, objectForParent] = object.save();
+                    [saved, objectForGUI, objectForSaving, objectForParent] = object.save(defaultSavePath);
                 else
                     objectForGUI = object;
                     objectForSaving = [];
@@ -257,15 +257,15 @@ classdef GyrfalconObject
                     saved = false;
                 end
             else
-                [saved, objectForGUI, objectForSaving, objectForParent] = object.save();
+                [saved, objectForGUI, objectForSaving, objectForParent] = object.save(defaultSavePath);
             end
         end
         
-        function [saved, objectForGUI, objectForSaving, objectForParent] = saveAsIfChanged(object)
+        function [saved, objectForGUI, objectForSaving, objectForParent] = saveAsIfChanged(object, defaultSavePath)
             if object.hasChanges()
-                [saved, objectForGUI, objectForSaving, objectForParent] = saveAs(object);
+                [saved, objectForGUI, objectForSaving, objectForParent] = saveAs(object, defaultSavePath);
             else
-                [saved, objectForGUI, objectForSaving, objectForParent] = save(object);
+                [saved, objectForGUI, objectForSaving, objectForParent] = save(object, defaultSavePath);
             end
         end
     end

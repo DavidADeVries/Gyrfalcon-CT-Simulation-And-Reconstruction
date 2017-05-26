@@ -86,7 +86,7 @@ methods
         name = 'Source';
     end
     
-    function [saved, sourceForGUI, sourceForParent, sourceForSaving] = saveChildrenObjects(source)
+    function [saved, sourceForGUI, sourceForParent, sourceForSaving] = saveChildrenObjects(source, defaultSavePath)
         sourceForGUI = source;
         sourceForParent = source;
         sourceForSaving = source;
@@ -94,7 +94,7 @@ methods
         saved = true;
     end
         
-    function source = loadFields(source)
+    function source = loadFields(source, defaultLoadPath)
     end
            
     function source = setDefaultValues(source)

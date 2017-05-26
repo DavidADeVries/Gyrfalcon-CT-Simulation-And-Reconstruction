@@ -3,7 +3,7 @@ function [] = simulationViewerListBoxValueChangedCallback(app)
 
 image = app.workspace.simulationRunForViewing.loadImageForScanSimulationViewer(app);
                 
-imshow(image, [], 'Parent', app.SimulationViewerAxes);
+imshow(-image, [], 'Parent', app.SimulationViewerAxes);
 
 end
 

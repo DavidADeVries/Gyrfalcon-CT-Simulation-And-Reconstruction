@@ -6,7 +6,7 @@ dataSet = PhantomDataSet;
 
 dataSet.saveInSeparateFile = true;
 
-dataSet = dataSet.load();  
+dataSet = dataSet.load(app.settings.Simulation_Save_Path);  
 
 if ~isempty(dataSet)
     % update handles

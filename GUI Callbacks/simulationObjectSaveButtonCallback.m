@@ -23,7 +23,9 @@ end
 
 objectForGUI.saveInSeparateFile = true;
 
-[saved,objectForGUI,~] = objectForGUI.saveAs();
+defaultSavePath = app.settings.Simulation_Save_Path;
+
+[saved,objectForGUI,~] = objectForGUI.saveAs(defaultSavePath);
 
 if saved && ~isempty(objectForGUI)        
     if strcmp(className, 'Simulation')

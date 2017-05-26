@@ -27,11 +27,11 @@ classdef ProcessingRun
             run.saveFileName = [];
         end
         
-        function [cancel, run] = collectSavePathAndFilename(run)
+        function [cancel, run] = collectSavePathAndFilename(run, defaultPath)
             filterspec = '*.mat';
             dialogTitle = 'Save As';
             
-            [filename,pathname] = uiputfile(filterspec, dialogTitle);
+            [filename,pathname] = uiputfile(filterspec, dialogTitle, defaultPath);
             
             if ~isa(filename,'double') % didn't click cancel
                 run.savePath = pathname(1:end-1); %slice off last '/'

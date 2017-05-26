@@ -91,7 +91,7 @@ classdef Detector < GyrfalconObject
             name = 'Detector';
         end
         
-        function [saved, detectorForGUI, detectorForParent, detectorForSaving] = saveChildrenObjects(detector)
+        function [saved, detectorForGUI, detectorForParent, detectorForSaving] = saveChildrenObjects(detector, defaultSavePath)
             detectorForGUI = detector;
             detectorForParent = detector;
             detectorForSaving = detector;
@@ -99,7 +99,7 @@ classdef Detector < GyrfalconObject
             saved = true;
         end
         
-        function detector = loadFields(detector)
+        function detector = loadFields(detector, defaultLoadPath)
         end
         
         function bool = isDetectorPlanarAnd2D(detector)
