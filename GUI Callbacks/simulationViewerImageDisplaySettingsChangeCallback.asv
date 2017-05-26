@@ -1,0 +1,15 @@
+function [] = simulationViewerImageDisplaySettingsChangeCallback(app)
+%[] = simulationViewerImageDisplaySettingsChangeCallback(app)
+
+[invert, contrastBounds] = getSimulationViewerImageDisplaySettings(app);
+
+image = app.workspace.simulationRunForViewing.loadImageForScanSimulationViewer(app);
+         
+if invert
+    image
+
+imshow(-image, [], 'Parent', app.SimulationViewerAxes);
+
+
+end
+

@@ -117,10 +117,9 @@ classdef SimulationRun < ProcessingRun
                 
                 imshow([], 'Parent', app.SimulationViewerAxes);
                 
-                app.InvertImageDisplayCheckBox.Enable = 'off';
-                app.ImageContrastLowEditField.Enable = 'off';
-                app.ImageContrastHighEditField.Enable = 'off';
-                app.SimulationViewerLoopThroughAnglesButton.Enable = 'off';
+                app.InvertImageDisplayCheckBox.Enable = 'o;
+                app.ImageContrastLowEditField.Value = minVal;
+                app.ImageContrastHighEditField.Value = maxVal;
             else
                 app.SimulationViewerFilePathLabel.Text = run.savePath;
                 
@@ -162,11 +161,6 @@ classdef SimulationRun < ProcessingRun
                 app.InvertImageDisplayCheckBox.Value = true;
                 app.ImageContrastLowEditField.Value = minVal;
                 app.ImageContrastHighEditField.Value = maxVal;
-                
-                app.InvertImageDisplayCheckBox.Enable = 'on';
-                app.ImageContrastLowEditField.Enable = 'on';
-                app.ImageContrastHighEditField.Enable = 'on';
-                app.SimulationViewerLoopThroughAnglesButton.Enable = 'on';
                 
                 showSimulationViewImage(app);
             end            
