@@ -1,6 +1,8 @@
 function [xCoords, yCoords, zCoords] = getAllDetectorCoords(detector, slicePosition, angle, perAngleXY, perAngleZ)
 %[xCoords, yCoords, zCoords] = getAllDetectorCoords(detector, slicePosition, angle, perAngleXY, perAngleZ)
 
+curvatureRadiusInM = detector.getAngularDetectorRadiusInM();
+
 perAngleXY = - perAngleXY; %need to do opposite of what source did
 
 locationInM = detector.locationUnits.convertToM(detector.location);
@@ -78,8 +80,12 @@ for i=1:length(xyVals)
                 xyScale = cosd(zVal);
             end
             
-            x = radius * cosd(xyVal) * zScale;
-            y = radius * sind(xyVal) * zScale + perAngleXY;
+            x = curvatureRadiusInM * cosd(xyVal) * zScale;
+            y = curvatureRadiusInM * sind(xyVal) * zScale + perAngleXY;
+            
+            % need to shift y if curvature radius is not the
+            % detector-isocentre distance
+            x = x + (norm(locationInM) - curvatureRadiusInM);
         else
             x = radius;
             y = xyVal + perAngleXY;
@@ -95,7 +101,7 @@ for i=1:length(xyVals)
         plotY = y;
         
         if zIsAngular
-            plotZ = z + radius * sind(zVal);
+            plotZ = z + curvatureRadiusInM * sind(zVal);
         else
             plotZ = z + zVal;
         end

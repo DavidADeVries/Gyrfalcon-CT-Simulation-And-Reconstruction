@@ -782,6 +782,9 @@ classdef Simulation < GyrfalconObject
             optimizeForPerAngleTranslation = true;
             optimizeForDetector = true;
             
+            if totalNumDetectors == 1 % we're dealing with a position based imaging set-up, prolly
+                
+            else
             if totalNumDetectors > maxNumBeamTraces
                 error('Not enough memory for a High Performance CPU simulation');
             elseif totalNumSteps * totalNumDetectors > maxNumBeamTraces
@@ -823,7 +826,7 @@ classdef Simulation < GyrfalconObject
 
             % RUN BEAM TRACES
             
-            if simulation.partialPixelModelling
+            if simulation.partialPixelModelling && simulation.partialPixelResolution ==1 && simulation.detector.isDetectorPlanarAnd2D()
                 runHighPerformancePartialPixelWithCentreOf2DDetectorsOnCPU(...
                     simulation, simulationRun, app, runIsParallel, slices, angles,...
                     numSlices, numAngles, zNumSteps, xyNumSteps, zNumDetectors, xyNumDetectors,...

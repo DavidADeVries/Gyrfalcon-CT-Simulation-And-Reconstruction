@@ -49,12 +49,13 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
         otherwise
             error('No run performance selected. No simulation can be run.');
     end
-        
-    simulationRun = simulationRun.clearBeforeSave();
-    simulationRun.save();
     
     % transfer the simulation run to the simulation run for viewing
     workspace.simulationRunForViewing = simulationRun;
+        
+    % save simulationRun data file
+    simulationRun = simulationRun.clearBeforeSave();
+    simulationRun.save();
     
     % reset simulationRun for running simulations
     workspace.simulationRun = SimulationRun;
@@ -63,12 +64,13 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
     % set GUI
     workspace.statusOutput = app.StatusOutputTextArea.Value;
     
+    app.workspace = workspace;
+    
     app = workspace.setGUI(app);
     resetScanSimulationViewerListBoxes(app)
     
     app.TabGroup.SelectedTab = app.ScanSimulationViewerTab;
     
-    app.workspace = workspace;
 end
 
 

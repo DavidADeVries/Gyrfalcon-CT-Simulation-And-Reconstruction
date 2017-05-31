@@ -1,15 +1,15 @@
 function rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, startingIntensity)
 % rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, startingIntensity)
 
-rawDetectorValue = [];
-
 bounds1 = [phantomLocationInM(1), phantomLocationInM(2:3) - voxelDimsInM(2:3).*phantomDims(2:3)];
 bounds2 = [phantomLocationInM(1)+voxelDimsInM(1)*phantomDims(1), phantomLocationInM(2:3)];
 
 [deltas, point] = createLineEquation(pointSourceCoords, pointDetectorCoords);
 
-tMinsTemp = (bounds1 - point) ./ deltas;
-tMaxsTemp = (bounds2 - point) ./ deltas;
+invDeltas = 1 ./ deltas;
+
+tMinsTemp = (bounds1 - point) .* invDeltas;
+tMaxsTemp = (bounds2 - point) .* invDeltas;
 
 tMins = tMinsTemp;
 tMaxs = tMaxsTemp;
@@ -19,32 +19,39 @@ negDeltas = deltas < 0;
 tMins(negDeltas) = tMaxsTemp(negDeltas);
 tMaxs(negDeltas) = tMinsTemp(negDeltas);
 
-tMin = tMins(1);
-tMax = tMaxs(1);
+tMin = -Inf;
+tMax = Inf;
 
-if (tMin > tMaxs(2)) || (tMins(2) > tMax)
-    rawDetectorValue = startingIntensity; %missed
-end
-
-if tMins(2) > tMin
-    tMin = tMins(2);
-end
-if tMaxs(2) < tMax
-    tMax = tMaxs(2);
+if deltas(1) ~= 0
+    if tMins(1) > tMin
+        tMin = tMins(1);
+    end
+    if tMaxs(1) < tMax
+        tMax = tMaxs(1);
+    end
 end
 
-if (tMin > tMaxs(3)) || (tMins(3) > tMax)
-    rawDetectorValue = startingIntensity; %missed
+if deltas(2) ~= 0
+    if tMins(2) > tMin
+        tMin = tMins(2);
+    end
+    if tMaxs(2) < tMax
+        tMax = tMaxs(2);
+    end
 end
 
-if tMins(3) > tMin
-    tMin = tMins(3);
-end
-if tMaxs(3) < tMax
-    tMax = tMaxs(3);
+if deltas(3) ~= 0
+    if tMins(3) > tMin
+        tMin = tMins(3);
+    end
+    if tMaxs(3) < tMax
+        tMax = tMaxs(3);
+    end
 end
 
-if isempty(rawDetectorValue)
+if tMax < tMin
+    rawDetectorValue = startingIntensity;
+else % run through the voxels
     startingPoint = point + tMin .* deltas;
     endPoint = point + tMax .* deltas;
     
@@ -55,7 +62,8 @@ if isempty(rawDetectorValue)
     endingPoint = endPoint - phantomLocationInM;
     
     deltas = endingPoint - startingPoint;
-    deltaSigns = deltas ./ abs(deltas);
+    invDeltas = 1 ./ deltas;
+    deltaSigns = -1*(deltas < 0) + (deltas > 0);
     
     isDelta0 = deltas==0;
     deltaSigns(isDelta0) = 0;
@@ -81,17 +89,13 @@ if isempty(rawDetectorValue)
     while ~all(lastLattices == endingLattices)%any(abs(currentPoint - endingPoint) > Constants.Round_Off_Error_Bound)
         currentIndices = lastLattices + latticeToIndex;
         
-        try
-            attenuation = phantomData(currentIndices(2), currentIndices(1), currentIndices(3));
-        catch e
-            disp(e);
-        end
+        attenuation = phantomData(currentIndices(2), currentIndices(1), currentIndices(3));
         
         nextLattices = lastLattices + nextPointFactors;
         
         nextPoints = [1, -1, -1] .* ((nextLattices)) .* voxelDimsInM; % finds next intersection point with part of the voxel grids for x,y,z
                 
-        tValsNeeded = (nextPoints - currentPoint) ./ deltas; % finds the t needed to reach these
+        tValsNeeded = (nextPoints - currentPoint) .* invDeltas; % finds the t needed to reach these
         tValsNeeded(isDelta0) = Inf;
         tValsNeeded = round(tValsNeeded, Constants.Round_Off_Level);
         
@@ -134,7 +138,10 @@ end
 function lattices = getLattices(point, voxelDimsInM, isDeltaNeg)
 
     unroundedVals = point ./ voxelDimsInM;
+    
     unroundedVals = [1 -1 -1].*unroundedVals;
+        
+    unroundedVals(voxelDimsInM == 0) = 1; % needs to be 1, since no change occurs, needs index to be 1
     
     % first need to kill off any rounding errors
     unroundedVals = round(unroundedVals, Constants.Round_Off_Level);

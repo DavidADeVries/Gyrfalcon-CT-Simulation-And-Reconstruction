@@ -16,7 +16,7 @@ voxelDimsInM = simulation.phantom.getVoxelDimensionsInM();
 phantomLocationInM = simulation.phantom.getLocationInM();
 
 detectorDims = detector.wholeDetectorDimensions;
-detectorPixelDims = detector.singleDetectorDimensions;
+detectorPixelDims = detector.singleDetectorDimenions;
 
 rawIntensity = simulation.scan.beamCharacterization.rawIntensity();
 calibratedPhantomDataSet = simulation.scan.beamCharacterization.calibratedPhantomDataSet{1};
@@ -25,21 +25,12 @@ calibratedPhantomDataSet = simulation.scan.beamCharacterization.calibratedPhanto
 partialPixelRes = simulation.partialPixelResolution;
 
 if partialPixelRes > 1
-    averagingBlockSize = [1 1];
-    
     for i=1:2 %xy and z
         if detectorPixelDims(i).value ~= 0 % don't increase resolution if there is no height in that direction
             detectorPixelDims(i).value = detectorPixelDims(i).value ./ partialPixelRes;
-            detectorDims(i) = detectorDims(i) .* partialPixelRes; % we increased the resolution by basically adding more detectors!
-            
-            averagingBlockSize(-i + 3) = partialPixelRes; % first index is z, second is xy (flipped)
+            detectorDims(i) = detectorDims(1) .* partialPixelRes;
         end
     end
-        
-    zNumDetectors = detectorDims(2);
-    xyNumDetectors = detectorDims(1);
-else
-    averagingBlockSize = [1 1]; % don't really need this, but we'll set it.
 end
 
 % calculate how to split up calculations
@@ -81,8 +72,6 @@ if runIsParallel % parallelize run; parallel pool is already online
             indexingLevels, optimizeFlags, numTracesInOptimizedCalc,...
             scatteringNoiseLevel, detectorNoiseLevel,...
             phantomDims, voxelDimsInM, phantomLocationInM,...
-            detectorDims, detectorPixelDims,...
-            partialPixelRes, averagingBlockSize,...
             rawIntensity, calibratedPhantomDataSet,...
             source, detector, scan,...
             savePath, slices, angles);
@@ -93,8 +82,6 @@ else % single processor run, though it is heavily optimized
             indexingLevels, optimizeFlags, numTracesInOptimizedCalc,...
             scatteringNoiseLevel, detectorNoiseLevel,...
             phantomDims, voxelDimsInM, phantomLocationInM,...
-            detectorDims, detectorPixelDims,...
-            partialPixelRes, averagingBlockSize,...
             rawIntensity, calibratedPhantomDataSet,...
             source, detector, scan, savePath, slices, angles);        
     end
@@ -192,7 +179,7 @@ function indices = getIndices(index, indexingLevels, useFlags)
     [indices(6), indices(5), indices(4), indices(3), indices(2), indices(1)] = ind2sub(fliplr(dims), index);
 end
 
-function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceIndices, parallelFlags, indexLevels, angles, partialPixelRes, averagingBlockSize)
+function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceIndices, parallelFlags, indexLevels, angles)
     parallelForDetector = parallelFlags(5) & parallelFlags(6);
     
     numBeamTraces = length(detectorData);
@@ -207,10 +194,6 @@ function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceI
             detectorImage = reshape(detectorImage, indexLevels(6), indexLevels(5));
             
             detectorImage = detectorImage';
-            
-            if partialPixelRes > 1 %need to average
-                detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
-            end
             
             saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices((i-1)*numPixelsInDetector+1,:), angles);
         end
@@ -231,7 +214,7 @@ function [] = saveDetectorImage(detectorData, savePath, indices, angles)
     save(writePath, Constants.Detector_Data_Var_Name);
 end
 
-function [] = runOptimizedRayTraceCalculation(i, indexingLevels, optimizeFlags, numTracesInOptimizedCalc, scatteringNoiseLevel, detectorNoiseLevel, phantomDims, voxelDimsInM, phantomLocationInM, detectorDims, detectorPixelDims, partialPixelRes, averagingBlockSize, rawIntensity, calibratedPhantomDataSet, source, detector, scan, savePath, slices, angles)
+function [] = runOptimizedRayTraceCalculation(i, indexingLevels, optimizeFlags, numTracesInOptimizedCalc, scatteringNoiseLevel, detectorNoiseLevel, phantomDims, voxelDimsInM, phantomLocationInM, rawIntensity, calibratedPhantomDataSet, source, detector, scan, savePath, slices, angles)
 nonOptimizedCalcIndices = getIndices(i, indexingLevels, ~optimizeFlags);
 
 optimizedCalcIndices = repmat(nonOptimizedCalcIndices, numTracesInOptimizedCalc, 1);
@@ -253,7 +236,7 @@ end
     optimizedCalcIndices, source.getLocationInM(), detector.getLocationInM(),...
     slices', angles',...
     scan.getPerAngleTranslationResolutionInM(), scan.perAngleTranslationDimensions,...
-    detectorDims, detectorPixelDims, detector.getAngularDetectorRadiusInM(),...
+    detector.wholeDetectorDimensions, detector.singleDetectorDimensions, detector.getAngularDetectorRadiusInM(),...
     detector.movesWithScanAngle, detector.movesWithPerAngleTranslation);
 
 fn = @(sourceCoordsX, sourceCoordsY, sourceCoordsZ, detectorCoordsX, detectorCoordsY, detectorCoordsZ)...
@@ -267,6 +250,6 @@ detectorData = arrayfun(fn,...
     pointSourceCoords(:,1), pointSourceCoords(:,2), pointSourceCoords(:,3),...
     pointDetectorCoords(:,1), pointDetectorCoords(:,2), pointDetectorCoords(:,3));
 
-writeDetectorDataToDisk(detectorData, savePath, optimizedCalcIndices, optimizeFlags, indexingLevels, angles, partialPixelRes, averagingBlockSize);
+writeDetectorDataToDisk(detectorData, savePath, optimizedCalcIndices, optimizeFlags, indexingLevels, angles);
 
 end

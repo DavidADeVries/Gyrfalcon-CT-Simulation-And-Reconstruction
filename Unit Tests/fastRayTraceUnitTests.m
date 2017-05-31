@@ -780,3 +780,50 @@ function hit_XYAngle_Corner2Corner2_Opposite_Test(testCase)
     
     verifyEqual(testCase,detectorValue,expected,'AbsTol',1E-9);
 end
+
+function hit_3D_Corner2Corner2_Test(testCase)
+    pointSourceCoords = [2 2 2];
+    pointDetectorCoords = [-2 -2 -2];
+    
+    phantomLocationInM = [-0.7 0.7 0.7];
+    
+    phantomDims = [2 2 2];
+    voxelDimsInM = [0.7 0.7 0.7];
+    
+    phantomData = zeros(2,2,2);
+    phantomData(:,:,1) = [0.1 0.2; 0.3 0.4];
+    phantomData(:,:,2) = [0.5 0.6; 0.7 0.8];
+    
+    beam = PhotonBeam(0.1, 100);    
+
+    detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
+        phantomLocationInM, phantomDims, voxelDimsInM,...
+        phantomData, beam.rawIntensity);
+    
+    expected = 100*exp(-(0.2*sqrt(3*0.49)+0.7*sqrt(3*0.49)));
+    
+    verifyEqual(testCase,detectorValue,expected,'AbsTol',1E-9);
+end
+
+function hit_Slice_Test(testCase)
+    pointSourceCoords = [2 2 0];
+    pointDetectorCoords = [-2 -2 0];
+    
+    phantomLocationInM = [-1 1 0];
+    
+    phantomDims = [2 2 1];
+    voxelDimsInM = [1 1 0];
+    
+    phantomData = zeros(2,2,1);
+    phantomData(:,:,1) = [0.1 0.2; 0.3 0.4];
+    
+    beam = PhotonBeam(0.1, 100);    
+
+    detectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords,...
+        phantomLocationInM, phantomDims, voxelDimsInM,...
+        phantomData, beam.rawIntensity);
+    
+    expected = 100*exp(-(0.2*sqrt(2)+0.3*sqrt(2)));
+    
+    verifyEqual(testCase,detectorValue,expected,'AbsTol',1E-9);
+end

@@ -127,18 +127,14 @@ end
 % that images are not stretched/shrunk for non-square pixels, detector
 % movements larger than the detector size, etc.
 
-xData = [0, (xyDim-1)*xyDimInM]; % gives locations of pixel centres
-xLim = xData + [-xyDimInM/2, +xyDimInM/2]; % goes to boundary of outside pixels
+xData = (
 
-yData = [0, (zDim-1)*zDimInM];
-yLim = yData + [-zDimInM/2, +zDimInM/2];
+imshow(image, contrastBounds, 'Parent', app.SimulationViewerAxes);
 
-imshow(image, contrastBounds,...
-    'Parent', app.SimulationViewerAxes,...
-    'XData', xData, 'YData', yData);
+dims = size(image);
 
-app.SimulationViewerAxes.XLim = xLim;
-app.SimulationViewerAxes.YLim = yLim;
+app.SimulationViewerAxes.XLim = [0 dims(2)+0.5];
+app.SimulationViewerAxes.YLim = [0 dims(1)+0.5];
 app.SimulationViewerAxes.BackgroundColor = [0 0 0];
 
 end

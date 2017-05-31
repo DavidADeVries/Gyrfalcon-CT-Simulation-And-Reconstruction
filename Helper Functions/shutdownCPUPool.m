@@ -8,7 +8,7 @@ newLine = true;
 app = updateStatusOutput(app, newString, newLine);
 
 % delete the pool
-delete(cpuPool);
+delete(gcp);
 
 % tell the user we're done
 newString = 'Complete';

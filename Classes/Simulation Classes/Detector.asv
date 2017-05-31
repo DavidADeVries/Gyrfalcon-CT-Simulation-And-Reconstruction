@@ -113,16 +113,9 @@ classdef Detector < GyrfalconObject
             
             bool = is2D1 & is2D2 * isPlanar1 & isPlanar2;
         end
-        
-        function bool = isPlanar(detector)
-            isPlanar1 = detector.singleDetectorDimensions(1).isPlanar();
-            isPlanar2 = detector.singleDetectorDimensions(2).isPlanar();
-            
-            bool = isPlanar1 && isPlanar2;
-        end
 
         function dimensions = getSingleDetectorDimensionsInM(detector)
-            radiusInM = detector.getAngularDetectorRadiusInM();
+            radiusInM = detector.getDistanceBetweenOriginAndDetectorCentrePointInM();
             
             xy = detector.singleDetectorDimensions(1).getLengthInM(radiusInM);
             z = detector.singleDetectorDimensions(2).getLengthInM(radiusInM);
@@ -137,7 +130,7 @@ classdef Detector < GyrfalconObject
         function detector = setDefaultValues(detector)
             detector.location = [0,-1];
             
-            detector.angularDetectorRadius = 1;
+            detector.radius = 1;
             
             detector.wholeDetectorDimensions = [10,10];
             
@@ -281,15 +274,7 @@ classdef Detector < GyrfalconObject
             
             app.DetectorAngularDetectorRadiusEditField.Value = detector.angularDetectorRadius;
             
-            if detector.isPlanar()
-                 app.DetectorAngularDetectorRadiusEditField.Enable = 'off';
-                 app.SetRadiusToIsocentreDistanceButton.Enable = 'off';
-                 app.SetRadiusToSourceDistanceButton.Enable = 'off';
-            else
-                 app.DetectorAngularDetectorRadiusEditField.Enable = 'on';
-                 app.SetRadiusToIsocentreDistanceButton.Enable = 'on';
-                 app.SetRadiusToSourceDistanceButton.Enable = 'on';
-            end
+            if detector.isPlan
             
             xy = detector.wholeDetectorDimensions(1);
             z = detector.wholeDetectorDimensions(2);
