@@ -217,28 +217,46 @@ function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceI
                 translationXY = indexLevels(4);
                 detectorZ = indexLevels(5);
                 detectorXY = indexLevels(6);
-                
-                if detectorXY == 1 && translationZ == 1                
-                    detectorImage = reshape(detectorImage,...
-                        translationZ*detectorZ,...
-                        translationXY*detectorXY);
-                else                
+                                
+                if translationXY > 1
+                    if partialPixelRes > 1 %need to average
+                        averagingBlockSize = [prod(averagingBlockSize),1];
+                        
+                        detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean(x.data)); % average the needed blocks
+                    end
+                    
+                    if translationZ > 1
+                        detectorImage = reshape(detectorImage,...
+                            translationXY*detectorXY/partialPixelRes,...
+                            translationZ*detectorZ/partialPixelRes);
+                        
+                        detectorImage = detectorImage';
+                    else
+                        detectorImage = reshape(detectorImage,...
+                            translationZ*detectorZ/partialPixelRes,...
+                            translationXY*detectorXY/partialPixelRes);
+                    end
+                else
                     detectorImage = reshape(detectorImage,...
                         translationXY*detectorXY,...
                         translationZ*detectorZ);
                     
                     detectorImage = detectorImage';
+                    
+                    if partialPixelRes > 1 %need to average
+                        detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
+                    end
                 end
             else
                 detectorImage = reshape(detectorImage, indexLevels(6), indexLevels(5));
                                 
                 detectorImage = detectorImage';
-            end
+                
+                if partialPixelRes > 1 %need to average
+                    detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
+                end
+            end                       
                         
-            if partialPixelRes > 1 %need to average
-                detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
-            end
-            
             saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices((i-1)*numPixelsInDetector+1,:), angles, isScanPositionMosiac);
         end
     else
@@ -261,19 +279,22 @@ end
 function [] = runOptimizedRayTraceCalculation(i, indexingLevels, optimizeFlags, numTracesInOptimizedCalc, scatteringNoiseLevel, detectorNoiseLevel, phantomDims, voxelDimsInM, phantomLocationInM, detectorDims, detectorPixelDims, partialPixelRes, averagingBlockSize, rawIntensity, calibratedPhantomDataSet, source, detector, scan, savePath, slices, angles, isScanPositionMosiac)
 nonOptimizedCalcIndices = getIndices(i, indexingLevels, ~optimizeFlags);
 
-optimizedCalcIndices = repmat(nonOptimizedCalcIndices, numTracesInOptimizedCalc, 1);
 
 % set parallel params
 
-for j=1:numTracesInOptimizedCalc
-    optimizedIndices = getIndices(j, indexingLevels, optimizeFlags);
-    
-    for k=1:6
-        if optimizeFlags(k)
-            optimizedCalcIndices(j,k) = optimizedIndices(k);
-        end
+traceIndices = 1:numTracesInOptimizedCalc;
+
+dims = ~optimizeFlags + optimizeFlags.*indexingLevels; % dimensionality of "1" for non-optimized levels
+
+optimizedCalcIndices = zeros(numTracesInOptimizedCalc, length(indexingLevels));
+
+[optimizedCalcIndices(:,6), optimizedCalcIndices(:,5), optimizedCalcIndices(:,4), optimizedCalcIndices(:,3), optimizedCalcIndices(:,2), optimizedCalcIndices(:,1)] = ...
+    ind2sub(fliplr(dims), traceIndices);
+
+for i=1:length(indexingLevels)
+    if ~optimizeFlags(i) % not being optimized, so values must be set! Are currently set to "1"
+        optimizedCalcIndices(:,i) = nonOptimizedCalcIndices(i);
     end
-    
 end
 
 [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCoords(...
