@@ -6,101 +6,42 @@ function [] = showSimulationViewImage(app)
 run = app.workspace.simulationRunForViewing;
 simulation = run.simulation;
 
+isPositionMosiac = simulation.isScanMultiplePositionMosiac();
+
 detectorDims = simulation.detector.wholeDetectorDimensions;
 detectorDimsInM = simulation.detector.getSingleDetectorDimensionsInM();
 
 stepDims = simulation.scan.perAngleTranslationDimensions;
 stepDimsInM = simulation.scan.getPerAngleTranslationResolutionInM();
 
-if all(detectorDims == 1) && any(stepDims > 1) % create image from single detectors at multiple positions
-    app.SimulationViewerPerAngleTranslationPositionListBox.Enable = 'off';
-    
-    sliceFolder = app.SimulationViewerSliceListBox.Value;
-    angleFolder = app.SimulationViewerScanAngleListBox.Value;
-    
-    toAnglePath = makePath(run.savePath, sliceFolder, angleFolder);
+image = loadImageForScanSimulationViewer(run, app);
+
+if isPositionMosiac
+    if all(detectorDims == 1) && any(stepDims > 1) % create image from single detectors at multiple positions
+        xyDim = stepDims(1);
+        xyDimInM = stepDimsInM(1);
         
-    xyDim = stepDims(1);
-    xyDimInM = stepDimsInM(1);
-    
-    zDim = stepDims(2);
-    zDimInM = stepDimsInM(2);
-    
-    image = zeros(stepDims(2),stepDims(1));
-     
-     for xy = 1:stepDims(1)
-         for z = 1:stepDims(2)
-             positionFolder = app.SimulationViewerPerAngleTranslationPositionListBox.ItemsData{(xy-1)*stepDims(1) + z};
-             loadPath = makePath(toAnglePath, positionFolder);
-             
-             fileData = load(loadPath);
-             
-             detectorData = fileData.(Constants.Detector_Data_Var_Name);
-             image(z,xy) = detectorData; % will be a 1x1 matrix
-         end
-     end
-elseif detectorDims(1) == 1 && stepDims(2) == 1 % have fans in the z direction at multiple xy positions
-    app.SimulationViewerPerAngleTranslationPositionListBox.Enable = 'off';
-    
-    sliceFolder = app.SimulationViewerSliceListBox.Value;
-    angleFolder = app.SimulationViewerScanAngleListBox.Value;
-    
-    toAnglePath = makePath(run.savePath, sliceFolder, angleFolder);
+        zDim = stepDims(2);
+        zDimInM = stepDimsInM(2);
+    elseif detectorDims(1) == 1 && stepDims(2) == 1 % have fans in the z direction at multiple xy positions
+        xyDim = stepDims(1);
+        xyDimInM = stepDimsInM(1);
         
-    xyDim = stepDims(1);
-    xyDimInM = stepDimsInM(1);
-    
-    zDim = detectorDims(2);
-    zDimInM = detectorDimsInM(2);
-    
-    image = zeros(detectorDims(2), stepDims(1));
-    
-    for xy = 1:stepDims(1)
-        positionFolder = app.SimulationViewerPerAngleTranslationPositionListBox.ItemsData{xy};
-        loadPath = makePath(toAnglePath, positionFolder);
+        zDim = detectorDims(2);
+        zDimInM = detectorDimsInM(2);
+    elseif detectorDims(2) == 1 && stepDims(1) == 1 % have fans in the xy direction at multiple z positions
+        xyDim = detectorDims(1);
+        xyDimInM = detectorDimsInM(1);
         
-        fileData = load(loadPath);
-        
-        detectorData = fileData.(Constants.Detector_Data_Var_Name);
-        
-        image(:,xy) = detectorData; %will be a column vector
-    end
-elseif detectorDims(2) == 1 && stepDims(1) == 1 % have fans in the xy direction at multiple z positions
-    app.SimulationViewerPerAngleTranslationPositionListBox.Enable = 'off';
-    
-    sliceFolder = app.SimulationViewerSliceListBox.Value;
-    angleFolder = app.SimulationViewerScanAngleListBox.Value;
-    
-    toAnglePath = makePath(run.savePath, sliceFolder, angleFolder);
-        
-    xyDim = detectorDims(1);
-    xyDimInM = detectorDimsInM(1);
-    
-    zDim = stepDims(2);
-    zDimInM = stepDimsInM(2);
-      
-    image = zeros(stepDims(2), detectorDims(1));
-    
-    for z = 1:stepDims(2)
-        positionFolder = app.SimulationViewerPerAngleTranslationPositionListBox.ItemsData{z};
-        loadPath = makePath(toAnglePath, positionFolder);
-        
-        fileData = load(loadPath);
-        
-        detectorData = fileData.(Constants.Detector_Data_Var_Name);
-        
-        image(z,:) = detectorData; % will be a row vector
+        zDim = stepDims(2);
+        zDimInM = stepDimsInM(2);
     end
 else %% have either a cone beam detector, or fans in the same direction as position movement, so can't put them together, we'll just display one position at a time
-    app.SimulationViewerPerAngleTranslationPositionListBox.Enable = 'on';
-        
     xyDim = detectorDims(1);
     xyDimInM = detectorDimsInM(1);
     
     zDim = detectorDims(2);
     zDimInM = detectorDimsInM(2);
-    
-    image = app.workspace.simulationRunForViewing.loadImageForScanSimulationViewer(app);
 end
 
 % if the image is just 1 pixel wide or high, pad it out to make it more

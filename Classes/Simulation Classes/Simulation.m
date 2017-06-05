@@ -104,6 +104,28 @@ classdef Simulation < GyrfalconObject
             simulation.partialPixelResolution = 1;
         end
         
+        function bool = isScanMultiplePositionMosiac(simulation)
+            % in order for the scan to be a "position mosiac", it must have 
+            % a detector that moves with the source and be one of:
+            % 1) Scan along the xy ONLY with a beam extending ONLY in the z
+            % 2) Scan along the z ONLY with a beam extending ONLY in the xy
+            % 3) Scanning in the xy and z but ONLY with a 1x1 detector
+            
+            scan = simulation.scan;
+            detector = simulation.detector;
+            
+            detectorMoves = detector.movesWithScanAngle && detector.movesWithPerAngleTranslation;
+            
+            detectorDims = detector.wholeDetectorDimensions;
+            translationDims = scan.perAngleTranslationDimensions;
+            
+            isCase1 = translationDims(2) == 1 && detectorDims(1) == 1;
+            isCase2 = translationDims(1) == 1 && detectorDims(2) == 1;
+            isCase3 = all(detectorDims == 1);
+            
+            bool = detectorMoves && (isCase1 || isCase2 || isCase3);
+        end
+        
         function name = defaultName(simulation)
             name = [Constants.Default_Simulation_Name, Constants.Matlab_File_Extension];
         end
@@ -782,33 +804,47 @@ classdef Simulation < GyrfalconObject
             optimizeForPerAngleTranslation = true;
             optimizeForDetector = true;
             
-            if totalNumDetectors > maxNumBeamTraces
-                error('Not enough memory for a High Performance CPU simulation');
-            elseif totalNumSteps * totalNumDetectors > maxNumBeamTraces
-                optimizeForSlices = false;
-                optimizeForAngles = false;
-                optimizeForPerAngleTranslation = false;
-            elseif numAngles * totalNumSteps * totalNumDetectors > maxNumBeamTraces
-                optimizeForSlices = false;
-                optimizeForAngles = false;
-            elseif numSlices * numAngles * totalNumSteps * totalNumDetectors > maxNumBeamTraces
-                optimizeForSlices = false;
-            else % everything can be done in one optimized MATLAB computation!
+            if simulation.isScanMultiplePositionMosiac %if true, all detectors AND translations at each angle must be calculated together (since they will be saved together!)
+                if totalNumSteps *totalNumDetectors > maxNumBeamTraces
+                    error('Not enough memory for a High Performance CPU simulation');
+                elseif numAngles * totalNumSteps * totalNumDetectors > maxNumBeamTraces
+                    optimizeForSlices = false;
+                    optimizeForAngles = false;
+                elseif numSlices * numAngles * totalNumSteps * totalNumDetectors > maxNumBeamTraces
+                    optimizeForSlices = false;
+                end
+            else % detector and position calcs are free to be split up
+                if totalNumDetectors > maxNumBeamTraces
+                    error('Not enough memory for a High Performance CPU simulation');
+                elseif totalNumSteps * totalNumDetectors > maxNumBeamTraces
+                    optimizeForSlices = false;
+                    optimizeForAngles = false;
+                    optimizeForPerAngleTranslation = false;
+                elseif numAngles * totalNumSteps * totalNumDetectors > maxNumBeamTraces
+                    optimizeForSlices = false;
+                    optimizeForAngles = false;
+                elseif numSlices * numAngles * totalNumSteps * totalNumDetectors > maxNumBeamTraces
+                    optimizeForSlices = false;
+                end
+            end
+            
+            if runIsParallel && optimizeForSlices
+                % everything can be done in one optimized MATLAB computation!
                 % while this is all and good, we wouldn't want to have one
                 % CPU trying to bash this out (even though it's optimized,
                 % it still takes time!), if the user has given use multiple CPUs
                 % to use
-                
-                if runIsParallel                    
-                    if numSlices >= numCPUs % parallelize slices
-                        optimizeForSlices = false;
-                    elseif numSlices * numAngles >= numCPUs % parallelize angles and slices
-                        optimizeForSlices = false;
-                        optimizeForAngles = false;
-                    else % parallelize angles, slices, and per angle translation
-                        optimizeForSlices = false;
-                        optimizeForAngles = false;
-                        optimizeForPerAngleTranslation = false;
+                if numSlices >= numCPUs % parallelize slices
+                    optimizeForSlices = false;
+                elseif numSlices * numAngles >= numCPUs % parallelize angles and slices
+                    optimizeForSlices = false;
+                    optimizeForAngles = false;
+                else % parallelize angles, slices, and per angle translation
+                    optimizeForSlices = false;
+                    optimizeForAngles = false;
+                    
+                    if ~simulation.isScanMultiplePositionMosiac()
+                        optimizeForPerAngleTranslation = false; % only split these up if allowed
                     end
                 end
             end

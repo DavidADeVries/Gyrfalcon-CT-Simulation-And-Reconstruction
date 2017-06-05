@@ -239,20 +239,14 @@ classdef SimulationRun < ProcessingRun
                 angleNames{i} = makeAngleFolderName(angles(i));
             end
             
-            isPositionMosiac = run.simulation.isScanMultiplePositionMosiac();
-            
-            if isPositionMosiac
-                positionNames = {makePositionName(0,0,isPositionMosiac)}; %single entry
-                positionFileNames = {makePositionFileName(positionNames{1})};
-            else
-                for i=1:zNumSteps
-                    for j=1:xyNumSteps
-                        index = (i-1)*zNumSteps + j;
-                        
-                        positionNames{index} = makePositionName(j,i,isPositionMosiac);
-                        positionFileNames{index} = makePositionFileName(positionNames{index});
-                    end
-                end                
+            if 
+            for i=1:zNumSteps
+                for j=1:xyNumSteps
+                    index = (i-1)*zNumSteps + j;
+                    
+                    positionNames{index} = makePositionName(i,j);
+                    positionFileNames{index} = makePositionFileName(positionNames{index});
+                end
             end
             
         end

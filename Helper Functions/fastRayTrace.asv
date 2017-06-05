@@ -94,13 +94,10 @@ else % run through the voxels
     latticeToIndex = isDeltaNeg;
     latticeToIndex(1) = ~latticeToIndex(1);
     
-    isDelta0Watch = lastLattices == 0;
-    isDelta0Watch(1) = lastLattices(1) == phantomDims(1);
-    correction = [0 1 1];
+    isDelta0Watch = latticeToIndex == 0;
+    isDelta0Watch(1) = phantomDims(1);
     
-    bool = isDelta0 & isDelta0Watch;
-    
-    latticeToIndex(bool) = correction(bool);
+    latticeToIndex(isDelta0 && latticeToIndex==isDelta0Watch) = 
     
     % useful add/sub to get next lattice point
     nextPointFactors = -1 * deltaSigns;

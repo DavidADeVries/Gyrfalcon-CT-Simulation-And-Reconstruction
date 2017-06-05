@@ -8,6 +8,8 @@ detector = simulation.detector;
 scan = simulation.scan;
 savePath = simulationRun.savePath;
 
+isScanPositionMosiac = simulation.isScanMultiplePositionMosiac();
+
 scatteringNoiseLevel = simulation.scatteringNoiseLevel;
 detectorNoiseLevel = simulation.detectorNoiseLevel;
 
@@ -85,7 +87,7 @@ if runIsParallel % parallelize run; parallel pool is already online
             partialPixelRes, averagingBlockSize,...
             rawIntensity, calibratedPhantomDataSet,...
             source, detector, scan,...
-            savePath, slices, angles);
+            savePath, slices, angles, isScanPositionMosiac);
     end
 else % single processor run, though it is heavily optimized      
     for i=1:numOfOptimizedCalcs
@@ -96,7 +98,7 @@ else % single processor run, though it is heavily optimized
             detectorDims, detectorPixelDims,...
             partialPixelRes, averagingBlockSize,...
             rawIntensity, calibratedPhantomDataSet,...
-            source, detector, scan, savePath, slices, angles);        
+            source, detector, scan, savePath, slices, angles, isScanPositionMosiac);        
     end
 end
 
@@ -129,8 +131,8 @@ function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCo
         % SOURCE
         
         % per angle steps
-        pointSourceCoords(:,2) = pointSourceCoords(:,2) + ((indices(:,4)-numPerAngleSteps(1)/2) * perAngleStepDimsInM(1));
-        pointSourceCoords(:,3) = pointSourceCoords(:,3) + ((indices(:,3)-numPerAngleSteps(2)/2) * perAngleStepDimsInM(2));
+        pointSourceCoords(:,2) = pointSourceCoords(:,2) + ((indices(:,4)-(numPerAngleSteps(1)+1)/2) * perAngleStepDimsInM(1));
+        pointSourceCoords(:,3) = pointSourceCoords(:,3) - ((indices(:,3)-(numPerAngleSteps(2)+1)/2) * perAngleStepDimsInM(2));
         
         % rotate with the scan angle and bring back from x-axis
         [pointSourceCoords(:,1), pointSourceCoords(:,2)] = rotateCoordsAboutOrigin(pointSourceCoords(:,1),pointSourceCoords(:,2), sourceAngleInDeg - anglesInDeg(indices(:,2)));
@@ -165,8 +167,8 @@ function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCo
         if detectorMovesWithPerAngleSteps
             % NOTE: indices for xy steps are negated, so that detector
             % matches source movement (which is opposite it)
-            pointDetectorCoords(:,2) = pointDetectorCoords(:,2) + ((-(indices(:,4)-numPerAngleSteps(1)/2)) * perAngleStepDimsInM(1));
-            pointDetectorCoords(:,3) = pointDetectorCoords(:,3) + ((indices(:,3)-numPerAngleSteps(2)/2) * perAngleStepDimsInM(2));
+            pointDetectorCoords(:,2) = pointDetectorCoords(:,2) - ((indices(:,4)-(numPerAngleSteps(1)+1)/2) * perAngleStepDimsInM(1));
+            pointDetectorCoords(:,3) = pointDetectorCoords(:,3) - ((indices(:,3)-(numPerAngleSteps(2)+1)/2) * perAngleStepDimsInM(2));
         end
         
         rotateAngles = detectorAngleInDeg;
@@ -192,37 +194,62 @@ function indices = getIndices(index, indexingLevels, useFlags)
     [indices(6), indices(5), indices(4), indices(3), indices(2), indices(1)] = ind2sub(fliplr(dims), index);
 end
 
-function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceIndices, parallelFlags, indexLevels, angles, partialPixelRes, averagingBlockSize)
+function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceIndices, parallelFlags, indexLevels, angles, partialPixelRes, averagingBlockSize, isScanPositionMosiac)
     parallelForDetector = parallelFlags(5) & parallelFlags(6);
     
     numBeamTraces = length(detectorData);
-    numPixelsInDetector = indexLevels(5) * indexLevels(6);
     
     if parallelForDetector
+        if isScanPositionMosiac
+            numPixelsInDetector = indexLevels(3) * indexLevels(4) * indexLevels(5) * indexLevels(6); % all positions and detectors make up a single image (it is ensured that no geometry in which detector data would overlap would have this)
+        else
+            numPixelsInDetector = indexLevels(5) * indexLevels(6);
+        end
+        
         numDetectorImages = numBeamTraces / numPixelsInDetector;
         
         for i=1:numDetectorImages
+            
             detectorImage = detectorData((i-1)*numPixelsInDetector+1:(i)*numPixelsInDetector, 1);
-            
-            detectorImage = reshape(detectorImage, indexLevels(6), indexLevels(5));
-            
-            detectorImage = detectorImage';
-            
+        
+            if isScanPositionMosiac
+                translationZ = indexLevels(3);
+                translationXY = indexLevels(4);
+                detectorZ = indexLevels(5);
+                detectorXY = indexLevels(6);
+                
+                if detectorXY == 1 && translationZ == 1                
+                    detectorImage = reshape(detectorImage,...
+                        translationZ*detectorZ,...
+                        translationXY*detectorXY);
+                else                
+                    detectorImage = reshape(detectorImage,...
+                        translationXY*detectorXY,...
+                        translationZ*detectorZ);
+                    
+                    detectorImage = detectorImage';
+                end
+            else
+                detectorImage = reshape(detectorImage, indexLevels(6), indexLevels(5));
+                                
+                detectorImage = detectorImage';
+            end
+                        
             if partialPixelRes > 1 %need to average
                 detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
             end
             
-            saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices((i-1)*numPixelsInDetector+1,:), angles);
+            saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices((i-1)*numPixelsInDetector+1,:), angles, isScanPositionMosiac);
         end
     else
         error('No specified action for saving Non-Parallelized Detector Calculation');
     end
 end
 
-function [] = saveDetectorImage(detectorData, savePath, indices, angles)
+function [] = saveDetectorImage(detectorData, savePath, indices, angles, isScanPositionMosiac)
     sliceFolder = makeSliceFolderName(indices(1));
     angleFolder = makeAngleFolderName(angles(indices(2)));
-    positionName = makePositionName(indices(3), indices(4));
+    positionName = makePositionName(indices(4), indices(3), isScanPositionMosiac);
     
     fileName = makePositionFileName(positionName);
     
@@ -231,7 +258,7 @@ function [] = saveDetectorImage(detectorData, savePath, indices, angles)
     save(writePath, Constants.Detector_Data_Var_Name);
 end
 
-function [] = runOptimizedRayTraceCalculation(i, indexingLevels, optimizeFlags, numTracesInOptimizedCalc, scatteringNoiseLevel, detectorNoiseLevel, phantomDims, voxelDimsInM, phantomLocationInM, detectorDims, detectorPixelDims, partialPixelRes, averagingBlockSize, rawIntensity, calibratedPhantomDataSet, source, detector, scan, savePath, slices, angles)
+function [] = runOptimizedRayTraceCalculation(i, indexingLevels, optimizeFlags, numTracesInOptimizedCalc, scatteringNoiseLevel, detectorNoiseLevel, phantomDims, voxelDimsInM, phantomLocationInM, detectorDims, detectorPixelDims, partialPixelRes, averagingBlockSize, rawIntensity, calibratedPhantomDataSet, source, detector, scan, savePath, slices, angles, isScanPositionMosiac)
 nonOptimizedCalcIndices = getIndices(i, indexingLevels, ~optimizeFlags);
 
 optimizedCalcIndices = repmat(nonOptimizedCalcIndices, numTracesInOptimizedCalc, 1);
@@ -267,6 +294,6 @@ detectorData = arrayfun(fn,...
     pointSourceCoords(:,1), pointSourceCoords(:,2), pointSourceCoords(:,3),...
     pointDetectorCoords(:,1), pointDetectorCoords(:,2), pointDetectorCoords(:,3));
 
-writeDetectorDataToDisk(detectorData, savePath, optimizedCalcIndices, optimizeFlags, indexingLevels, angles, partialPixelRes, averagingBlockSize);
+writeDetectorDataToDisk(detectorData, savePath, optimizedCalcIndices, optimizeFlags, indexingLevels, angles, partialPixelRes, averagingBlockSize, isScanPositionMosiac);
 
 end

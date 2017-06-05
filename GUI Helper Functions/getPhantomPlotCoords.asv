@@ -95,8 +95,8 @@ end
 lowHU = min([minXY, minXZ, minYZ]);
 highHU = max([maxXY, maxXZ, maxYZ]);
 
-if lowHU == highHU
-    window = [lowHU, highHU+1];    
+if lowHU == highHu
+    window = [lowHU, highHU];    
 else
     window = [lowHU, highHU];
 end

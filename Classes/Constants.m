@@ -67,6 +67,7 @@ classdef Constants
         Slice_Folder = 'Slice';
         Angle_Folder = 'Angle';
         Position_Filename = 'Position';
+        All_Positions_Filename = 'All Positions';
         
         Detector_Data_Filename = 'Detector Data';
         Detector_Data_Var_Name = 'detectorData';
