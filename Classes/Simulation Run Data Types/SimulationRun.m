@@ -28,6 +28,8 @@ classdef SimulationRun < ProcessingRun
         performanceType
                 
         sliceData
+        
+        useMexCode
     end
     
     methods
@@ -72,6 +74,8 @@ classdef SimulationRun < ProcessingRun
             run.notes = '';
             run.savePath = '';
             run.saveFileName = '';
+            
+            run.useMexCode = true;
         end
         
         function run = createFromGUI(run, app)
@@ -93,9 +97,27 @@ classdef SimulationRun < ProcessingRun
                 run.computerInfo.numCoresUsed = 1;
             end
             
+            if run.performanceType == SimulationRunPerformanceTypes.low
+                run.useMexCode = false; 
+            else
+                run.useMexCode = app.SimulationRunUseMEXCodeCheckBox.Value;
+            end
+            
             run.notes = app.SimulationRunNotesTextArea.Value;
         end
-                
+           
+        function string = getPerformanceString(run)
+            str1 = run.performanceType.displayString;
+            
+            if isempty(run.useMexCode) || ~run.useMexCode
+                str2 = ' (No MEX)';
+            else
+                str2 = ' (With MEX)';
+            end
+            
+            string = [str1 str2];
+        end
+        
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())
                 app.SimulationViewerFilePathLabel.Text = 'No Simulation Run Selected';
@@ -148,7 +170,7 @@ classdef SimulationRun < ProcessingRun
                 end
                 
                 app.SimulationViewerInfoStartDateTimeEditField.Value = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
-                app.SimulationViewerInfoRunPerformanceEditField.Value = run.performanceType.displayString;
+                app.SimulationViewerInfoRunPerformanceEditField.Value = run.getPerformanceString();
                 app.SimulationViewerInfoGyrfalconVersionEditField.Value = ['v', run.versionUsed];
                 app.SimulationViewerInfoRunTimeEditField.Value = run.getRunTimeString();
                 app.SimulationViewerInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
@@ -206,6 +228,8 @@ classdef SimulationRun < ProcessingRun
             
             numCPUsAvailableString = ['/' num2str(run.computerInfo.cpuNumCores)];
             app.SimulationRunNumCPUsAvailableLabel.Text = numCPUsAvailableString;
+            
+            app.SimulationRunUseMEXCodeCheckBox.Value = run.useMexCode;
             
             app = setSimulationRunComponentEnableFromPerformanceType(app, run.performanceType);
             

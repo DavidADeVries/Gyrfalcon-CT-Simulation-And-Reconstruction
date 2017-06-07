@@ -8,6 +8,13 @@ else
     app.SimulationRunNumCPUsEditField.Enable = 'off';
 end
 
+% use MEX code checkbox
+if performanceType == SimulationRunPerformanceTypes.low
+    app.SimulationRunUseMEXCodeCheckBox.Enable = 'off';
+else
+    app.SimulationRunUseMEXCodeCheckBox.Enable = 'on';
+end
+
 % enable on/off for display checkboxs
 if performanceType == SimulationRunPerformanceTypes.low
     app.SimulationRunShowDetectorValuesCheckBox.Enable = 'on';

@@ -65,7 +65,7 @@ classdef ReconstructionRun < ProcessingRun
                 app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.simulationRun.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
                 app.SimulationRunInfoRunTimeEditField.Value = run.simulationRun.getRunTimeString();
                 app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.simulationRun.versionUsed];
-                app.SimulationRunInfoRunPerformanceEditField.Value = run.simulationRun.performanceType.displayString; 
+                app.SimulationRunInfoRunPerformanceEditField.Value = run.simulationRun.getPerformanceString(); 
                 
                 app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = run.simulationRun.simulation.getScanGeometryString(scanGeometry, errorMsg);
                 app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.simulationRun.computerInfo.getSummaryString();
