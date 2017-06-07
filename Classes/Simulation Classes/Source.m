@@ -129,6 +129,10 @@ methods
         bool = dimensions(1).value == 0 && dimensions(2).value == 0;
     end
     
+    function beamAngleInDeg = getBeamAngleInDegrees(source)
+        beamAngleInDeg = source.beamAngleUnits.convertToDegrees(source.beamAngle);
+    end
+    
     function locationInM = getLocationInM(source)
         units = source.locationUnits;
 

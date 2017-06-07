@@ -104,7 +104,7 @@ end
 
 end
 
-function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCoords(indices, sourcePositionInM, detectorPositionInM, slicesInM, anglesInDeg, perAngleStepDimsInM, numPerAngleSteps, detectorDims, detectorPixelDimsWithUnits, angularDetectorRadiusInM, detectorMovesWithScanAngle, detectorMovesWithPerAngleSteps)
+function [pointSourceCoords, pointDetectorCoords, pointDetectorWithinSourceBeam] = calculateSourceAndDetectorCoords(indices, sourcePositionInM, detectorPositionInM, slicesInM, anglesInDeg, perAngleStepDimsInM, numPerAngleSteps, detectorDims, detectorPixelDimsWithUnits, angularDetectorRadiusInM, detectorMovesWithScanAngle, detectorMovesWithPerAngleSteps, beamAnglesInDeg)
                 
         % pre-allocate
         dims = size(indices);
@@ -134,8 +134,6 @@ function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCo
         pointSourceCoords(:,2) = pointSourceCoords(:,2) + ((indices(:,4)-(numPerAngleSteps(1)+1)/2) * perAngleStepDimsInM(1));
         pointSourceCoords(:,3) = pointSourceCoords(:,3) - ((indices(:,3)-(numPerAngleSteps(2)+1)/2) * perAngleStepDimsInM(2));
         
-        % rotate with the scan angle and bring back from x-axis
-        [pointSourceCoords(:,1), pointSourceCoords(:,2)] = rotateCoordsAboutOrigin(pointSourceCoords(:,1),pointSourceCoords(:,2), sourceAngleInDeg - anglesInDeg(indices(:,2)));
         
         % DETECTOR
         
@@ -169,6 +167,59 @@ function [pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCo
             % matches source movement (which is opposite it)
             pointDetectorCoords(:,2) = pointDetectorCoords(:,2) - ((indices(:,4)-(numPerAngleSteps(1)+1)/2) * perAngleStepDimsInM(1));
             pointDetectorCoords(:,3) = pointDetectorCoords(:,3) - ((indices(:,3)-(numPerAngleSteps(2)+1)/2) * perAngleStepDimsInM(2));
+        end
+        
+        % ************************************************
+        % check if point detectors are within source beams
+        % ************************************************
+        % move source to origin
+        tempDetectorCoords = pointDetectorCoords - pointSourceCoords;
+        
+        % check xy
+        % angle at with source is pointing
+        sourceAngles = sourceAngleInDeg - anglesInDeg(indices(:,2));
+                
+        anglesToDetector = atand(tempDetectorCoords(:,2) ./ tempDetectorCoords(:,1));
+        
+        upperAngles = sourceAngles + beamAnglesInDegrees(1)/2;
+        lowerAngles = sourceAngles - beamAnglesInDegrees(1)/2;
+        
+        withinXY = upperAngles >= anglesToDetector & lowerAngles <= anglesToDetector;
+        
+        % check z
+        xyLength = sqrt(((tempDetectorCoords(:,1)).^2)+((tempDetectorCoords(:,2)).^2));
+        
+        anglesToDetector = atand(tempDetectorCoords(:,3) ./ xyLength);
+        
+        upperAngle = beamAnglesInDegees(2)/2;
+        lowerAngle = -beamAnglesInDegees(2)/2;
+        
+        withinZ = upperAngle >= anglesToDetector & lowerAngle <= anglesToDetector;
+        
+        % check whether detector points are within the source beam
+        if detectorMovesWithScanAngle
+            % do within beam check
+            radius = abs(pointSourceCoords(:,1)-pointDetectorCoords(:,1));
+            
+            detectorCompY = abs(pointDetectorCoords(:,2) - pointSourceCoords(:,2)); % puts source at y = 0
+            detectorCompZ = abs(pointDetectorCoords(:,3) - pointSourceCoords(:,3)); % puts source at z = 0
+            
+            yBound = radius * sind(beamAnglesInDeg(1)/2);
+            zBound = radius * sind(beamAnglesInDeg(2)/2);
+            
+            pointDetectorWithinSourceBeam = (yBound > detectorCompY) & (zBound > detectorCompZ);
+                        
+            % rotate after check
+            % rotate with the scan angle and bring back from x-axis
+            [pointSourceCoords(:,1), pointSourceCoords(:,2)] = rotateCoordsAboutOrigin(pointSourceCoords(:,1),pointSourceCoords(:,2), sourceAngleInDeg - anglesInDeg(indices(:,2)));
+        
+        else
+            % rotate before check
+            % rotate with the scan angle and bring back from x-axis
+            [pointSourceCoords(:,1), pointSourceCoords(:,2)] = rotateCoordsAboutOrigin(pointSourceCoords(:,1),pointSourceCoords(:,2), sourceAngleInDeg - anglesInDeg(indices(:,2)));
+            
+            % do within beam angle check
+            error('Cannot yet check if detector is within the beam');
         end
         
         rotateAngles = detectorAngleInDeg;
@@ -217,41 +268,46 @@ function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceI
                 translationXY = indexLevels(4);
                 detectorZ = indexLevels(5);
                 detectorXY = indexLevels(6);
-                
-                
-                    if translationXY > 1
-                        if partialPixelRes > 1 %need to average
-                            averagingBlockSize = [prod(averagingBlockSize),1];
-                            
-                            detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean(x.data)); % average the needed blocks
-                        end
+                                
+                if translationXY > 1
+                    if partialPixelRes > 1 %need to average
+                        averagingBlockSize = [prod(averagingBlockSize),1];
                         
+                        detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean(x.data)); % average the needed blocks
+                    end
+                    
+                    if translationZ > 1
+                        detectorImage = reshape(detectorImage,...
+                            translationXY*detectorXY/partialPixelRes,...
+                            translationZ*detectorZ/partialPixelRes);
+                        
+                        detectorImage = detectorImage';
+                    else
                         detectorImage = reshape(detectorImage,...
                             translationZ*detectorZ/partialPixelRes,...
-                            translationXY*detectorXY);
-                    else
-                        
-                end
-                
-                if detectorXY == 1 && translationZ == 1                
-                    
-                else                
+                            translationXY*detectorXY/partialPixelRes);
+                    end
+                else
                     detectorImage = reshape(detectorImage,...
                         translationXY*detectorXY,...
                         translationZ*detectorZ);
                     
                     detectorImage = detectorImage';
+                    
+                    if partialPixelRes > 1 %need to average
+                        detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
+                    end
                 end
             else
                 detectorImage = reshape(detectorImage, indexLevels(6), indexLevels(5));
                                 
                 detectorImage = detectorImage';
-            end
+                
+                if partialPixelRes > 1 %need to average
+                    detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
+                end
+            end                       
                         
-            if partialPixelRes > 1 %need to average
-                detectorImage = blockproc(detectorImage, averagingBlockSize, @(x)mean2(x.data)); % average the needed blocks
-            end
-            
             saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices((i-1)*numPixelsInDetector+1,:), angles, isScanPositionMosiac);
         end
     else
@@ -292,15 +348,15 @@ for i=1:length(indexingLevels)
     end
 end
 
-[pointSourceCoords, pointDetectorCoords] = calculateSourceAndDetectorCoords(...
+[pointSourceCoords, pointDetectorCoords, pointDetectorWithinSourceBeam] = calculateSourceAndDetectorCoords(...
     optimizedCalcIndices, source.getLocationInM(), detector.getLocationInM(),...
     slices', angles',...
     scan.getPerAngleTranslationResolutionInM(), scan.perAngleTranslationDimensions,...
     detectorDims, detectorPixelDims, detector.getAngularDetectorRadiusInM(),...
-    detector.movesWithScanAngle, detector.movesWithPerAngleTranslation);
+    detector.movesWithScanAngle, detector.movesWithPerAngleTranslation, source.getBeamAngleInDegrees());
 
 fn = @(sourceCoordsX, sourceCoordsY, sourceCoordsZ, detectorCoordsX, detectorCoordsY, detectorCoordsZ)...
-    fastRayTrace(...
+    fastRayTrace_mex(...
     [sourceCoordsX, sourceCoordsY, sourceCoordsZ],...
     [detectorCoordsX, detectorCoordsY, detectorCoordsZ],...
     phantomLocationInM, phantomDims, voxelDimsInM,...

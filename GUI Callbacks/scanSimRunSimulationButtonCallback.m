@@ -62,6 +62,7 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
     workspace.simulationRun = workspace.simulationRun.setDefaultValues;
     
     % set GUI
+    drawnow;
     workspace.statusOutput = app.StatusOutputTextArea.Value;
     
     app.workspace = workspace;

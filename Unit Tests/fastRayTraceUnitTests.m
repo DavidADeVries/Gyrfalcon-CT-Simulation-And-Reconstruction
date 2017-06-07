@@ -267,7 +267,7 @@ function hit_BasicXTraversalOnTheLine_Test(testCase)
         phantomLocationInM, phantomDims, voxelDimsInM,...
         phantomData, beam.rawIntensity);
     
-    expected = 100*exp(-(0.1*1 + 0.2*1));
+    expected = 100*exp(-(0.3*1 + 0.4*1));
     
     verifyEqual(testCase,detectorValue,expected,'AbsTol',1E-9);
 end
@@ -476,7 +476,7 @@ function hit_BasicZTraversalOnTheLine_Test(testCase)
         phantomLocationInM, phantomDims, voxelDimsInM,...
         phantomData, beam.rawIntensity);
     
-    expected = 100*exp(-(0.2*1 + 0.6*1));
+    expected = 100*exp(-(0.4*1 + 0.8*1));
     
     verifyEqual(testCase,detectorValue,expected,'AbsTol',1E-9);
 end

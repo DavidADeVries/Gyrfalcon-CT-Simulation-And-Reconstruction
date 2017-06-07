@@ -884,7 +884,6 @@ classdef Simulation < GyrfalconObject
             app = updateStatusOutput(app, newString, newLine);
             
             app.StatusOutputLamp.Color = [0 1 0]; % green
-            
         end
         
         function simulationRun = runScanSimulationHighPerformanceOnGPU(simulation, simulationRun, app)
