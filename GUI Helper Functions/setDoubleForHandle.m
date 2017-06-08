@@ -1,5 +1,5 @@
 function [] = setDoubleForHandle(handle, value)
-% [] = setDoubleForHandle(handles, value)
+% [] = setDoubleForHandle(handle, value)
 % takes numerical value and sets it in the 'String' field
 
 string = num2str(value);

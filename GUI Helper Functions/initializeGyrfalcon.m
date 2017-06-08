@@ -1,124 +1,61 @@
-function handles = initializeGyrfalcon(hObject, handles)
-% handles = initializeGyrfalcon(hObject, handles)
+function app = initializeGyrfalcon(app)
+% app = initializeGyrfalcon(app)
 % initializes the UI and variables for Gyrfalcon.
 % Also opens the display figure
+
+% ******************************
+% *** INITIALIZE GUI OBJECTS ***
+% ******************************
+
+app.StatusOutputTextArea.Value = {''};
+
+pos = app.GyrfalconUIFigure.Position;
+
+pos(1:2) = [0 30]; %is default at 100,100 (not very useful for large apps
+
+app.GyrfalconUIFigure.Position = pos;
+
+% set drop down menus
+Units.setDropDown(app.SourceDimsXYUnitsDropDown);
+Units.setDropDown(app.SourceDimsZUnitsDropDown);
+
+Units.setDropDown(app.DetectorPixelDimsXYUnitsDropDown);
+Units.setDropDown(app.DetectorPixelDimsZUnitsDropDown);
+
+InterpolationTypes3D.setDropDown(app.ReconstructionRun3DInterpolationTypeDropDown);
+
+% set drop down menus in algorithm settings tabs
+FirstGenFilterTypes.setDropDown(app.Gen1FBP_FilterTypeDropDown);
+
+InterpolationTypes.setDropDown(app.Gen1FBP_InterpolationTypeDropDown);
 
 % *******************************
 % *** INITIALIZE DATA HANDLES ***
 % *******************************
 
-handles.simulationSavePath = '';
-handles.simulationSaveFileName = '';
+app.workspace = GyrfalconWorkspace;
+app.workspace = app.workspace.setDefaultValues();
 
-handles.detectorSavePath = '';
-handles.detectorSaveFileName = '';
-
-handles.sourceSavePath = '';
-handles.sourceSaveFileName = '';
-
-handles.scanSavePath = '';
-handles.scanSaveFileName = '';
-
-handles.scanBeamCharacterizationPath = '';
-handles.scanBeamCharacterizationFileName = '';
-handles.scanBeamCharacterization = {};
-
-handles.phantomSavePath = '';
-handles.phantomSaveFileName = '';
-
-handles.phantomDataPath = '';
-handles.phantomDataFileName = '';
-handles.phantomDataSet = [];
-
-% *********************************
-% *** INITIALIZE DISPLAY FIGURE ***
-% *********************************
-
-handles = initializeDisplayFigure(handles);
+% gets settings loaded up
+Settings.load(app);
 
 % **********************
 % *** INITIALIZE GUI ***
 % **********************
 
-% *** CONTROL PANEL ***
+app = app.workspace.setGUI(app);
 
-setString(handles.statusOutputText, {'Initializing Gyrfalcon...Complete'});
+newString = 'Complete';
+newLine = false;
 
-set(handles.controlPanelRunScanSimButton, 'Enable', 'on');
-set(handles.controlPanelRunReconstructionButton, 'Enable', 'off');
-set(handles.controlPanelUnassignedTaskButton, 'Enable', 'off');
+% *********************************
+% *** INITIALIZE DISPLAY FIGURE ***
+% *********************************
 
-% *** SCAN SIMULATION PARAMETERS ***
+app = initializeDisplayFigure(app);
 
-% SIMULATION
-setString(handles.simulationFileNameText, Constants.No_File_Name_String);
-
-setString(handles.simulationScatteringNoiseLevelEdit, '');
-setString(handles.simulationDetectorNoiseLevelEdit, '');
-
-set(handles.simulationPartialPixelModellingCheckbox, 'Value', 1);
-
-% DETECTOR
-setString(handles.detectorFileNameText, Constants.No_File_Name_String);
-
-setString(handles.detectorStartingLocationXEdit, '0'); % assume detector starts along y-axis
-setString(handles.detectorStartingLocationYEdit, '');
-setString(handles.detectorStartingLocationZEdit, '0'); % assume detector starts along y-axis
-
-setString(handles.detectorWholeDetectorDimensionsXYEdit, '');
-setString(handles.detectorWholeDetectorDimensionsZEdit, '0'); % assume 2D
-
-setString(handles.detectorSingleDetectorDimensionsXYEdit, '');
-setString(handles.detectorSingleDetectorDimensionsZEdit, '0'); % assume 2D
-
-setPopupMenu(handles.detectorSingleDetectorDimensionsXYUnitsPopupMenu, 'Units', Units.mm);
-setPopupMenu(handles.detectorSingleDetectorDimensionsZUnitsPopupMenu, 'Units', Units.mm);
-
-set(handles.detectorMovesWithScanAngleCheckbox, 'Value', 1);
-set(handles.detectorMovesWithPerAngleTranslationCheckbox, 'Value', 0);
-
-% SOURCE
-setString(handles.sourceFileNameText, Constants.No_File_Name_String);
-
-setString(handles.sourceStartingLocationXEdit, '0'); % assume source starts along y-axis
-setString(handles.sourceStartingLocationYEdit, '');
-setString(handles.sourceStartingLocationZEdit, '0'); % assume source starts along y-axis
-
-setString(handles.sourceDimensionsXYEdit, '0'); % assume point source
-setString(handles.sourceDimensionsZEdit, '0'); % assume point source
-
-setPopupMenu(handles.sourceDimensionsXYUnitsPopupMenu, 'Units', Units.mm);
-setPopupMenu(handles.sourceDimensionsZUnitsPopupMenu, 'Units', Units.mm);
-
-setString(handles.sourceBeamAngleXYEdit, '');
-setString(handles.sourceBeamAngleZEdit, '0'); %assume 2D
-
-% SCAN
-setString(handles.scanFileNameText, Constants.No_File_Name_String);
-
-setString(handles.scanAnglesEdit, '0:10:350'); % default is 360 scan at 10 degree increments
-setString(handles.scanSlicePositionsEdit, '0'); % assume one slice only (2D)
-
-setString(handles.scanPerAngleTranslationStepsXYEdit, '0'); % assume no per angle movement
-setString(handles.scanPerAngleTranslationStepsZEdit, '0'); % assume no per angle movement
-
-setString(handles.scanPerAngleStepDimensionsXYEdit, '0'); % assume no per angle movement
-setString(handles.scanPerAngleStepDimensionsZEdit, '0'); % assume no per angle movement
-
-setString(handles.scanBeamCharacterizationFileNameText, Constants.No_File_Name_String);
-
-% PHANTOM
-setString(handles.phantomFileNameText, Constants.No_File_Name_String);
-
-setString(handles.phantomStartingLocationXEdit, '');
-setString(handles.phantomStartingLocationYEdit, '');
-setString(handles.phantomStartingLocationZEdit, '0'); %assume 2D
-
-setString(handles.phantomVoxelDimensionsXEdit, '');
-setString(handles.phantomVoxelDimensionsYEdit, '');
-setString(handles.phantomVoxelDimensionsZEdit, '');
-
-setString(handles.phantomDataSetFileNameText, Constants.No_File_Name_String);
+% FINALIZE
+app = updateStatusOutput(app, newString, newLine);
 
 end
 
