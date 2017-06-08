@@ -85,6 +85,21 @@ classdef Units
             end
         end
         
+        function valueInToUnits = convertFromDegrees(toUnits, valueInDegrees)
+            if ~toUnits.isAngular
+                error('Invalid units!');
+            else
+                switch toUnits
+                    case Units.degree
+                        valueInToUnits = valueInDegrees;
+                    case Units.radian
+                        valueInToUnits = valueInDegrees * Constants.deg_to_rad;
+                    otherwise
+                        error('Invalid units!');
+                end
+            end
+        end
+        
     end
     
 end
