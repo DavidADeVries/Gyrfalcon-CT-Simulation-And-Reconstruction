@@ -1,8 +1,8 @@
-function [] = detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY)
-%[] = detectorMakeDetectorDimsEqualCallback(hObject, eventdata, handles, changeXY)
+function [] = detectorMakeDetectorDimsEqualCallback(app, changeXY)
+%[] = detectorMakeDetectorDimsEqualCallback(app, changeXY)
 
 
-simulation = handles.workspace.simulation.createFromGUI(handles);
+simulation = app.workspace.simulation.createFromGUI(app);
 
 detector = simulation.detector;
 
@@ -23,13 +23,13 @@ else
         
         xyDim = xyDim.setValueFromLengthInM(setLength, dist, Units.m);
         
-        setDoubleForHandle(handles.detectorSingleDetectorDimensionsXYEdit, xyDim.value);
+        app.DetectorPixelDimsXYEditField.Value = xyDim.value;
     else
         setLength = xyDim.getLengthInM(dist, Units.m);
         
         zDim = zDim.setValueFromLengthInM(setLength, dist, Units.m);
         
-        setDoubleForHandle(handles.detectorSingleDetectorDimensionsZEdit, zDim.value);
+        app.DetectorPixelDimsZEditField.Value = zDim.value;
     end
 end
 

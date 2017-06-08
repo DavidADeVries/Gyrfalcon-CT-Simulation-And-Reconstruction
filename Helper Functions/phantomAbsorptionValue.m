@@ -4,6 +4,10 @@ function [absorptionVal, phantomCoords] = phantomAbsorptionValue(startPoint, end
 
 dims = size(phantomData);
 
+if length(dims) == 2
+    dims = [dims 0];
+end
+
 averPoint = mean([startPoint; endPoint]); %this a point located within the voxel we're interested in
 
 phantX = phantomLocation(1);

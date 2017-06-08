@@ -2,10 +2,8 @@ classdef Constants
     %Constants
     
     properties (Constant)
-        version = '1.0.1';
-        
-        object_save_directory = 'C:\Github Code Repos\Gyrfalcon Saved Objects'
-        
+        version = '2.0.0';
+                
         mm_to_m = (1/1000);
         m_to_mm = (1000/1);
         
@@ -39,6 +37,9 @@ classdef Constants
         Slash = '\';
         
         Matlab_File_Extension = '.mat';
+        PNG_File_Extension = '.png';
+        MPEG4_File_Extension = '.mp4';
+        AVI_File_Extension = '.avi';
                 
         Processing_Run_Var_Name = 'run';
         
@@ -59,6 +60,29 @@ classdef Constants
         Photon_Beam_Display_Name = 'Photon Beam';
         Phantom_Data_Set_Display_Name = 'Phantom Data Set';
         Workspace_Display_Name = 'Workspace';
+        
+        Reconstruction_Folder_Name = 'Recon';
+        Reconstruction_Run_File_Name = 'Reconstruction Run';
+        
+        Slice_Folder = 'Slice';
+        Angle_Folder = 'Angle';
+        Position_Filename = 'Position';
+        All_Positions_Filename = 'All Positions';
+        
+        Detector_Data_Filename = 'Detector Data';
+        Detector_Data_Var_Name = 'detectorData';
+        
+        Recon_Slices_Folder_Name = 'Slices';
+        Recon_Slices_File_Name = 'Slice';
+        
+        FBP_Recon_Sinograms_Folder_Name = 'Sinograms';
+        FBP_Recon_Sinograms_File_Name = 'Slice Sinogram';
+        
+        FBP_Recon_Videos_Folder_Name = 'Recon Videos';
+        FBP_Recon_Videos_File_Name = 'Slice Video';
+        
+        Round_Off_Error_Bound = 1E-9; %1nm
+        Round_Off_Level = 10;
     end
     
     methods

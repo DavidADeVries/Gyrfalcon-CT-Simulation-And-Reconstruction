@@ -20,6 +20,14 @@ classdef Dimension
 
             bool = b1 && b2;
         end
+        
+        function bool = isAngular(dim)
+            bool = dim.units.isAngular();
+        end
+        
+        function bool = isPlanar(dim)
+            bool = ~dim.units.isAngular();
+        end
                 
         function dimLength = getLengthInM(dimension, varargin)
             %will give length of dimensions in m, for angular dimensions,

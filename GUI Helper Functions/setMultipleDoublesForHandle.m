@@ -43,7 +43,7 @@ end
 
 % set string
 
-setString(handle, string);
+handle.Value = string;
 
 
 end

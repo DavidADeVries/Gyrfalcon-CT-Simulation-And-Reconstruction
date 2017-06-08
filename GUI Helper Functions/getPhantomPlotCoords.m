@@ -2,6 +2,11 @@ function handles = getPhantomPlotCoords(phantomDataInHU, phantomDimsInM, phantom
             
 dims = size(phantomDataInHU);
 
+if length(dims) == 2
+    dims = [dims 1];
+    phantomDimsInM(3) = 0; % no z dimensionality
+end
+
 numX = dims(2);
 numY = dims(1);
 numZ = dims(3);
@@ -11,21 +16,26 @@ xEnd = xStart + numX*phantomDimsInM(1);
 xMiddle = mean([xStart xEnd]);
 
 yzSliceValues = [xStart, xMiddle, xEnd];
-yzSliceIndices = [1 round((numX-1)/2) numX];
+yzSliceIndices = [1 ceil((numX)/2) numX];
 
 yEnd = phantomLocationInM(2);
 yStart = yEnd - numY*phantomDimsInM(2);
 yMiddle = mean([yStart yEnd]);
 
 xzSliceValues = [yStart, yMiddle, yEnd];
-xzSliceIndices = [1 round((numY-1)/2) numY];
+xzSliceIndices = [1 ceil((numY)/2) numY];
 
 zEnd = phantomLocationInM(3);
 zStart = zEnd - numZ*phantomDimsInM(3);
 zMiddle = mean([zStart zEnd]);
 
-xySliceValues = [zStart, zMiddle, zEnd];
-xySliceIndices = [numZ round((numZ-1)/2) 1];
+if numZ == 1
+    xySliceValues = 0;
+    xySliceIndices = 1;
+else
+    xySliceValues = [zStart, zMiddle, zEnd];
+    xySliceIndices = [numZ round((numZ-1)/2) 1];
+end
 
 % calc xy slices
 numXYSlices = length(xySliceValues);
@@ -85,7 +95,12 @@ end
 lowHU = min([minXY, minXZ, minYZ]);
 highHU = max([maxXY, maxXZ, maxYZ]);
 
-window = [lowHU, highHU];
+if lowHU == highHU
+    window = [lowHU, highHU+1];    
+else
+    window = [lowHU, highHU];
+end
+
 grayscaleMax = 1;
 
 
@@ -114,10 +129,14 @@ hold(axesHandle,'on');
 
 xyHandles = plotSlices(xySliceXCoords, xySliceYCoords, xySlicesZCoords, axesHandle, xySlicesData);
 
-xzHandles = plotSlices(xzSliceXCoords, xzSlicesYCoords, xzSliceZCoords, axesHandle, xzSlicesData);
-
-yzHandles = plotSlices(yzSlicesXCoords, yzSliceYCoords, yzSliceZCoords, axesHandle, yzSlicesData);
-
+if numZ ~= 1 % only plot these if 3D phantom
+    xzHandles = plotSlices(xzSliceXCoords, xzSlicesYCoords, xzSliceZCoords, axesHandle, xzSlicesData);
+    
+    yzHandles = plotSlices(yzSlicesXCoords, yzSliceYCoords, yzSliceZCoords, axesHandle, yzSlicesData);
+else
+    xzHandles = {};
+    yzHandles = {};
+end
 
 boxHandles = plotBox([xStart xEnd], [yStart yEnd], [zStart zEnd], axesHandle, 'w');
 

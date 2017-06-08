@@ -1,40 +1,61 @@
-function handles = initializeGyrfalcon(hObject, handles)
-% handles = initializeGyrfalcon(hObject, handles)
+function app = initializeGyrfalcon(app)
+% app = initializeGyrfalcon(app)
 % initializes the UI and variables for Gyrfalcon.
 % Also opens the display figure
 
-setString(handles.statusOutputText, {'Initializing Gyrfalcon...'});
+% ******************************
+% *** INITIALIZE GUI OBJECTS ***
+% ******************************
+
+app.StatusOutputTextArea.Value = {''};
+
+pos = app.GyrfalconUIFigure.Position;
+
+pos(1:2) = [0 30]; %is default at 100,100 (not very useful for large apps
+
+app.GyrfalconUIFigure.Position = pos;
+
+% set drop down menus
+Units.setDropDown(app.SourceDimsXYUnitsDropDown);
+Units.setDropDown(app.SourceDimsZUnitsDropDown);
+
+Units.setDropDown(app.DetectorPixelDimsXYUnitsDropDown);
+Units.setDropDown(app.DetectorPixelDimsZUnitsDropDown);
+
+InterpolationTypes3D.setDropDown(app.ReconstructionRun3DInterpolationTypeDropDown);
+
+% set drop down menus in algorithm settings tabs
+FirstGenFilterTypes.setDropDown(app.Gen1FBP_FilterTypeDropDown);
+
+InterpolationTypes.setDropDown(app.Gen1FBP_InterpolationTypeDropDown);
 
 % *******************************
 % *** INITIALIZE DATA HANDLES ***
 % *******************************
 
-handles.workspace = GyrfalconWorkspace;
-handles.workspace = handles.workspace.setDefaultValues();
+app.workspace = GyrfalconWorkspace;
+app.workspace = app.workspace.setDefaultValues();
 
-% *********************************
-% *** INITIALIZE DISPLAY FIGURE ***
-% *********************************
-
-handles = initializeDisplayFigure(handles);
+% gets settings loaded up
+Settings.load(app);
 
 % **********************
 % *** INITIALIZE GUI ***
 % **********************
 
-% *** CONTROL PANEL ***
+app = app.workspace.setGUI(app);
 
-set(handles.controlPanelRunScanSimButton, 'Enable', 'on');
-set(handles.controlPanelRunReconstructionButton, 'Enable', 'off');
-set(handles.controlPanelUnassignedTaskButton, 'Enable', 'off');
+newString = 'Complete';
+newLine = false;
 
-% *** SCAN SIMULATION PARAMETERS ***
+% *********************************
+% *** INITIALIZE DISPLAY FIGURE ***
+% *********************************
 
-setString(handles.statusOutputText, {'Initializing Gyrfalcon...Complete'});
+app = initializeDisplayFigure(app);
 
-handles.workspace.statusOutput = getString(handles.statusOutputText);
-
-handles = handles.workspace.setGUI(handles);
+% FINALIZE
+app = updateStatusOutput(app, newString, newLine);
 
 end
 
