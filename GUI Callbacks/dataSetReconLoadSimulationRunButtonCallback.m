@@ -39,7 +39,8 @@ if ~all(fileName == 0) % have a selection
                 reconRun.reconstruction = choice;
                 reconRun.simulationRun = simulationRun;
             else
-                reconRun = [];
+                reconRun = ReconstructionRun;
+                reconRun = reconRun.setDefaultValues();
             end
             
             workspace.reconstructionRun = reconRun;

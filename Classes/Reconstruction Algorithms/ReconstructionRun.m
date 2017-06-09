@@ -37,14 +37,14 @@ classdef ReconstructionRun < ProcessingRun
             
             run.notes = app.ReconstructionRunNotesTextArea.Value;
             
-            if ~isa(run.reconstruction, class(Reconstruction))
+            if ~strcmp(class(run.reconstruction), class(Reconstruction))
                 run.reconstruction = run.reconstruction.createFromGUI(app);
             end
         end
         
         function app = setGUI(run, app)
-            [scanGeometry, errorMsg] = run.getScanGeometry();
-                
+            scanGeometry = [];
+            
             % simulationRun 
             if isempty(run.simulationRun)
                 app.SimulationRunInfoLoadPathLabel.Text = 'Simulation Run Not Loaded';
@@ -59,7 +59,9 @@ classdef ReconstructionRun < ProcessingRun
                 app.SimulationRunInfoNotesTextArea.Value = {''};
                 
                 app.SimulationRunInfoLoadSimulationButton.Enable = 'off';
-            else                
+            else
+                [scanGeometry, errorMsg] = run.getScanGeometry();  
+                
                 app.SimulationRunInfoLoadPathLabel.Text = run.simulationRun.getPath();
                 
                 app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.simulationRun.startTimestamp, 'mmm dd, yyyy HH:MM:SS');

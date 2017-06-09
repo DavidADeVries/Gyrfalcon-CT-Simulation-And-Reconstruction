@@ -36,36 +36,46 @@ classdef AngleData
         function angleData = loadData(angleData, basePath, simulation)
             numPositions = simulation.scan.perAngleTranslationDimensions();
             
-            positionData = cell(numPositions);
+            isScanMosiac = simulation.isScanMultiplePositionMosiac();
             
-            for xy=1:numPositions(1) %in xy
-                for z=1:numPositions(2) % in z
-                    positionName = makePositionName(z, xy);
-                    positionFileName = makePositionFileName(positionName);
-                    
-                    path = makePath(basePath, positionFileName);
-                    
-                    data = PositionData;
-                    
-                    data = data.loadData(path);
-                    
-                    positionData{xy,z} = data;
+            
+            if isScanMosiac
+                positionName = makePositionName(0, 0, isScanMosiac);
+                positionFileName = makePositionFileName(positionName);
+                
+                path = makePath(basePath, positionFileName);
+                
+                data = PositionData;
+                
+                data = data.loadData(path);
+                
+                positionData = {data};
+            else
+                positionData = cell(numPositions);
+                
+                for xy=1:numPositions(1) %in xy
+                    for z=1:numPositions(2) % in z
+                        positionName = makePositionName(z, xy, isScanMosiac);
+                        positionFileName = makePositionFileName(positionName);
+                        
+                        path = makePath(basePath, positionFileName);
+                        
+                        data = PositionData;
+                        
+                        data = data.loadData(path);
+                        
+                        positionData{xy,z} = data;
+                    end
                 end
             end
             
-            angleData.positionData = positionData;            
+            angleData.positionData = positionData;
         end
           
         function firstGenDataColumn = compileProjectionDataFor1stGenRecon(data)
-            positions = data.positionData;
-
-            numDetectors = length(positions); %each position is a detector since 1st gen (parallel pencil beams)
+            allPositionsData = data.positionData{1};
             
-            firstGenDataColumn = zeros(numDetectors, 1);
-
-            for i=1:numDetectors
-                firstGenDataColumn(i) = positions{i}.detectorData;
-            end
+            firstGenDataColumn = (allPositionsData.detectorData)';
         end
     end
     

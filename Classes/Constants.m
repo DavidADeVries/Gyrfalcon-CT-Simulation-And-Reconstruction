@@ -2,7 +2,7 @@ classdef Constants
     %Constants
     
     properties (Constant)
-        version = '2.0.0';
+        version = '2.1.0';
                 
         mm_to_m = (1/1000);
         m_to_mm = (1000/1);

@@ -111,8 +111,7 @@ classdef FirstGenPAIRReconstruction < Reconstruction
                     
                     lengthSum = sum(sum(hitMatrix));
                     weighting = hitMatrix ./ lengthSum;
-                    applyTo = hitMatrix ~= 0;
-                    smearMatrix(applyTo) = smearMatrix(applyTo) + projectionValue .* weighting(applyTo);
+                    smearMatrix(hitMatrix ~= 0) = projectionValue ./ weighting;
                     
 %                     hitVector = reshape(hitMatrix, [numVoxels, 1]);
 %                     
@@ -126,8 +125,6 @@ classdef FirstGenPAIRReconstruction < Reconstruction
 %                     betaVector = betaVector + 2 .* hitVector .* projectionValue;
                 end
             end
-            
-            disp('Done!');
         end
         
     end

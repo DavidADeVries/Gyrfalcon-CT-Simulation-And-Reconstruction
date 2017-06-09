@@ -1,5 +1,5 @@
-function rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, startingIntensity)
-% rawDetectorValue = fastRayTrace(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM, phantomData, startingIntensity)
+function hitMatrix = fastRayTraceForPAIRAlphaMatrix(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM)
+% hitMatrix = fastRayTraceForPAIRAlphaMatrix(pointSourceCoords, pointDetectorCoords, phantomLocationInM, phantomDims, voxelDimsInM)
 
 bounds1 = [phantomLocationInM(1), phantomLocationInM(2:3) - voxelDimsInM(2:3).*phantomDims(2:3)];
 bounds2 = [phantomLocationInM(1)+voxelDimsInM(1)*phantomDims(1), phantomLocationInM(2:3)];
@@ -58,9 +58,9 @@ elseif sourceStartingPoint(3) > bounds2(3) || sourceStartingPoint(3) < bounds1(3
     tMax = -Inf;
 end
 
-if tMax < tMin
-    rawDetectorValue = startingIntensity;
-else % run through the voxels
+hitMatrix = zeros(phantomDims(2), phantomDims(1), phantomDims(3));
+
+if tMax >= tMin % ray hits phantom! Run through the voxels
     sourceStartingPoint = sourceStartingPoint - phantomLocationInM; %shift over so corner is at origin
     
     currentT = tMin;
@@ -69,9 +69,7 @@ else % run through the voxels
         
     % have starting point and end point, now will find which voxels and with
     % what distances across each voxel the ray travels
-       
-    radonSum = 0;
-    
+           
     isVoxelDim0 = (voxelDimsInM == 0);
     
     isDelta0 = (deltas == 0);
@@ -99,14 +97,11 @@ else % run through the voxels
         length = norm(currentPoint - nextPoint);
         indices = currentLattices + latticeToIndex;
         
-        attenuation = phantomData(indices(2), indices(1), indices(3));
-                    
+        hitMatrix(indices(2), indices(1), indices(3)) = length;
+        
         currentT = nextT;
-        currentPoint = nextPoint;
-        radonSum = radonSum + length .* attenuation;        
+        currentPoint = nextPoint;     
     end
-    
-    rawDetectorValue = startingIntensity.*exp(-radonSum);
 end
 
 end
@@ -125,7 +120,7 @@ function lattices = getLattices(point, invVoxelDims, isVoxelDim0, isDeltaNeg, is
     % no round to get lattice/index values
     isDeltaNeg(1) = ~isDeltaNeg(1);
     selectFloor = isDeltaNeg | isDelta0; % ceiling if delta is positive ONLY
-        
+    
     floorVals = floor(unroundedVals(selectFloor));
     ceilVals = ceil(unroundedVals(~selectFloor));
      

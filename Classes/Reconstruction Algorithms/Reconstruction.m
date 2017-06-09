@@ -43,7 +43,7 @@ classdef Reconstruction
             x = app.ReconstructionRunSlicePixelDimsXEditField.Value;
             y = app.ReconstructionRunSlicePixelDimsYEditField.Value;
             
-            recon.reconSliceVoxelDimensionsInM = [x, y];
+            recon.reconSliceVoxelDimensionsInM = [x, y] .* Constants.mm_to_m;
             
             x = app.ReconstructionRunDataSetDimsXEditField.Value;
             y = app.ReconstructionRunDataSetDimsYEditField.Value;
