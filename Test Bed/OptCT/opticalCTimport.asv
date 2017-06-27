@@ -1,0 +1,67 @@
+function [] = opticalCTimport()
+% [] = opticalCTimport()
+
+loadPath = 'C:\Users\MPRadmin\Git Repos\OptCT Data\FSRT1_singlespot';
+
+dataPath = makePath(loadPath, 'data');
+refPath = makePath(loadPath, 'reference');
+
+[dataFrames, dataDarkFrame, dataXmlData] = loadOptCtFolder(dataPath);
+[refFrames, refDarkFrame, refXmlData] = loadOptCtFolder(refPath);
+
+end
+
+function [frames, darkFrame, xmlData] = loadOptCtFolder(path)
+    allFilesAndFolders = dir(path);
+    
+    numEntries = length(allFilesAndFolders);
+    
+    prefix = '';
+    
+    for i=1:numEntries
+        entry = allFilesAndFolders(i);
+        
+        if ~entry.isdir
+            indices = strfind(entry.name, '_');
+            
+            prefix = entry.name(1:indices(end));
+            break;
+        end
+    end
+    
+    optCtXmlData = loadOptCtXmlData(makePath(path,prefix,'Info.xml'));
+    
+    numFrames = optCtXmlData.num_images;
+    
+    % load up frames
+    frames = cell(numFrames,1);
+    
+    for i=1:numFrames
+        filename = [prefix, filenam
+    end
+end
+
+function optCtXmlData = loadOptCtXmlData(path)
+    rawXml = xml2struct(path);
+    
+    children = rawXml.Children;
+    
+    optCtXmlData = struct; 
+    
+    for i=1:length(children)
+        child = children(i);
+        
+        if ~isempty(child.children)
+            fieldName = lower(child.Name); % lower case
+            data = child.children.Data;
+            
+            dataAsDouble = str2double(data);
+            
+            if ~isnan(dataAsDouble)
+                data = dataAsDouble;
+            end
+            
+            optCtXmlData.(fieldName) = data;
+        end
+    end
+end
