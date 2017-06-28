@@ -7,6 +7,9 @@ classdef Constants
         mm_to_m = (1/1000);
         m_to_mm = (1000/1);
         
+        cm_to_m = (1/100);
+        m_to_cm = (100/1);
+        
         deg_to_rad = (pi/180);
         rad_to_deg = (180/pi);
         
