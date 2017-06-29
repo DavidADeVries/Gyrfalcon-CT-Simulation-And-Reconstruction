@@ -50,6 +50,12 @@ sourceToAxisInM = sourceToAxisInCm .* Constants.cm_to_m;
 axisToDetectorInCm = dataXmlData.axis_to_detector;
 axisToDetectorInM = axisToDetectorInCm .* Constants.cm_to_m;
 
+numAngles = dataXmlData.num_images;
+stepSizeInDegrees = dataXmlData.stepsize;
+
+anglesInDeg = 0:stepSizeInDegrees:(numAngles-1)*stepSizeInDegrees;
+
+% interpolate/average to get projection data set
 projectionDataSet = interpolateOptCtImagesToProjectionDataSet(...
     deltaAttenuationFrames, detectorPixelDimsInM, ...
     targetDetectorSize, targetPixelDimsInM);
@@ -81,8 +87,8 @@ for x=1:targetDetectorSize(1)
         lowestXLattice = ceil(topLeftLoc(1) ./ originalDimsInM(1));
         greatestXLattice = floor(topRightLoc(1) ./ originalDimsInM(1));
         
-        lowestYlattice = ceil(topRightLoc(2) ./ originalDimsInM(2));
-        greatestYlattice = floor(bottomRightLoc(2) ./ originalDimsInM(2));
+        lowestYLattice = ceil(topRightLoc(2) ./ originalDimsInM(2));
+        greatestYLattice = floor(bottomRightLoc(2) ./ originalDimsInM(2));
         
         xPoints = (lowestXLattice:1:greatestXLattice).*originalDimsInM(1);
         
@@ -107,16 +113,16 @@ for x=1:targetDetectorSize(1)
         end
         
         numXPoints = length(xPoints);
-        numYPoint = length(yPoints);
+        numYPoints = length(yPoints);
         
         xSideLengths = zeros(1,numXPoints-1);
         ySideLengths = zeros(1,numYPoints-1);
         
         for i=1:numXPoints-1
-            xSideLengths(i) = xPoints(i+1,i);
+            xSideLengths(i) = xPoints(i+1) - xPoints(i);
         end
         for i=1:numYPoints-1
-            ySideLengths(i) = yPoints(i+1,i);
+            ySideLengths(i) = yPoints(i+1) - yPoints(i);
         end
         
         [xSide,ySide] = meshgrid(xSideLengths,ySideLengths);
@@ -138,7 +144,7 @@ for x=1:targetDetectorSize(1)
         
         weightedPixelVals = pixelVals .* areasNorm;
         
-        projectionDataSet = sum(sum(weightedPixelVals));        
+        projectionDataSet(y,x) = sum(sum(weightedPixelVals));        
     end
 end
 

@@ -43,6 +43,7 @@ classdef Constants
         PNG_File_Extension = '.png';
         MPEG4_File_Extension = '.mp4';
         AVI_File_Extension = '.avi';
+        XML_File_Extension = '.xml';
                 
         Processing_Run_Var_Name = 'run';
         

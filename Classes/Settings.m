@@ -7,6 +7,7 @@ classdef Settings
     properties
         Simulation_Save_Path
         Simulation_And_Reconstruction_Run_Save_Path
+        Imaging_Scan_Run_Save_Path
     end
     
     methods (Static)
@@ -30,6 +31,7 @@ classdef Settings
             % defaults here!
             settings.Simulation_Save_Path = 'C:\';
             settings.Simulation_And_Reconstruction_Run_Save_Path = 'C:\';
+            settings.Imaging_Scan_Run_Save_Path = 'C:\';
         end
         
         function [] = changeSimulationSavePath(settings, app)
@@ -64,6 +66,22 @@ classdef Settings
             end
         end
         
+        function [] = changeImagingScanRunSavePath(settings, app)
+            newFolder = uigetdir(settings.Imaging_Scan_Run_Save_Path, 'Default Imaging Scan Run Save Folder:');
+            
+            if newFolder ~= 0 % not cancelled
+                settings.Imaging_Scan_Run_Save_Path = newFolder;
+                
+                app.settings = settings;
+                
+                % update GUI
+                settings.setGUI(app);
+                
+                % save settings back to file
+                settings.save();
+            end
+        end
+        
         function [] = save(settings)
             savePath = Settings.getSettingsFilePath();
             
@@ -73,6 +91,7 @@ classdef Settings
         function [] = setGUI(settings, app)
             app.SimulationSavePathSettingEditField.Value = settings.Simulation_Save_Path;
             app.SimulationReconstructionRunSavePathSettingEditField.Value = settings.Simulation_And_Reconstruction_Run_Save_Path;
+            app.ImagingScanRunSavePathSettingEditField.Value = settings.Imaging_Scan_Run_Save_Path;
         end
         
     end
