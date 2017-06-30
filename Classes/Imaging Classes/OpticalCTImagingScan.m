@@ -21,7 +21,14 @@ classdef OpticalCTImagingScan < ImagingScan
             
         end
         
-        function imagingScan = importDataSet(imagingScan, seriesPath, targetDetectorDims, targetPixelDimsInM, savePath, saveFileName, vistaScannerData, usedRGBColours)
+        function [targetDetectorDims, targetPixelDimsInM, usedRGBColours] = getSettingsFromGUI(app)
+            
+        end
+        
+        function imagingScan = importDataSet(imagingScan, seriesPath, savePath, saveFileName, app)
+            [targetDetectorDims, targetPixelDimsInM, usedRGBColours] = ...
+                getSettingsFromGUI(app);
+            
             % load Vista scanner data
             vistaScannerData = vistaScannerData.loadData(seriesPath);
             
