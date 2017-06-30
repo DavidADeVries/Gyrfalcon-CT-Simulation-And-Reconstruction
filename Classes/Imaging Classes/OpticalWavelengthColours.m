@@ -1,27 +1,22 @@
-classdef OpticalWavelengthColours
-    % OpticalWavelengthColours
-    % contains colours of wavelengths of light
-    % just RGB for now
+classdef OpticalWavelengthColoursForVistaScanner
+    % OpticalWavelengthColoursForVistaScanner
     
     properties
         displayString
-        symbol
         wavelengthInNm % in nm
     end
     
     enumeration
-        red('red', 'R', 650);
-        green('green', 'G', 510);
-        blue('blue', 'B', 440);
+        red('Red', 650);
+        amber('Amber', 585);
     end
     
     methods(Static)
     end
     
     methods
-        function obj = OpticalWavelengthColours(displayString, symbol, wavelengthInNm)
+        function obj = OpticalWavelengthColours(displayString, wavelengthInNm)
             obj.displayString = displayString;
-            obj.symbol = symbol;
             obj.wavelengthInNm = wavelengthInNm;
         end        
     end
