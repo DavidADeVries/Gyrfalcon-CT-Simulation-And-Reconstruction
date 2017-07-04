@@ -35,21 +35,28 @@ classdef Units
         
         function [] = setPlanarUnitsDropDown(handle)
             [rawItemData,~] = enumeration('Units');
-                        
-            counter = 1;
             
-            items = {};
-            itemsData = {};
+            dropIndices = [];
             
             for i=1:length(rawItemData)
-                if ~rawItemData(i).isAngular
-                    items{counter} = rawItemData(i).displayString;
-                    itemsData{counter} = rawItemData(i);
-                    
-                    counter = counter + 1;
+                if rawItemData(i).isAngular
+                    rawItemData(i) = [];
+                    i = i - 1;
                 end
             end
-                        
+            
+            rawItem
+            
+            numItems = length(rawItemData);
+            
+            items = cell(1, numItems);
+            itemsData = cell(1, numItems);
+            
+            for i=1:numItems
+                items{i} = rawItemData(i).displayString;
+                itemsData{i} = rawItemData(i);
+            end
+            
             handle.Items = items;
             handle.ItemsData = itemsData;
         end

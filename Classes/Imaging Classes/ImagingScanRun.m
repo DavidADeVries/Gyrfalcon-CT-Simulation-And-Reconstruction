@@ -12,6 +12,15 @@ classdef ImagingScanRun
     % *importTimestamp
     % Unix timestamp of when the scan was imported into Gyrfalcon
     %
+    % *importPath
+    % path data was imported from
+    %
+    % *savePath
+    % path where data was saved to
+    %
+    % *notes
+    % any notes about the imaging scan run
+    %
     % **FURTHER SCANNER SPECIFIC FIELDS IN ImagingScan SUBCLASSES
     
     
@@ -19,22 +28,93 @@ classdef ImagingScanRun
     properties
         imagingScan
         
-        scanTimestamp
         importTimestamp
+        
+        importPath
+        savePath
         
         notes
     end
     
     methods
-        function scanRun = ImagingScanRun(scanRun)
+        function scanRun = ImagingScanRun()
             
         end
         
-        function run = importDataSet(run, imagingScan, scanTimestamp, notes)
-            run.imagingScan = imagingScan; %everything should already be imported
-            run.scanTimestamp = scanTimestamp;
+        function app = setGUI(run, app)
+            if isempty(run.savePath) % not yet set
+                app.ImagingScanRunSavePathEditField.Value = 'Not Selected...';
+            else
+                app.ImagingScanRunSavePathEditField.Value = run.savePath;
+            end
+            
+            if isempty(run.importPath) % not yet set
+                app.ImagingScanDataImportPathEditField.Value = 'Not Selected...';
+            else
+                app.ImagingScanDataImportPathEditField.Value = run.importPath;
+            end
+            
+            % need to be set to run the import
+            if isempty(run.savePath) || isempty(run.importPath)
+                app.ImportImagingScanDataButton.Enable = 'off';
+            else
+                app.ImportImagingScanDataButton.Enable = 'on';
+            end
+            
+            app.ImagingScanRunNotesTextArea.Value = run.notes;
+            
+            % select / set settings tab
+            scanClass = class(run.imagingScan);
+            
+            hideAllImagingScanImportSettingsTabs(app);
+            
+            if strcmp(scanClass, class(ImagingScanTypes.opticalCT.imagingScanObject))
+                app.ImagingScanTypeDropDown.Value = ImagingScanTypes.opticalCT;
+                
+                app.OpticalCTImportSettingsTab.Parent = app.ImportImagingScanTabGroup;
+                
+                % set fields
+                app.OptCTSettings_DetectorWholeDetectorDimsXYEditField.Value = run.imagingScan.targetDetectorDimensions(1);
+                app.OptCTSettings_DetectorWholeDetectorDimsZEditField.Value = run.imagingScan.targetDetectorDimensions(2);
+                
+                app.OptCtSettings_DetectorPixelDimsXYEditField.Value = run.imagingScan.targetPixelDimensions(1).value;
+                app.OptCtSettings_DetectorPixelDimsZEditField.Value = run.imagingScan.targetPixelDimensions(2).value;
+                
+                app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value = run.imagingScan.targetPixelDimensions(1).units;
+                app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value = run.imagingScan.targetPixelDimensions(2).units;
+            elseif strcmp(scanClass, class(ImagingScanTypes.xrayCT.imagingScanObject))
+                app.ImagingScanTypeDropDown.Value = ImagingScanTypes.xrayCT;
+                
+                app.XRayCTImportSettingsTab.Parent = app.ImportImagingScanTabGroup;
+            end
+        end
+        
+        function run = createFromGUI(run, app)
+            run.importPath = app.ImagingScanDataImportPathEditField.Value;
+            run.savePath = app.ImagingScanRunSavePathEditField.Value;
+            
+            run.notes = app.ImagingScanRunNotesTextArea.Value;
+            
+            run.imagingScan = app.ImagingScanTypeDropDown.Value.imagingScanObject;
+        end
+        
+        function run = importDataSet(run, app)
+            run = run.createFromGUI(app);
+                
             run.importTimestamp = now;
-            run.notes = notes;
+            
+            run.createSaveDirectory();
+            
+            run.imagingScan = run.imagingScan.importDataSet(app, run.importPath, run.savePath);
+        end
+        
+        function [] = createSaveDirectory(run)
+            pathSections = breakUpPath(run.savePath);
+            
+            folder = pathSections{end};
+            path = run.savePath(1:end-length(folder));
+            
+            mkdir(path, folder);
         end
         
         function run = loadData(run, basePath) %use given basePath in case files are moved around
@@ -61,26 +141,18 @@ classdef ImagingScanRun
         end
         
         function run = setDefaultValues(run)
-            run.simulation = [];
-            run.performanceType = SimulationRunPerformanceTypes.high;
-            run.sliceData = [];
+            scan = OpticalCTImagingScan;
+            scan = scan.setDefaultValues();
             
-            run.startTimestamp = [];
-            run.endTimestamp = [];
+            run.imagingScan = scan;
             
-            run.computerInfo = ComputerInfo();
-            run.versionUsed = Constants.version;
+            run.importTimestamp = [];
             
-            run.notes = '';
+            run.importPath = '';
             run.savePath = '';
-            run.saveFileName = '';
-            
-            run.useMexCode = true;
+            run.notes = '';
         end
-        
-        function run = createFromGUI(run, app)
-        end 
-        
+                
         function [sliceNames, angleNames, positionNames, positionFileNames] = getFolderNames(run)
             numSlices = length(run.simulation.scan.slices);
             

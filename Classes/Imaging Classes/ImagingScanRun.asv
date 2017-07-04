@@ -12,6 +12,15 @@ classdef ImagingScanRun
     % *importTimestamp
     % Unix timestamp of when the scan was imported into Gyrfalcon
     %
+    % *importPath
+    % path data was imported from
+    %
+    % *savePath
+    % path where data was saved to
+    %
+    % *notes
+    % any notes about the imaging scan run
+    %
     % **FURTHER SCANNER SPECIFIC FIELDS IN ImagingScan SUBCLASSES
     
     
@@ -19,22 +28,71 @@ classdef ImagingScanRun
     properties
         imagingScan
         
-        scanTimestamp
         importTimestamp
+        
+        importPath
+        savePath
         
         notes
     end
     
     methods
-        function scanRun = ImagingScanRun(scanRun)
+        function scanRun = ImagingScanRun()
             
         end
         
-        function run = importDataSet(run, imagingScan, scanTimestamp, notes)
-            run.imagingScan = imagingScan; %everything should already be imported
-            run.scanTimestamp = scanTimestamp;
-            run.
-            run.notes = notes;
+        function app = setGUI(run, app)
+            if isempty(run.savePath) % not yet set
+                app.ImagingScanRunSavePathEditField.Value = 'Not Selected...';
+            else
+                app.ImagingScanRunSavePathEditField.Value = run.savePath;
+            end
+            
+            if isempty(run.importPath) % not yet set
+                app.ImagingScanDataImportPathEditField.Value = 'Not Selected...';
+            else
+                app.ImagingScanDataImportPathEditField.Value = run.importPath;
+            end
+            
+            % need to be set to run the import
+            if isempty(run.savePath) || isempty(run.importPath)
+                app.ImportImagingScanDataButton.Enable = 'off';
+            else
+                app.ImportImagingScanDataButton.Enable = 'on';
+            end
+            
+            app.ImagingScanRunNotesTextArea.Value = run.notes;
+            
+            % select / set settings tab
+            app.ImagingScanTypeDropDown.Value = 
+        end
+        
+        function run = createFromGUI(run, app)
+            run.importPath = app.ImagingScanDataImportPathEditField.Value;
+            run.savePath = app.ImagingScanRunSavePathEditField.Value;
+            
+            run.notes = app.ImagingScanRunNotesTextArea.Value;
+            
+            run.imagingScan = app.ImagingScanTypeDropDown.Value.imagingScanObject;
+        end
+        
+        function run = importDataSet(run, app)
+            run = run.createFromGUI(app);
+                
+            run.importTimestamp = now;
+            
+            run.createSaveDirectory();
+            
+            run.imagingScan = run.imagingScan.importDataSet(app, run.importPath, run.savePath);
+        end
+        
+        function [] = createSaveDirectory(run)
+            pathSections = breakUpPath(run.savePath);
+            
+            folder = pathSections{end};
+            path = run.savePath(1:end-length(folder));
+            
+            mkdir(path, folder);
         end
         
         function run = loadData(run, basePath) %use given basePath in case files are moved around

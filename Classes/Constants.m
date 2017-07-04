@@ -44,6 +44,7 @@ classdef Constants
         MPEG4_File_Extension = '.mp4';
         AVI_File_Extension = '.avi';
         XML_File_Extension = '.xml';
+        BMP_File_Extension = '.bmp';
                 
         Processing_Run_Var_Name = 'run';
         

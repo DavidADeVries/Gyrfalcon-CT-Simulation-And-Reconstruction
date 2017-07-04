@@ -1,19 +1,19 @@
-classdef ImagingScanTypes
-    % ImagingScanTypes
+classdef OpticalWavelengthColoursForVistaScanner
+    % OpticalWavelengthColoursForVistaScanner
     
     properties
         displayString
-        imagingScanObject
+        wavelengthInNm % in nm
     end
     
     enumeration
-        opticalCT ('Optical CT', OpticalCTImagingScan)
-        xrayCT ('X-Ray CT (Not Yet Available)', XrayCTImagingScan);
+        red('Red', 650);
+        amber('Amber', 585);
     end
     
     methods(Static)
         function [] = setDropDown(handle)
-            [rawItemData,~] = enumeration('ImagingScanTypes');
+            [rawItemData,~] = enumeration('OpticalWavelengthColoursForVistaScanner');
             
             numItems = length(rawItemData);
             
@@ -21,7 +21,7 @@ classdef ImagingScanTypes
             itemsData = cell(1, numItems);
             
             for i=1:numItems
-                items{i} = rawItemData(i).displayString;
+                items{i} = [rawItemData(i).displayString, ' (', num2str(rawItemData(i).wavelengthInNm), 'nm)'];
                 itemsData{i} = rawItemData(i);
             end
             
@@ -31,9 +31,9 @@ classdef ImagingScanTypes
     end
     
     methods
-        function obj = ImagingScanTypes(displayString, imagingScanObject)
+        function obj = OpticalWavelengthColoursForVistaScanner(displayString, wavelengthInNm)
             obj.displayString = displayString;
-            obj.imagingScanObject = imagingScanObject;
+            obj.wavelengthInNm = wavelengthInNm;
         end        
     end
     

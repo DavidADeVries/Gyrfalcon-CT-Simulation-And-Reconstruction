@@ -9,6 +9,8 @@ classdef GyrfalconWorkspace < GyrfalconObject
         
         reconstructionRun
         
+        imagingScanRun
+        
         simulationRunForViewing
     end
     
@@ -49,6 +51,11 @@ classdef GyrfalconWorkspace < GyrfalconObject
             workspace.reconstructionRun = reconRun;
             
             workspace.simulationRunForViewing = SimulationRun;
+            
+            scanRun = ImagingScanRun;
+            scanRun = scanRun.setDefaultValues();
+            
+            workspace.imagingScanRun = scanRun;
         end
         
         function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace, defaultSavePath)
@@ -80,6 +87,9 @@ classdef GyrfalconWorkspace < GyrfalconObject
             end
             
             % reconstructionRun
+            % save everything with workspace, are not saved independently
+            
+            % imagingScanRun
             % save everything with workspace, are not saved independently
         end
         
@@ -121,6 +131,7 @@ classdef GyrfalconWorkspace < GyrfalconObject
             app = workspace.simulationRun.setGUIForScanSimulation(app);
             app = workspace.reconstructionRun.setGUI(app);
             app = workspace.simulationRunForViewing.setGUIForScanSimulationViewer(app);
+            app = workspace.imagingScanRun.setGUI(app);
         end
         
         function workspace = createFromGUI(workspace, app)
@@ -131,6 +142,8 @@ classdef GyrfalconWorkspace < GyrfalconObject
             workspace.simulationRun = workspace.simulationRun.createFromGUI(app);
             
             workspace.reconstructionRun = workspace.reconstructionRun.createFromGUI(app);
+            
+            workspace.imagingScanRun = workspace.imagingScanRun.createFromGUI(app);
         end
     end
     
