@@ -32,6 +32,23 @@ classdef OpticalCTImagingScan < ImagingScan
             
         end
         
+        function app = setGUI(scan, app)
+            app.ImagingScanTypeDropDown.Value = ImagingScanTypes.opticalCT;
+            
+            hideAllImagingScanImportSettingsTabs(app);
+            app.OpticalCTImportSettingsTab.Parent = app.ImportImagingScanTabGroup;
+            
+            % set fields
+            app.OptCTSettings_DetectorWholeDetectorDimsXYEditField.Value = scan.targetDetectorDimensions(1);
+            app.OptCTSettings_DetectorWholeDetectorDimsZEditField.Value = scan.targetDetectorDimensions(2);
+            
+            app.OptCtSettings_DetectorPixelDimsXYEditField.Value = scan.targetPixelDimensions(1).value;
+            app.OptCtSettings_DetectorPixelDimsZEditField.Value = scan.targetPixelDimensions(2).value;
+            
+            app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value = scan.targetPixelDimensions(1).units;
+            app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value = scan.targetPixelDimensions(2).units;
+        end
+        
         function scan = setDefaultValues(scan)
             scan.vistaScannerHeaderData = [];
             
@@ -44,11 +61,11 @@ classdef OpticalCTImagingScan < ImagingScan
             scan.usedLightSourceColour = OpticalWavelengthColoursForVistaScanner.amber;
         end
         
-        function [targetDetectorDims, targetPixelDims, usedLightColour] = getSettingsFromGUI(imagingScan, app)
+        function imagingScan = createFromGUI(imagingScan, app)
             xy = app.OptCTSettings_DetectorWholeDetectorDimsXYEditField.Value;
             z = app.OptCTSettings_DetectorWholeDetectorDimsZEditField.Value;
             
-            targetDetectorDims = [xy, z];
+            imagingScan.targetDetectorDimensions = [xy, z];
             
             xyVal = app.OptCtSettings_DetectorPixelDimsXYEditField.Value;
             xyUnits = app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value;
@@ -56,33 +73,35 @@ classdef OpticalCTImagingScan < ImagingScan
             zVal = app.OptCtSettings_DetectorPixelDimsZEditField.Value;
             zUnits = app.OptCtSettings_DetectorPixelDimsZUnitsDropDown.Value;
             
-            targetPixelDims = [Dimension(xyVal, xyUnits), Dimensions(zVal, zUnits)];
+            imagingScan.targetPixelDimensions = [Dimension(xyVal, xyUnits), Dimension(zVal, zUnits)];
             
-            usedLightColour = app.OptCtSettings_LightSourceColourDropDown.Value;
+            imagingScan.usedLightSourceColour = app.OptCtSettings_LightSourceColourDropDown.Value;
         end
         
-        function imagingScan = importDataSet(imagingScan, app, importPath, savePath)
-            % ******************************
-            % Load scan type specific fields
-            % ******************************
-            [targetDetectorDims, targetPixelDims, usedLightColour] = ...
-                imagingScan.getSettingsFromGUI(app);
+        function dimsInM = getTargetPixelDimensionsInM(imagingScan)
+            xyDim = imagingScan.targetPixelDimensions(1);
+            zDim = imagingScan.targetPixelDimensions(2);
             
-            imagingScan.targetDetectorDimensions = targetDetectorDims;
-            imagingScan.targetPixelDimensions = targetPixelDims;
-            imagingScan.usedLightSourceColour = usedLightColour;
-            
+            dimsInM(1) = xyDim.getLengthInM();
+            dimsInM(2) = zDim.getLengthInM();
+        end
+        
+        function imagingScan = importDataSet(imagingScan, importPath, savePath)
+                        
             % ***********************
             % Load Vista scanner data
             % ***********************
             vistaScannerData = Vista15ScannerData();
             vistaScannerData = vistaScannerData.loadData(importPath);
             
-            imagingScan.vistaScannerData = vistaScannerData;
+            imagingScan.vistaScannerHeaderData = vistaScannerData;
             
             % *****************************************************
             % Load-up imaging scan objects (Detector, source, etc.)
             % *****************************************************
+            
+            targetPixelDimsInM = imagingScan.getTargetPixelDimensionsInM();
+            targetDetectorDims = imagingScan.targetDetectorDimensions;
             
             %DETECTOR
             detectorLocationInM = [0, vistaScannerData.getAxisToDetectorInM()];
@@ -119,17 +138,10 @@ classdef OpticalCTImagingScan < ImagingScan
             perAngleTranslationDimensions = [1,1]; % single point
             perAngleTranslationResolution = [0,0]; % no movement
             
-            numWavelengths = length(usedRGBColours);
+            wavelengthInNm = imagingScan.usedLightSourceColour.wavelengthInNm;                        
+            intensity = 1; % actual intensity is irrelevant, just set to 1
             
-            wavelengthsInNm = zeros(1,numWavelengths);
-            
-            for i=1:numWavelengths
-                wavelengthsInNm(i) = usedRGBColours(i).wavelengthInNm;
-            end
-            
-            intensities = ones(1,numWavelengths); % actual intensity is irrelevant, just relative intensity (RGB equal)
-            
-            beamCharacterization = OpticalPhotonBeam(wavelengthsInNm, intensities);
+            beamCharacterization = OpticalPhotonBeam(wavelengthInNm, intensity);
             
             scan = Scan(scanAnglesInDeg, slices,...
                 perAngleTranslationDimensions, perAngleTranslationResolution,...
@@ -186,8 +198,8 @@ classdef OpticalCTImagingScan < ImagingScan
                 dataFilename = [dataPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
                 refFilename = [refPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
                 
-                dataFrame = readOptCtFrameBmp(makePath(dataPath, dataFilename));
-                refFrame = readOptCtFrameBmp(makePath(refPath, refFilename));
+                dataFrame = readOptCtFrameBmp(makePath(dataPath, dataFilename), frameDims);
+                refFrame = readOptCtFrameBmp(makePath(refPath, refFilename), frameDims);
                 
                 % apply dark frame
                 dataFrame = dataFrame - dataDarkFrame;
@@ -211,9 +223,9 @@ classdef OpticalCTImagingScan < ImagingScan
                 angleFolder = makeAngleFolderName(anglesInDeg(i));
                 mkdir(savePath, angleFolder);
                 
-                savePath = makePath(savePath, angleFolder, saveFileName);
+                path = makePath(savePath, angleFolder, saveFileName);
                 
-                save(savePath, Constants.Detector_Data_Var_Name);
+                save(path, Constants.Detector_Data_Var_Name); % save 'detectorData'
             end
                         
         end
@@ -250,14 +262,14 @@ end
 
 function projectionDataSet = interpolateOptCtFrameToProjectionDataSet(frame, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM)
 
-frameDims = size(frames);
+frameDims = size(frame);
 detectorSize = [frameDims(2), frameDims(1)];
 
 originalLocationInM = [0 0]; %top-left corner [x,y]
 originalDimsInM = detectorSize .* detectorPixelDimsInM;
 
 targetDimsInM = targetDetectorSize .* targetPixelDimsInM;
-targetLocationInM = (originalDimsInM - targetDimsInM) ./ 2; % centre it
+targetLocationInM = [1,-1] .* (originalDimsInM - targetDimsInM) ./ 2; % centre it
 
 projectionDataSet = zeros(targetDetectorSize(2), targetDetectorSize(1));
 
@@ -265,20 +277,20 @@ for x=1:targetDetectorSize(1)
     for y=1:targetDetectorSize(2)
         shift = [x,y];
         
-        topLeftLoc = targetLocationInM + (shift-1).*targetDimsInM;
-        topRightLoc = topLeftLoc + [1 0].*targetDimsInM;
-        bottomLeftLoc = topLeftLoc + [0 1].*targetDimsInM;
-        bottomRightLoc = topLeftLoc + [1 1].*targetDimsInM;
+        topLeftLoc = targetLocationInM + (shift-1).*[1,-1].*targetPixelDimsInM;
+        topRightLoc = topLeftLoc + [1 0].*targetPixelDimsInM;
+        bottomLeftLoc = topLeftLoc + [0 -1].*targetPixelDimsInM;
+        bottomRightLoc = topLeftLoc + [1 -1].*targetPixelDimsInM;
         
-        lowestXLattice = ceil(topLeftLoc(1) ./ originalDimsInM(1));
-        greatestXLattice = floor(topRightLoc(1) ./ originalDimsInM(1));
+        lowestXLattice = ceil(topLeftLoc(1) ./ detectorPixelDimsInM(1));
+        greatestXLattice = floor(topRightLoc(1) ./ detectorPixelDimsInM(1));
         
-        lowestYLattice = ceil(topRightLoc(2) ./ originalDimsInM(2));
-        greatestYLattice = floor(bottomRightLoc(2) ./ originalDimsInM(2));
+        lowestYLattice = -ceil(topRightLoc(2) ./ detectorPixelDimsInM(2));
+        greatestYLattice = -floor(bottomRightLoc(2) ./ detectorPixelDimsInM(2));
         
-        xPoints = (lowestXLattice:1:greatestXLattice).*originalDimsInM(1);
+        xPoints = (lowestXLattice:1:greatestXLattice).*detectorPixelDimsInM(1);
         
-        if xPoints(1) > topLeftLoc(1)
+        if topLeftLoc(1) < xPoints(1) 
             xPoints = [topLeftLoc(1), xPoints];
             lowestXLattice = lowestXLattice - 1;
         end
@@ -287,14 +299,14 @@ for x=1:targetDetectorSize(1)
             greatestXLattice = greatestXLattice + 1;
         end
           
-        yPoints = (lowestYLattice:1:greatestYLattice).*originalDimsInM(2);
+        yPoints = -(greatestYLattice:-1:lowestYLattice).*detectorPixelDimsInM(2);
         
-        if yPoints(1) > topRightLoc(2)
-            yPoints = [topRightLoc(2), xyPoints];
+        if bottomRightLoc(2) < yPoints(1)
+            yPoints = [bottomRightLoc(2), yPoints];
             lowestYLattice = lowestYLattice - 1;
         end
-        if yPoints(end) < bottomRightLoc(2)
-            yPoints = [yPoints, bottomRightLoc(2)];
+        if yPoints(end) < topRightLoc(2)
+            yPoints = [yPoints, topRightLoc(2)];
             greatestYLattice = greatestYLattice + 1;
         end
         
@@ -315,18 +327,18 @@ for x=1:targetDetectorSize(1)
         
         areas = xSide .* ySide;
         
-        xIndices = (lowestXLattice:1:greatestXLattice) + 1;
-        yIndices = (lowestYLattice:1:greatestYLattice) + 1;
+        xIndices = (lowestXLattice+1:1:greatestXLattice) + 1;
+        yIndices = (greatestYLattice:-1:lowestYLattice+1) + 1;
         
         [colIndex,rowIndex] = meshgrid(xIndices,yIndices);
         
         frameSelect = sub2ind(frameDims, rowIndex, colIndex);
-        
-        pixelVals = frames(frameSelect);
+                
+        pixelVals = frame(frameSelect);
         
         totalArea = sum(sum(areas));
         
-        areasNorm = totalArea ./ totalArea;
+        areasNorm = areas ./ totalArea;
         
         weightedPixelVals = pixelVals .* areasNorm;
         

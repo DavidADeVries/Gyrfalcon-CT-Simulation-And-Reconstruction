@@ -4,6 +4,8 @@ classdef Vista15ScannerData
     % holds information from a Vista 15 scanner
     
     properties
+        seriesName
+        
         scanDate
         scanTime
         
@@ -54,14 +56,59 @@ classdef Vista15ScannerData
         end
         
         function label = getXmlLabel()
-            label = 'info';
+            label = 'Info';
         end
     end
     
     methods
-        function data = Vista15ScannerData(seriesName, xmlStruct)
-            data.seriesName = seriesName;
+        function data = Vista15ScannerData()            
             
+        end
+        
+        function numAngles = getNumAngles(data)
+            numAngles = data.numImages;
+        end
+        
+        function spacingInDeg = getAngleSpacingInDeg(data)
+            spacingInDeg = data.stepSizeInDeg;
+        end
+        
+        function len = getAxisToSourceInM(data)
+            len = data.sourceToAxisInM;
+        end
+        
+        function len = getAxisToDetectorInM(data)
+            len = data.axisToDetectorInM;
+        end
+        
+        function dimsInM = getDetectorPixelDimensionsInM(data)
+            lightSizeInM = data.lightSizeInM;
+            numPixels = data.getRawImageDimensions();
+            
+            pixelsPerM = numPixels ./ lightSizeInM;
+            
+            detectorPixelDimsInM = 1 ./ pixelsPerM;
+        end
+        
+        function data = loadData(data, seriesPath)
+            pathSections = breakUpPath(seriesPath);
+            
+            data.seriesName = pathSections{end};
+            
+            % load-up xml
+            path = makePath(seriesPath, data.getDataFrameFolderName());
+            
+            prefix = getFilePrefix(path);
+            
+            fileName = [prefix, data.getXmlLabel(), Constants.XML_File_Extension];
+            
+            optCtXmlData = loadOptCtXml(makePath(path, fileName));
+            
+            data = data.setXmlDataProperties(optCtXmlData);           
+            
+        end
+        
+        function data = setXmlDataProperties(data, xmlStruct)
             data.scanDate = xmlStruct.date;
             data.scanTime = xmlStruct.time;
             
@@ -89,36 +136,33 @@ classdef Vista15ScannerData
             
             data.acquisitionVersion = xmlStruct.acquisition_version;
         end
+    end
+    
+end
+
+% HELPER FUNCTIONS
+
+
+
+function optCtXmlData = loadOptCtXml(path)
+    rawXml = xml2struct(path);
+    
+    names = fieldnames(rawXml.SCANDATA);
+    
+    numFields = length(names);
+    
+    optCtXmlData = struct; 
+    
+    for i=1:numFields        
+        fieldName = names{i};
+        data = rawXml.SCANDATA.(fieldName).Text;
         
-        function data = loadData(data, seriesPath)
-            pathSections = breakUpPath(seriesPath);
-            
-            data.seriesName = pathSections{end};
-            
-            % load-up xml
-            
+        dataAsDouble = str2double(data);
+        
+        if ~isnan(dataAsDouble)
+            data = dataAsDouble;
         end
-    end
-    
-end
-
-function prefix = getFilePrefix(path)
-
-allFilesAndFolders = dir(path);
-
-numEntries = length(allFilesAndFolders);
-
-prefix = '';
-
-for i=1:numEntries
-    entry = allFilesAndFolders(i);
-    
-    if ~entry.isdir
-        indices = strfind(entry.name, '_');
         
-        prefix = entry.name(1:indices(end));
-        break;
+        optCtXmlData.(lower(fieldName)) = data;
     end
-end
-
 end

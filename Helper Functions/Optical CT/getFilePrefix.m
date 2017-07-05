@@ -1,4 +1,5 @@
 function prefix = getFilePrefix(path)
+%prefix = getFilePrefix(path)
 
 allFilesAndFolders = dir(path);
 

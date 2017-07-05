@@ -20,6 +20,19 @@ classdef XrayCTImagingScan < ImagingScan
             
         end
         
+        function scan = createFromGUI(scan, app)
+            
+        end
+        
+        function app = setGUI(scan, app)
+            app.ImagingScanTypeDropDown.Value = ImagingScanTypes.xrayCT;
+            
+            hideAllImagingScanImportSettingsTabs(app);
+            app.XRayCTImportSettingsTab.Parent = app.ImportImagingScanTabGroup;
+            
+            % set fields
+        end
+        
         function imagingScan = importDataSet(imagingScan, seriesPath, targetDetectorDims, targetPixelDimsInM, savePath, saveFileName, vistaScannerData, usedRGBColours)
             % load Vista scanner data
             vistaScannerData = vistaScannerData.loadData(seriesPath);

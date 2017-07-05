@@ -60,6 +60,10 @@ classdef SimulationRun < ProcessingRun
             
         end
         
+        function setup = getImagingSetup(run)
+            setup = run.simulation;
+        end
+        
         function run = setDefaultValues(run)
             run.simulation = [];
             run.performanceType = SimulationRunPerformanceTypes.high;
@@ -120,7 +124,7 @@ classdef SimulationRun < ProcessingRun
         
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())
-                app.SimulationViewerFilePathLabel.Text = 'No Simulation Run Selected';
+                app.SimulationViewerFilePathLabel.Text = 'No Run Selected';
                 
                 app.SimulationViewerSliceListBox.Enable = 'off';
                 app.SimulationViewerScanAngleListBox.Enable = 'off';
@@ -281,21 +285,7 @@ classdef SimulationRun < ProcessingRun
             
         end
         
-        function image = loadImageForScanSimulationViewer(run, app)
-            % get selected folders/files
-            sliceFolder = app.SimulationViewerSliceListBox.Value;
-            angleFolder = app.SimulationViewerScanAngleListBox.Value;
-            positionDetectorDataFilename = app.SimulationViewerPerAngleTranslationPositionListBox.Value; %ItemData used to the filename
-            
-            loadPath = makePath(run.savePath,...
-                sliceFolder,...
-                angleFolder,...
-                positionDetectorDataFilename);
-            
-            fileData = load(loadPath);
-            
-            image = fileData.(Constants.Detector_Data_Var_Name);
-        end
+        
         
         function simulationRun = startRun(simulationRun)
             simulationRun = simulationRun.startProcessingRun();

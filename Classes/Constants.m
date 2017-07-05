@@ -47,6 +47,7 @@ classdef Constants
         BMP_File_Extension = '.bmp';
                 
         Processing_Run_Var_Name = 'run';
+        Imaging_Run_Var_Name = 'run';
         
         Default_Simulation_Name = 'Simulation';
         Default_Phantom_Name = 'Phantom';
@@ -85,6 +86,8 @@ classdef Constants
         
         FBP_Recon_Videos_Folder_Name = 'Recon Videos';
         FBP_Recon_Videos_File_Name = 'Slice Video';
+        
+        Imaging_Scan_Run_File_Name = 'Imaging Scan Run';
         
         Round_Off_Error_Bound = 1E-9; %1nm
         Round_Off_Level = 10;

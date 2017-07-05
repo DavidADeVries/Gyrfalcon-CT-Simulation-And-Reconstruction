@@ -12,12 +12,7 @@ classdef ImagingScan < GyrfalconObject
     %
     % *scan:
     %  See Scan class
-    %
-    % *scanTimestamp
-    %
-    % *importTimestamp
-    %
-    % * notes
+    
     
     
     
@@ -33,6 +28,28 @@ classdef ImagingScan < GyrfalconObject
         
         function object = createBlankObject(object)
             object = ImagingScan;
+        end
+        
+        function bool = isScanMultiplePositionMosiac(imagingScan)
+            % in order for the scan to be a "position mosiac", it must have 
+            % a detector that moves with the source and be one of:
+            % 1) Scan along the xy ONLY with a beam extending ONLY in the z
+            % 2) Scan along the z ONLY with a beam extending ONLY in the xy
+            % 3) Scanning in the xy and z but ONLY with a 1x1 detector
+            
+            scan = imagingScan.scan;
+            detector = imagingScan.detector;
+            
+            detectorMoves = detector.movesWithScanAngle && detector.movesWithPerAngleTranslation;
+            
+            detectorDims = detector.wholeDetectorDimensions;
+            translationDims = scan.perAngleTranslationDimensions;
+            
+            isCase1 = translationDims(2) == 1 && detectorDims(1) == 1;
+            isCase2 = translationDims(1) == 1 && detectorDims(2) == 1;
+            isCase3 = all(detectorDims == 1);
+            
+            bool = detectorMoves && (isCase1 || isCase2 || isCase3);
         end
         
         function simulation = setDefaultValues(simulation)            

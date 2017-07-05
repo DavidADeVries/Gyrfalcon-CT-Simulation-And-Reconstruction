@@ -4,6 +4,8 @@ classdef Vista15ScannerData
     % holds information from a Vista 15 scanner
     
     properties
+        seriesName
+        
         scanDate
         scanTime
         
@@ -63,8 +65,29 @@ classdef Vista15ScannerData
             
         end
         
+        function numAngles = getNumAngles(data)
+            numAngles = data.numImages;
+        end
+        
+        function spacingInDeg = getAngleSpacingInDeg(data)
+            spacingInDeg = data.stepSizeInDeg;
+        end
+        
+        function len = getAxisToSourceInM(data)
+            len = data.sourceToAxisInM;
+        end
+        
         function len = getAxisToDetectorInM(data)
             len = data.axisToDetectorInM;
+        end
+        
+        function dimsInM = getDetectorPixelDimensionsInM(data)
+            sizeLightInM = data.sizeLightInM;
+            numPixels = data.getRawImageDimensions();
+            
+            pixelsPerM = numPixels ./ sizeLightInM;
+            
+            dimsInM = 1 ./ pixelsPerM;
         end
         
         function data = loadData(data, seriesPath)
@@ -77,7 +100,7 @@ classdef Vista15ScannerData
             
             prefix = getFilePrefix(path);
             
-            fileName = [prefix, data.getXmlLabel(), XML_File_Extension];
+            fileName = [prefix, data.getXmlLabel(), Constants.XML_File_Extension];
             
             optCtXmlData = loadOptCtXml(makePath(path, fileName));
             
@@ -118,6 +141,8 @@ classdef Vista15ScannerData
 end
 
 % HELPER FUNCTIONS
+
+
 
 function optCtXmlData = loadOptCtXml(path)
     rawXml = xml2struct(path);

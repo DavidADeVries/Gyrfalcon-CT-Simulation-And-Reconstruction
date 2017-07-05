@@ -31,7 +31,9 @@ classdef ImagingScanRun
         importTimestamp
         
         importPath
+        
         savePath
+        saveFileName
         
         notes
     end
@@ -45,7 +47,7 @@ classdef ImagingScanRun
             if isempty(run.savePath) % not yet set
                 app.ImagingScanRunSavePathEditField.Value = 'Not Selected...';
             else
-                app.ImagingScanRunSavePathEditField.Value = run.savePath;
+                app.ImagingScanRunSavePathEditField.Value = makePath(run.savePath, run.saveFileName);
             end
             
             if isempty(run.importPath) % not yet set
@@ -63,58 +65,171 @@ classdef ImagingScanRun
             
             app.ImagingScanRunNotesTextArea.Value = run.notes;
             
-            % select / set settings tab
-            scanClass = class(run.imagingScan);
-            
-            hideAllImagingScanImportSettingsTabs(app);
-            
-            if strcmp(scanClass, class(ImagingScanTypes.opticalCT.imagingScanObject))
-                app.ImagingScanTypeDropDown.Value = ImagingScanTypes.opticalCT;
-                
-                app.OpticalCTImportSettingsTab.Parent = app.ImportImagingScanTabGroup;
-                
-                % set fields
-                app.OptCTSettings_DetectorWholeDetectorDimsXYEditField.Value = run.imagingScan.targetDetectorDimensions(1);
-                app.OptCTSettings_DetectorWholeDetectorDimsZEditField.Value = run.imagingScan.targetDetectorDimensions(2);
-                
-                app.OptCtSettings_DetectorPixelDimsXYEditField.Value = run.imagingScan.targetPixelDimensions(1).value;
-                app.OptCtSettings_DetectorPixelDimsZEditField.Value = run.imagingScan.targetPixelDimensions(2).value;
-                
-                app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value = run.imagingScan.targetPixelDimensions(1).units;
-                app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown.Value = run.imagingScan.targetPixelDimensions(2).units;
-            elseif strcmp(scanClass, class(ImagingScanTypes.xrayCT.imagingScanObject))
-                app.ImagingScanTypeDropDown.Value = ImagingScanTypes.xrayCT;
-                
-                app.XRayCTImportSettingsTab.Parent = app.ImportImagingScanTabGroup;
-            end
+            % select / set settings tab     
+            run.imagingScan.setGUI(app);
         end
         
-        function run = createFromGUI(run, app)
-            run.importPath = app.ImagingScanDataImportPathEditField.Value;
-            run.savePath = app.ImagingScanRunSavePathEditField.Value;
+        function path = getPath(run)
+            path = makePath(run.savePath, run.saveFileName);
+        end
+        
+        function setup = getImagingSetup(run)
+            setup = run.imagingScan;
+        end
+        
+        function app = setGUIForScanSimulationViewer(run, app)
+            if isempty(run.getPath())
+                app.SimulationViewerFilePathLabel.Text = 'No Run Selected';
+                
+                app.SimulationViewerSliceListBox.Enable = 'off';
+                app.SimulationViewerScanAngleListBox.Enable = 'off';
+                app.SimulationViewerPerAngleTranslationPositionListBox.Enable = 'off';
+                
+                app.SimulationViewerSliceListBox.Items = {};
+                app.SimulationViewerScanAngleListBox.Items = {};
+                app.SimulationViewerPerAngleTranslationPositionListBox.Items = {};
+                
+                app.SimulationViewerInfoStartDateTimeEditField.Value = '';
+                app.SimulationViewerInfoRunPerformanceEditField.Value = '';
+                app.SimulationViewerInfoGyrfalconVersionEditField.Value = '';
+                app.SimulationViewerInfoRunTimeEditField.Value = '';
+                app.SimulationViewerInfoComputerArchitectureSummaryTextArea.Value = '';
+                app.SimulationViewerInfoNotesTextArea.Value = '';
+                
+                imshow([], 'Parent', app.SimulationViewerAxes);
+                
+                app.InvertImageDisplayCheckBox.Enable = 'off';
+                app.ImageContrastLowEditField.Enable = 'off';
+                app.ImageContrastHighEditField.Enable = 'off';
+                app.SimulationViewerLoopThroughAnglesButton.Enable = 'off';
+            else
+                app.SimulationViewerFilePathLabel.Text = run.savePath;
+                
+                app.SimulationViewerSliceListBox.Enable = 'on';
+                app.SimulationViewerScanAngleListBox.Enable = 'on';
+                app.SimulationViewerPerAngleTranslationPositionListBox.Enable = 'on';
+                
+                [sliceNames, angleNames, positionNames, positionFileNames] = run.getFolderNames();
+                
+                app.SimulationViewerSliceListBox.Items = sliceNames;
+                app.SimulationViewerScanAngleListBox.Items = angleNames;
+                app.SimulationViewerPerAngleTranslationPositionListBox.Items = positionNames;
+                app.SimulationViewerPerAngleTranslationPositionListBox.ItemsData = positionFileNames;
+                
+                if isempty(app.SimulationViewerSliceListBox.Value)
+                    app.SimulationViewerSliceListBox.Value = sliceNames{1};
+                end
+                
+                if isempty(app.SimulationViewerScanAngleListBox.Value)
+                    app.SimulationViewerScanAngleListBox.Value = angleNames{1};
+                end
+                
+                if isempty(app.SimulationViewerPerAngleTranslationPositionListBox.Value)
+                    app.SimulationViewerPerAngleTranslationPositionListBox.Value = positionFileNames{1};
+                end
+                
+                app.SimulationViewerInfoStartDateTimeEditField.Value =  'N/A';%datestr(run.imagingScan.scanTimestamp, 'mmm dd, yyyy HH:MM:SS');
+                app.SimulationViewerInfoRunPerformanceEditField.Value = 'N/A';
+                app.SimulationViewerInfoGyrfalconVersionEditField.Value = 'N/A';
+                app.SimulationViewerInfoRunTimeEditField.Value = 'N/A';
+                app.SimulationViewerInfoComputerArchitectureSummaryTextArea.Value = 'N/A';
+                app.SimulationViewerInfoNotesTextArea.Value = run.notes;
+                
+                image = loadImageForScanSimulationViewer(run, app);
+                
+                minVal = allMin(image);
+                maxVal = allMax(image);
+                
+                app.InvertImageDisplayCheckBox.Value = true;
+                app.ImageContrastLowEditField.Value = minVal;
+                app.ImageContrastHighEditField.Value = maxVal;
+                
+                app.InvertImageDisplayCheckBox.Enable = 'on';
+                app.ImageContrastLowEditField.Enable = 'on';
+                app.ImageContrastHighEditField.Enable = 'on';
+                app.SimulationViewerLoopThroughAnglesButton.Enable = 'on';
+                
+                showSimulationViewImage(app);
+            end            
+        end
+        
+        function [sliceNames, angleNames, positionNames, positionFileNames] = getFolderNames(run)
+            numSlices = length(run.imagingScan.scan.slices);
             
+            angles = run.imagingScan.scan.getScanAnglesInDegrees();
+            numAngles = length(angles);
+            
+            positionDims = run.imagingScan.scan.perAngleTranslationDimensions;
+            
+            xyNumSteps = positionDims(1);
+            zNumSteps = positionDims(2);
+            
+            numSteps = xyNumSteps*zNumSteps;
+            
+            sliceNames = cell(numSlices,1);
+            angleNames = cell(numAngles,1);
+            positionNames = cell(numSteps,1);
+            positionFileNames = cell(numSteps,1);
+            
+            for i=1:numSlices
+                sliceNames{i} = makeSliceFolderName(i);
+            end
+            
+            for i=1:numAngles
+                angleNames{i} = makeAngleFolderName(angles(i));
+            end
+            
+            isPositionMosiac = false;
+            
+            for i=1:zNumSteps
+                for j=1:xyNumSteps
+                    index = (i-1)*zNumSteps + j;
+                    
+                    positionNames{index} = makePositionName(j,i,isPositionMosiac);
+                    positionFileNames{index} = makePositionFileName(positionNames{index});
+                end
+            end
+            
+        end
+        
+        function name = getDefaultFolderName(run)
+            typeClass = class(run.imagingScan);
+            
+            if strcmp(typeClass, class(OpticalCTImagingScan))
+                start = ImagingScanTypes.opticalCT.displayString;
+            elseif strcmp(typeClass, class(XrayCTImagingScan))
+                start = ImagningScanTypes.xrayCT.displayString;
+            else
+                error('Invalid Scan Type');
+            end
+            
+            name = [start, ' ', Constants.Imaging_Scan_Run_File_Name, Constants.Matlab_File_Extension];
+        end
+        
+        function run = createFromGUI(run, app)            
             run.notes = app.ImagingScanRunNotesTextArea.Value;
             
-            run.imagingScan = app.ImagingScanTypeDropDown.Value.imagingScanObject;
+            run.imagingScan = run.imagingScan.createFromGUI(app);
         end
         
-        function run = importDataSet(run, app)
-            run = run.createFromGUI(app);
-                
+        function run = importDataSet(run)                
             run.importTimestamp = now;
             
-            run.createSaveDirectory();
+            run = run.createSaveDirectory();
             
-            run.imagingScan = run.imagingScan.importDataSet(app, run.importPath, run.savePath);
+            run.imagingScan = run.imagingScan.importDataSet(run.importPath, run.savePath);
+            
+            save(makePath(run.savePath, run.saveFileName), Constants.Imaging_Run_Var_Name); %saving 'run'
         end
         
-        function [] = createSaveDirectory(run)
-            pathSections = breakUpPath(run.savePath);
+        function run = createSaveDirectory(run)
+            path = run.savePath;
+            fileName = run.saveFileName;
             
-            folder = pathSections{end};
-            path = run.savePath(1:end-length(folder));
-            
-            mkdir(path, folder);
+            folder = removeFileExtension(fileName);
+                        
+            mkdir(path, folder);            
+            run.savePath = makePath(path, folder);
         end
         
         function run = loadData(run, basePath) %use given basePath in case files are moved around
@@ -152,51 +267,7 @@ classdef ImagingScanRun
             run.savePath = '';
             run.notes = '';
         end
-                
-        function [sliceNames, angleNames, positionNames, positionFileNames] = getFolderNames(run)
-            numSlices = length(run.simulation.scan.slices);
-            
-            angles = run.simulation.scan.getScanAnglesInDegrees();
-            numAngles = length(angles);
-            
-            positionDims = run.simulation.scan.perAngleTranslationDimensions;
-            
-            xyNumSteps = positionDims(1);
-            zNumSteps = positionDims(2);
-            
-            numSteps = xyNumSteps*zNumSteps;
-            
-            sliceNames = cell(numSlices,1);
-            angleNames = cell(numAngles,1);
-            positionNames = cell(numSteps,1);
-            positionFileNames = cell(numSteps,1);
-            
-            for i=1:numSlices
-                sliceNames{i} = makeSliceFolderName(i);
-            end
-            
-            for i=1:numAngles
-                angleNames{i} = makeAngleFolderName(angles(i));
-            end
-            
-            isPositionMosiac = run.simulation.isScanMultiplePositionMosiac();
-            
-            if isPositionMosiac
-                positionNames = {makePositionName(0,0,isPositionMosiac)}; %single entry
-                positionFileNames = {makePositionFileName(positionNames{1})};
-            else
-                for i=1:zNumSteps
-                    for j=1:xyNumSteps
-                        index = (i-1)*zNumSteps + j;
-                        
-                        positionNames{index} = makePositionName(j,i,isPositionMosiac);
-                        positionFileNames{index} = makePositionFileName(positionNames{index});
-                    end
-                end                
-            end
-            
-        end
-        
+                   
         function image = loadImageForScanSimulationViewer(run, app)
             % get selected folders/files
             sliceFolder = app.SimulationViewerSliceListBox.Value;
