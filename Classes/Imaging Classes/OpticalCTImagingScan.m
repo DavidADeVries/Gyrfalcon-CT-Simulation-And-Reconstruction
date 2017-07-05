@@ -132,6 +132,7 @@ classdef OpticalCTImagingScan < ImagingScan
             angleSpacingInDeg = vistaScannerData.getAngleSpacingInDeg();
             
             scanAnglesInDeg = 0:angleSpacingInDeg:(vistaScannerData.getNumAngles()-1)*angleSpacingInDeg;
+            scanAnglesInDeg = -scanAnglesInDeg; % to match Gyrfalcon conventions
             
             slices = 0; % single slice at z=0
             
@@ -220,7 +221,7 @@ classdef OpticalCTImagingScan < ImagingScan
                     deltaAttenuationFrame, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
                 
                 % save it in the imaging scan run folder
-                angleFolder = makeAngleFolderName(anglesInDeg(i));
+                angleFolder = makeAngleFolderName(round(anglesInDeg(i),2));
                 mkdir(savePath, angleFolder);
                 
                 path = makePath(savePath, angleFolder, saveFileName);

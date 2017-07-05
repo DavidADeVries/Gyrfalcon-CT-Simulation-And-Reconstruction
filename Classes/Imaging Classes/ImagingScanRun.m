@@ -176,7 +176,7 @@ classdef ImagingScanRun
             end
             
             for i=1:numAngles
-                angleNames{i} = makeAngleFolderName(angles(i));
+                angleNames{i} = makeAngleFolderName(round(angles(i),2));
             end
             
             isPositionMosiac = false;

@@ -180,7 +180,7 @@ classdef SimulationRun < ProcessingRun
                 app.SimulationViewerInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
                 app.SimulationViewerInfoNotesTextArea.Value = run.notes;
                 
-                image = app.workspace.simulationRunForViewing.loadImageForScanSimulationViewer(app);
+                image = loadImageForScanSimulationViewer(app.workspace.simulationRunForViewing, app);
                 
                 minVal = allMin(image);
                 maxVal = allMax(image);
