@@ -482,33 +482,7 @@ classdef Simulation < GyrfalconObject
             app.StatusOutputLamp.Color = [0 1 0]; % green
         end
         
-        function string = getScanGeometryString(simulation, scanGeometry, errorMsg)
-            if isempty(scanGeometry)
-                string = errorMsg;
-            else
-                numSlices = num2str(length(simulation.scan.slices));
-                numAngles = num2str(length(simulation.scan.scanAngles));
-                
-                angleString = [numAngles, ' Scan Angles [°] (', ')'];
-                slicesString = [numSlices, ' Slices [mm] (', ')'];
-                
-                detectorDims = simulation.detector.wholeDetectorDimensions;
-                
-                detectorSizeString = ['Detector Size: ', num2str(detectorDims(1)), 'x', num2str(detectorDims(2))];
-                
-                perAngleDims = simulation.scan.perAngleTranslationResolution;
-                
-                perAngleString = ['Per Angle Translation Steps: ', num2str(perAngleDims(1)), 'x', num2str(perAngleDims(2))];
-                
-                string = {...
-                    scanGeometry.displayString,...
-                    scanGeometry.shortDescriptionString,...
-                    angleString,...
-                    slicesString,...
-                    detectorSizeString,...
-                    perAngleString};
-            end
-        end
+        
         
         function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, sliceSavePath)
             angles = simulation.scan.getScanAnglesInDegrees();

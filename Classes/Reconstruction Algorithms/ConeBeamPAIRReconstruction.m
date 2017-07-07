@@ -1,21 +1,21 @@
-classdef ConeBeamFDKReconstruction < Reconstruction
-    % ConeBeamFDKReconstruction
+classdef ConeBeamPAIRReconstruction < Reconstruction
+    % ConeBeamPAIRReconstruction
     
     properties
-        displayName = 'FDK Algorithm'
-        fullName = 'FDK Algorithm (CBCT)'
+        displayName = 'PAIR Algorithm'
+        fullName = 'PAIR Algorithm (CBCT)'
     end
     
     methods(Static)
         function handle = getSettingsTabHandle(app)
-            handle = app.ConeBeamFDK_SettingsTab;
+            handle = app.ConeBeamPAIR_SettingsTab;
         end
     end
     
     methods
         function string = getNameString(recon)
-            string = 'CBCT FDK';
-        end
+            string = 'CBCT PAIR';
+        end     
         
         function recon = createFromGUIForSubClass(recon, app)
             % no GUI fields yet
@@ -29,7 +29,7 @@ classdef ConeBeamFDKReconstruction < Reconstruction
             tabHandle.Parent = app.ReconstructionAlgorithmSettingsTabGroup;
             
             % set settings
-        end
+        end           
     end
     
 end

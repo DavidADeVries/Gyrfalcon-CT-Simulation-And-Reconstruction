@@ -5,7 +5,7 @@ reconRun = app.workspace.reconstructionRun;
 
 currentFolder = reconRun.getCurrentSaveFolder();
 
-savePath = reconRun.simulationRun.savePath;
+savePath = reconRun.simulationOrImagingScanRun.savePath;
 
 answer = {''}; % this is NOT empty
 validFolder = false;
@@ -30,7 +30,7 @@ while ~isempty(answer) && ~validFolder % keep looping till folder found or cance
 end
 
 if ~isempty(answer) && validFolder % didn't cancel
-    savePath = makePath(reconRun.simulationRun.savePath, folderName);
+    savePath = makePath(reconRun.simulationOrImagingScanRun.savePath, folderName);
     
     reconRun.savePath = savePath;
     

@@ -16,7 +16,7 @@ app = newRecon.setGUI(app);
 app.workspace.reconstructionRun.reconstruction = newRecon;
 
 % change up savePath as needed
-savePath = newRecon.getSavePath(app.workspace.reconstructionRun.simulationRun.savePath);                
+savePath = newRecon.getSavePath(app.workspace.reconstructionRun.simulationOrImagingScanRun.savePath);                
 app.workspace.reconstructionRun.savePath = savePath;
 
 app.ReconstructionRunSavePathEditField.Value = savePath;

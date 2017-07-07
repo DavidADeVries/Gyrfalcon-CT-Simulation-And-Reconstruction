@@ -66,14 +66,19 @@ classdef Reconstruction
             % set defaults for the reconDataSet based on the phantom
             % dimensions
             
-            phantomDataSet = phantom.dataSet;
-            
-            dims = phantomDataSet.getSize();
-            voxelDimsInM = phantom.getVoxelDimensionsInM();
+            if isempty(phantom)
+                dims = [256 256 256]; % default
+                voxelDimsInM = [1 1 1] .* Constants.mm_to_m; % default (1mm isotropic)
+            else
+                phantomDataSet = phantom.dataSet;
+                
+                dims = phantomDataSet.getSize();
+                voxelDimsInM = phantom.getVoxelDimensionsInM();
+            end
             
             recon.reconSliceDimensions = dims(1:2);
             recon.reconSliceVoxelDimensionsInM = voxelDimsInM(1:2);
-            
+                        
             recon.reconDataSetDimensions = dims;
             recon.reconDataSetVoxelDimensionsInM = voxelDimsInM;
         end

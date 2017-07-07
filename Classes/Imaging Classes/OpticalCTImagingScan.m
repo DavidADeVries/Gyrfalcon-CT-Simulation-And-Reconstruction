@@ -86,6 +86,10 @@ classdef OpticalCTImagingScan < ImagingScan
             dimsInM(2) = zDim.getLengthInM();
         end
         
+        function string = getSummaryString(imagingScan)
+            string = 'N/A';
+        end
+        
         function imagingScan = importDataSet(imagingScan, importPath, savePath)
                         
             % ***********************

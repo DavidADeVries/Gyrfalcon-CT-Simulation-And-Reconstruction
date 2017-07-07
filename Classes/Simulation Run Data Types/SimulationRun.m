@@ -58,6 +58,31 @@ classdef SimulationRun < ProcessingRun
             
             run.sliceData = sliceData;
             
+        end 
+        
+        function [scanGeometry, errorMsg] = findScanGeometry(run)
+            [scanGeometry, errorMsg] = boolLogicForFindScanGeometry(run.simulation);
+        end
+        
+        function phantom = getPhantom(run)
+            phantom = run.simulation.phantom;
+        end
+        
+        function app = setGUIForReconstructionRun(run, app)
+            [scanGeometry, errorMsg] = run.findScanGeometry();
+            
+            app.SimulationRunInfoLoadPathLabel.Text = run.getPath();
+            
+            app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
+            app.SimulationRunInfoRunTimeEditField.Value = run.getRunTimeString();
+            app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.versionUsed];
+            app.SimulationRunInfoRunPerformanceEditField.Value = run.getPerformanceString();
+            
+            app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = getScanGeometryString(run.simulation, scanGeometry, errorMsg);
+            app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
+            app.SimulationRunInfoNotesTextArea.Value = run.notes;
+            
+            %app.SimulationRunInfoLoadSimulationButton.Enable = 'on'; %TODO
         end
         
         function setup = getImagingSetup(run)

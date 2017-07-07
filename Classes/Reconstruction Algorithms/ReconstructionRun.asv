@@ -43,12 +43,10 @@ classdef ReconstructionRun < ProcessingRun
         end
         
         function app = setGUI(run, app)
+            scanGeometry = [];
                         
             % simulationRun 
-            if isempty(run.simulationOrImagingScanRun)
-                scanGeometry = [];
-                erroMsg = '';
-
+            if isempty(run.simulationRun)
                 app.SimulationRunInfoLoadPathLabel.Text = 'Simulation/Imaging Run Not Loaded';
                 
                 app.SimulationRunInfoStartDateTimeEditField.Value = '';
@@ -62,8 +60,6 @@ classdef ReconstructionRun < ProcessingRun
                 
                 app.SimulationRunInfoLoadSimulationButton.Enable = 'off';
             else
-                [scanGeometry, errorMsg] = run.simulationOrImagingScanRun.findScanGeometry();
-
                 run.simulationOrImagingScanRun.setGUIForReconstructionRun(app);
             end
                             
@@ -213,7 +209,7 @@ classdef ReconstructionRun < ProcessingRun
         
         function [] = saveReconstructionValues(run)
             % clear out simulationRun projection data
-            run.simulationOrImagingScanRun.sliceData = {};
+            run.simulationRun.sliceData = {};
             
             % have reconstruction save any extra outputs
             run.reconstruction.saveOuput(run.savePath);

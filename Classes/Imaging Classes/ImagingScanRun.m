@@ -18,6 +18,9 @@ classdef ImagingScanRun
     % *savePath
     % path where data was saved to
     %
+    % * sliceData
+    % when data is loaded up, it'll be in here
+    %
     % *notes
     % any notes about the imaging scan run
     %
@@ -34,6 +37,8 @@ classdef ImagingScanRun
         
         savePath
         saveFileName
+        
+        sliceData
         
         notes
     end
@@ -76,6 +81,33 @@ classdef ImagingScanRun
         function setup = getImagingSetup(run)
             setup = run.imagingScan;
         end
+            
+        function phantom = getPhantom(run)
+            phantom = []; % threre is no phantom return empty
+        end
+        
+        function run = loadData(run, basePath) %use given basePath in case files are moved around
+            imagingScan = run.imagingScan;
+            
+            numSlices = length(imagingScan.scan.slices);
+                        
+            sliceData = cell(1, numSlices);
+            
+            for i=1:numSlices
+                sliceFolder = makeSliceFolderName(i);
+                
+                path = makePath(basePath, sliceFolder);
+                
+                data = SliceData;
+                
+                data = data.loadData(path, imagingScan);
+                
+                sliceData{i} = data;
+            end
+            
+            run.sliceData = sliceData;
+            
+        end 
         
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())
@@ -151,6 +183,29 @@ classdef ImagingScanRun
                 
                 showSimulationViewImage(app);
             end            
+        end
+        
+        function app = setGUIForReconstructionRun(run, app)
+            [scanGeometry, errorMsg] = run.findScanGeometry();
+            
+            app.SimulationRunInfoLoadPathLabel.Text = run.getPath();
+            
+            app.SimulationRunInfoStartDateTimeEditField.Value = 'N/A';%datestr(run.simulationRun.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
+            app.SimulationRunInfoRunTimeEditField.Value = 'N/A';
+            app.SimulationRunInfoGyrfalconVersionEditField.Value = 'N/A';
+            app.SimulationRunInfoRunPerformanceEditField.Value = 'N/A';
+            
+            geometryString = getScanGeometryString(run.imagingScan, scanGeometry, errorMsg);
+            
+            app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = geometryString;
+            app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.imagingScan.getSummaryString();
+            app.SimulationRunInfoNotesTextArea.Value = run.notes;
+            
+            %app.SimulationRunInfoLoadSimulationButton.Enable = 'on'; %TODO
+        end
+                  
+        function [scanGeometry, errorMsg] = findScanGeometry(run)
+            [scanGeometry, errorMsg] = boolLogicForFindScanGeometry(run.imagingScan);
         end
         
         function [sliceNames, angleNames, positionNames, positionFileNames] = getFolderNames(run)
@@ -231,30 +286,7 @@ classdef ImagingScanRun
             mkdir(path, folder);            
             run.savePath = makePath(path, folder);
         end
-        
-        function run = loadData(run, basePath) %use given basePath in case files are moved around
-            sim = run.simulation;
-            
-            numSlices = length(sim.scan.slices);
-                        
-            sliceData = cell(1, numSlices);
-            
-            for i=1:numSlices
-                sliceFolder = makeSliceFolderName(i);
                 
-                path = makePath(basePath, sliceFolder);
-                
-                data = SliceData;
-                
-                data = data.loadData(path, sim);
-                
-                sliceData{i} = data;
-            end
-            
-            run.sliceData = sliceData;
-            
-        end
-        
         function run = setDefaultValues(run)
             scan = OpticalCTImagingScan;
             scan = scan.setDefaultValues();
