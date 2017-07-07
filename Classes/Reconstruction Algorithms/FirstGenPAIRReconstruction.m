@@ -38,8 +38,8 @@ classdef FirstGenPAIRReconstruction < Reconstruction
             recon.nonPartialWeightingCutoff = app.Gen1PAIR_NonPartialVoxelWeightingCutoffEditField.Value;
         end
         
-        function recon = runReconstruction(recon, simulationRun, app)
-            recon = firstGenPAIRAlgorithm(recon, simulationRun);
+        function recon = runReconstruction(recon, simulationOrImagingRun, app)
+            recon = firstGenPAIRAlgorithm(recon, simulationOrImagingRun);
         end
                 
     end

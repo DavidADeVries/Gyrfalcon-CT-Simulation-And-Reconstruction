@@ -4,6 +4,17 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
     properties
         displayName = 'PAIR Algorithm'
         fullName = 'PAIR Algorithm (CBCT)'
+
+        rayTraceMatricesLoadPath
+
+        rayTraceMatricesSavePath
+        rayTraceMatricesSaveFileName
+
+        alphaMatricesLoadPath
+
+        alphaMatricesSavePath
+        alphaMatricesSaveFileName
+
     end
     
     methods(Static)
