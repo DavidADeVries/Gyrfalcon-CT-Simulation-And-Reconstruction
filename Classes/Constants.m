@@ -89,6 +89,17 @@ classdef Constants
         
         Imaging_Scan_Run_File_Name = 'Imaging Scan Run';
         
+        Default_Ray_Trace_Matrices_File_Name = 'Ray Trace Hit Matrices';
+        Default_Alpha_Matrices_File_Name = 'Alpha Matrices';
+        
+        Temporary_Gyrfalcon_Directory = 'Gyrfalcon-Data'
+        
+        Alpha_Matrix_File_Name_Prefix = 'Alpha Matrix';
+        Selection_Matrix_File_Name_Prefix = 'Selection Matrix';
+        
+        Alpha_Matrix_Var_Name = 'alphaMatrix';
+        Selection_Matrix_Var_Name = 'selectionMatrix';
+        
         Round_Off_Error_Bound = 1E-9; %1nm
         Round_Off_Level = 10;
     end

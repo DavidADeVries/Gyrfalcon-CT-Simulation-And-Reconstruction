@@ -6,8 +6,8 @@ classdef Reconstruction
         
         reconDataSet % the 3D reconstructed data set (which can be compared to the original phantom)
         
-        reconSliceDimensions = [0 0]% number of voxels in x,y,z for each slice
-        reconSliceVoxelDimensionsInM = [0 0]% dimension of each voxel in data set
+        reconSliceDimensions = [0 0 0]% number of voxels in x,y,z for each slice
+        reconSliceVoxelDimensionsInM = [0 0 0]% dimension of each voxel in data set
         reconSliceLocationInM
         
         reconDataSetDimensions = [0 0 0] % number of voxels in x,y,z for dataset
@@ -37,13 +37,15 @@ classdef Reconstruction
         function recon = createFromGUI(recon, app)
             x = app.ReconstructionRunSliceDimsXEditField.Value;
             y = app.ReconstructionRunSliceDimsYEditField.Value;
+            z = app.ReconstructionRunSliceDimsZEditField.Value;
             
-            recon.reconSliceDimensions = [x, y];
+            recon.reconSliceDimensions = [x, y, z];
             
             x = app.ReconstructionRunSlicePixelDimsXEditField.Value;
             y = app.ReconstructionRunSlicePixelDimsYEditField.Value;
+            z = app.ReconstructionRunSlicePixelDimsZEditField.Value;
             
-            recon.reconSliceVoxelDimensionsInM = [x, y] .* Constants.mm_to_m;
+            recon.reconSliceVoxelDimensionsInM = [x, y, z] .* Constants.mm_to_m;
             
             x = app.ReconstructionRunDataSetDimsXEditField.Value;
             y = app.ReconstructionRunDataSetDimsYEditField.Value;
@@ -76,8 +78,8 @@ classdef Reconstruction
                 voxelDimsInM = phantom.getVoxelDimensionsInM();
             end
             
-            recon.reconSliceDimensions = dims(1:2);
-            recon.reconSliceVoxelDimensionsInM = voxelDimsInM(1:2);
+            recon.reconSliceDimensions = dims(1:3);
+            recon.reconSliceVoxelDimensionsInM = voxelDimsInM(1:3);
                         
             recon.reconDataSetDimensions = dims;
             recon.reconDataSetVoxelDimensionsInM = voxelDimsInM;

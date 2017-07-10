@@ -103,12 +103,14 @@ classdef ReconstructionRun < ProcessingRun
             % recon settings
             app.ReconstructionRunSliceDimsXEditField.Value = run.reconstruction.reconSliceDimensions(1);
             app.ReconstructionRunSliceDimsYEditField.Value = run.reconstruction.reconSliceDimensions(2);
+            app.ReconstructionRunSliceDimsZEditField.Value = run.reconstruction.reconSliceDimensions(3);
             
             % convert to mm
             pixelDimsInMM = Units.mm.convertFromM(run.reconstruction.reconSliceVoxelDimensionsInM);
             
             app.ReconstructionRunSlicePixelDimsXEditField.Value = pixelDimsInMM(1);
             app.ReconstructionRunSlicePixelDimsYEditField.Value = pixelDimsInMM(2);
+            app.ReconstructionRunSlicePixelDimsZEditField.Value = pixelDimsInMM(3);
             
             app.ReconstructionRunDataSetDimsXEditField.Value = run.reconstruction.reconDataSetDimensions(1);
             app.ReconstructionRunDataSetDimsYEditField.Value = run.reconstruction.reconDataSetDimensions(2);
