@@ -309,7 +309,7 @@ real_T fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3],
     }
 
     /* needs to be, since we always floor to find the lattice for delta == 0 */
-    while (tMin < tMax) {
+    while (tMax - tMin > 1.0E-9) {
       st.site = &emlrtRSI;
 
       /*  ** HELPER FUNCTIONS ** */

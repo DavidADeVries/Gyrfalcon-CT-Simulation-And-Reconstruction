@@ -87,25 +87,25 @@ classdef ImagingScanRun
         end
         
         function run = loadData(run, basePath) %use given basePath in case files are moved around
-            imagingScan = run.imagingScan;
-            
-            numSlices = length(imagingScan.scan.slices);
-                        
-            sliceData = cell(1, numSlices);
-            
-            for i=1:numSlices
-                sliceFolder = makeSliceFolderName(i);
-                
-                path = makePath(basePath, sliceFolder);
-                
-                data = SliceData;
-                
-                data = data.loadData(path, imagingScan);
-                
-                sliceData{i} = data;
-            end
-            
-            run.sliceData = sliceData;
+%             imagingScan = run.imagingScan;
+%             
+%             numSlices = length(imagingScan.scan.slices);
+%                         
+%             sliceData = cell(1, numSlices);
+%             
+%             for i=1:numSlices
+%                 sliceFolder = makeSliceFolderName(i);
+%                 
+%                 path = makePath(basePath, sliceFolder);
+%                 
+%                 data = SliceData;
+%                 
+%                 data = data.loadData(path, imagingScan);
+%                 
+%                 sliceData{i} = data;
+%             end
+%             
+%             run.sliceData = sliceData;
             
         end 
         

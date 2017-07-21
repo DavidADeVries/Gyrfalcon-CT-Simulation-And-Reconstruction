@@ -151,6 +151,10 @@ classdef ReconstructionRun < ProcessingRun
         
         function run = setDefaultValues(run)
             run.reconstruction = Reconstruction();
+            
+            phantom = [];
+            run.reconstruction = run.reconstruction.setReconDataSetDefaults(phantom);
+            
             run.simulationOrImagingScanRun = [];
             
             run.performanceType = ReconstructionRunPerformanceTypes.high;

@@ -101,7 +101,7 @@ function [pointSourceCoords, pointDetectorCoords, pointDetectorWithinSourceBeam]
 
     withinZ = upperAngle >= anglesToDetector & lowerAngle <= anglesToDetector;
 
-    pointDetectorWithinSourceBeam = withinXY & withinZ;
+    pointDetectorWithinSourceBeam = withinXY & withinZ | true;
 end
 
 function [x, y] = rotateCoordsAboutOrigin(x, y, anglesInDeg)

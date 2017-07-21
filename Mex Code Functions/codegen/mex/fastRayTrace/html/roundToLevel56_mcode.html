@@ -91,7 +91,7 @@
 <span class="srcline"><span class="lineno"><a href="1,85" id="srcline85"> 85</a></span><span class="line">    </span></span>
 <span class="srcline"><span class="lineno"><a href="1,86" id="srcline86"> 86</a></span><span class="line">    latticeToIndex(isDelta0) = 1; <span class="comment">%needs to be, since we always floor to find the lattice for delta == 0</span></span></span>
 <span class="srcline"><span class="lineno"><a href="1,87" id="srcline87"> 87</a></span><span class="line">    </span></span>
-<span class="srcline"><span class="lineno"><a href="1,88" id="srcline88"> 88</a></span><span class="line">    while currentT &lt; endingT</span></span>
+<span class="srcline"><span class="lineno"><a href="1,88" id="srcline88"> 88</a></span><span class="line">    while endingT - currentT &gt; Constants.Round_Off_Error_Bound</span></span>
 <span class="srcline"><span class="lineno"><a href="1,89" id="srcline89"> 89</a></span><span class="line">        currentLattices = getLattices(currentPoint, invVoxelDims, isVoxelDim0, isDeltaNeg, isDelta0);</span></span>
 <span class="srcline"><span class="lineno"><a href="1,90" id="srcline90"> 90</a></span><span class="line">        </span></span>
 <span class="srcline"><span class="lineno"><a href="1,91" id="srcline91"> 91</a></span><span class="line">        nextLattices = currentLattices + nextLatticeAdder;</span></span>
@@ -106,7 +106,7 @@
 <span class="srcline"><span class="lineno"><a href="1,100" id="srcline100">100</a></span><span class="line">        indices = currentLattices + latticeToIndex;</span></span>
 <span class="srcline"><span class="lineno"><a href="1,101" id="srcline101">101</a></span><span class="line">        </span></span>
 <span class="srcline"><span class="lineno"><a href="1,102" id="srcline102">102</a></span><span class="line">        attenuation = phantomData(indices(2), indices(1), indices(3));</span></span>
-<span class="srcline"><span class="lineno"><a href="1,103" id="srcline103">103</a></span><span class="line">        </span></span>
+<span class="srcline"><span class="lineno"><a href="1,103" id="srcline103">103</a></span><span class="line">                </span></span>
 <span class="srcline"><span class="lineno"><a href="1,104" id="srcline104">104</a></span><span class="line">        currentT = nextT;</span></span>
 <span class="srcline"><span class="lineno"><a href="1,105" id="srcline105">105</a></span><span class="line">        currentPoint = nextPoint;</span></span>
 <span class="srcline"><span class="lineno"><a href="1,106" id="srcline106">106</a></span><span class="line">        radonSum = radonSum + length .* attenuation;        </span></span>
@@ -131,7 +131,7 @@
 <span class="srcline"><span class="lineno"><a href="1,125" id="srcline125">125</a></span><span class="line">    <span class="comment">% no round to get lattice/index values</span></span></span>
 <span class="srcline"><span class="lineno"><a href="1,126" id="srcline126">126</a></span><span class="line">    isDeltaNeg(1) = ~isDeltaNeg(1);</span></span>
 <span class="srcline"><span class="lineno"><a href="1,127" id="srcline127">127</a></span><span class="line">    selectFloor = isDeltaNeg | isDelta0; <span class="comment">% ceiling if delta is positive ONLY</span></span></span>
-<span class="srcline"><span class="lineno"><a href="1,128" id="srcline128">128</a></span><span class="line">    </span></span>
+<span class="srcline"><span class="lineno"><a href="1,128" id="srcline128">128</a></span><span class="line">        </span></span>
 <span class="srcline"><span class="lineno"><a href="1,129" id="srcline129">129</a></span><span class="line">    floorVals = floor(unroundedVals(selectFloor));</span></span>
 <span class="srcline"><span class="lineno"><a href="1,130" id="srcline130">130</a></span><span class="line">    ceilVals = ceil(unroundedVals(~selectFloor));</span></span>
 <span class="srcline"><span class="lineno"><a href="1,131" id="srcline131">131</a></span><span class="line">     </span></span>
@@ -145,8 +145,8 @@
 </div>
 <pre class="code">
 <span class="srcline"><span class="lineno"><a href="1,138" id="srcline138">138</a></span><span class="line"></span></span>
-<span class="srcline"><span class="lineno"><a href="1,139" id="srcline139">139</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S64T2U616">roundedValues</span> = roundToLevel(<span class="var type1" id="S65T2U619">unroundedValues</span>, <span class="var type2" id="S66T1V1U620">level</span>)</span></span>
-<span class="srcline"><span class="lineno"><a href="1,140" id="srcline140">140</a></span><span class="line">    <span class="mxinfo " id="T2:U4"><span class="var type1" id="S64T2U623">roundedValues</span> = <span class="mxinfo " id="T2:U6"><span class="mxinfo " id="T2:U7">floor(<span class="mxinfo " id="T2:U8">(<span class="mxinfo " id="T2:U9"><span class="var type1" id="S65T2U630">unroundedValues</span>.*(<span class="mxinfo " id="T1:U11"><span class="mxinfo " id="T1:U12">10</span>^<span class="var type1" id="S66T1U634">level</span></span>)</span>) + <span class="mxinfo " id="T1:U14">0.5</span></span>)</span>.*(<span class="mxinfo " id="T1:U15"><span class="mxinfo " id="T1:U16">10</span>^(-<span class="var type1" id="S66T1U641">level</span>)</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="1,139" id="srcline139">139</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S65T2U620">roundedValues</span> = roundToLevel(<span class="var type1" id="S66T2U623">unroundedValues</span>, <span class="var type2" id="S67T1V1U624">level</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="1,140" id="srcline140">140</a></span><span class="line">    <span class="mxinfo " id="T2:U4"><span class="var type1" id="S65T2U627">roundedValues</span> = <span class="mxinfo " id="T2:U6"><span class="mxinfo " id="T2:U7">floor(<span class="mxinfo " id="T2:U8">(<span class="mxinfo " id="T2:U9"><span class="var type1" id="S66T2U634">unroundedValues</span>.*(<span class="mxinfo " id="T1:U11"><span class="mxinfo " id="T1:U12">10</span>^<span class="var type1" id="S67T1U638">level</span></span>)</span>) + <span class="mxinfo " id="T1:U14">0.5</span></span>)</span>.*(<span class="mxinfo " id="T1:U15"><span class="mxinfo " id="T1:U16">10</span>^(-<span class="var type1" id="S67T1U645">level</span>)</span>)</span></span>;</span></span>
 <span class="srcline"><span class="lineno"><a href="1,141" id="srcline141">141</a></span><span class="line"><span class="keyword">end</span></span></span>
 </pre>
 </body>

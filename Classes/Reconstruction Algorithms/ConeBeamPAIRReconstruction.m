@@ -15,9 +15,11 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
         alphaMatricesSavePath = ''
         alphaMatricesSaveFileName = ''
         
-        numberPartitions = 1
-        numberIterations = 1
-        numberAverages = 1;
+        numberPartitions = 500
+        numberIterations = 5
+        numberAverages = 3
+        
+        numberOfRaysInBatch = 32768
     end
     
     methods(Static)
@@ -36,6 +38,8 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
             recon.numberPartitions = app.CBCT_PAIR_NumberPartitionsEditField.Value;
             recon.numberIterations = app.CBCT_PAIR_NumberIterationsEditField.Value;
             recon.numberAverages = app.CBCT_PAIR_NumberAveragesEditField.Value;
+            
+            recon.numberOfRaysInBatch = app.CBCT_PAIR_NumberRaysInBatchEditField.Value;
         end
         
         function app = setGUI(recon, app)
@@ -66,30 +70,45 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
             app.CBCT_PAIR_NumberPartitionsEditField.Value = recon.numberPartitions;
             app.CBCT_PAIR_NumberIterationsEditField.Value = recon.numberIterations;
             app.CBCT_PAIR_NumberAveragesEditField.Value = recon.numberAverages;
+            app.CBCT_PAIR_NumberRaysInBatchEditField.Value = recon.numberOfRaysInBatch;
         end
         
         function recon = runReconstruction(recon, simulationOrImagingScanRun, app)
             if isempty(recon.alphaMatricesLoadPath)
+                rayTraceLoadPath = recon.rayTraceMatricesLoadPath;
+                
+                rayTraceSavePath = recon.rayTraceMatricesSavePath;
+                rayTraceSaveFolder = removeFileExtension(recon.rayTraceMatricesSaveFileName);
+                
                 % one for top half, one for bottom half
                 alphaMatrixPath = createAlphaMatrices(...
-                    simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages, ...
-                    recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName, true);                
-                alphaMatrixPath = createAlphaMatrices(...
-                    simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
-                    recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName, false);
+                    simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberAverages, recon.numberOfRaysInBatch, ...
+                    recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName,...
+                    rayTraceLoadPath, rayTraceSavePath, rayTraceSaveFolder,...
+                    true);                
+%                 alphaMatrixPath = createAlphaMatrices(...
+%                     simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberAverages, recon.numberOfRaysInBatch,...
+%                     recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName,...
+%                     rayTraceLoadPath, rayTraceSavePath, rayTraceSaveFolder,...
+%                     false);
             else
                 alphaMatrixPath = recon.alphaMatricesLoadPath;
             end
             
-            initialSolution_Top = findSmearSolution();
-            initialSolution_Bottom = findSmearSolution();
+            data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
+            initialSolution_Top = data.dataSet(:,:,1:23);
+%             initialSolution_Top = findSmearSolution(...
+%                 simulationOr);
+            %initialSolution_Bottom = findSmearSolution();
+            
+            initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
             
             reconstruction_Top = performIterativePairReconstruction(...
-                simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
-                alphaMatrixPath, initialSolution_Top, true);
-            reconstruction_Bottom = performIterativePairReconstruction(...
-                simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
-                alphaMatrixPath, initialSolution_Top, true);
+                simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages, recon.numberOfRaysInBatch,...
+                alphaMatrixPath, initialSolution_Top, true, true);
+%             reconstruction_Bottom = performIterativePairReconstruction(...
+%                 simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
+%                 alphaMatrixPath, initialSolution_Top, true);
         end
     end
     

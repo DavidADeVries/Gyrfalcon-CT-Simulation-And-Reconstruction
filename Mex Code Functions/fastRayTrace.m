@@ -99,13 +99,8 @@ else % run through the voxels
         length = norm(currentPoint - nextPoint);
         indices = currentLattices + latticeToIndex;
         
-        try
         attenuation = phantomData(indices(2), indices(1), indices(3));
-        catch e
-            
-            disp(e);
-        end
-        
+                
         currentT = nextT;
         currentPoint = nextPoint;
         radonSum = radonSum + length .* attenuation;        

@@ -72,6 +72,7 @@ classdef Reconstruction
                 dims = [256 256 256]; % default
                 voxelDimsInM = [1 1 1] .* Constants.mm_to_m; % default (1mm isotropic)
             else
+                phantom = phantom.loadFields('');
                 phantomDataSet = phantom.dataSet;
                 
                 dims = phantomDataSet.getSize();

@@ -95,11 +95,27 @@ classdef Constants
         Temporary_Gyrfalcon_Directory = 'Gyrfalcon-Data'
         
         Alpha_Matrix_File_Name_Prefix = 'Alpha Matrix';
-        Selection_Matrix_File_Name_Prefix = 'Selection Matrix';
+        Selection_Matrices_File_Name = 'Selection Matrices';
         
         Alpha_Matrix_Var_Name = 'alphaMatrix';
-        Selection_Matrix_Var_Name = 'selectionMatrix';
+        Selection_Matrices_Var_Name = 'selectionMatrices';
         
+        Number_Of_Voxels_In_Partitions_File_Name = 'Number of Voxels in Partitions';
+        Number_Of_Voxels_In_Partitions_Var_Name = 'numVoxelsInPartitions';
+        
+        Hit_Vector_File_Name_Prefix = 'Hit Vector';
+        Hit_Vector_Indices_Var_Name = 'hitIndices';
+        Hit_Vector_Lengths_Var_Name = 'hitLengths';
+        
+        Partition_Hit_Vectors_File_Name = 'Partition Hit Vectors';
+        Partition_Original_Hit_Indices_Vector_Var_Name = 'originalHitIndices';
+        Partition_Hit_Indices_Vector_Var_Name = 'hitIndices';
+        Partition_Hit_Lengths_Vector_Var_Name = 'hitLengths';
+        Partition_Num_Hits_Vector_Var_Name = 'numHits';
+        
+        Projection_Values_For_Batch_File_Name = 'Batch Projection Values';
+        Projection_Values_For_Batch_Var_Name = 'projectionValues';
+                
         Round_Off_Error_Bound = 1E-9; %1nm
         Round_Off_Level = 10;
     end
