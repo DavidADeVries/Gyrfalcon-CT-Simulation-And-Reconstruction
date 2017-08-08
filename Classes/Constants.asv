@@ -102,9 +102,7 @@ classdef Constants
         Alpha_Matrix_Average_Suffix = 'Aver';
         Alpha_Matrix_Zero_Average_Suffix = 'Zero';
         
-        Alpha_Matrix_CT_Var_Name = 'alphaMatrix_CT';
-        Alpha_Matrix_Aver_Var_Name = 'alphaMatrix_Aver';
-        Alpha_Matrix_Zero_Var_Name = 'alphaMatrix_Zero';
+        Alpha_Matrix_CT_Var_
         
         Alpha_Matrix_Var_Name = 'alphaMatrix';
         Selection_Matrices_Var_Name = 'selectionMatrices';
