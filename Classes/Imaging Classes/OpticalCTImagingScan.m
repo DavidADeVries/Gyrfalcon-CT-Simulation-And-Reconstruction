@@ -211,7 +211,7 @@ classdef OpticalCTImagingScan < ImagingScan
                 refFrame = refFrame - refDarkFrame;
                 
                 % convert to \sigma(delta_attenuation .* distance)
-                deltaAttenuationFrame = log(refFrame ./ dataFrame); % log = ln is matlab
+                deltaAttenuationFrame = refFrame ./ dataFrame; % log = ln is matlab
                 
                 % correct for axis of rotation (AOR) error
                 % puts axis of rotation in centre of image

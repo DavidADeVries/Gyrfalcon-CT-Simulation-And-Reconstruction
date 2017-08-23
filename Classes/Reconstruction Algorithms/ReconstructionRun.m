@@ -179,7 +179,7 @@ classdef ReconstructionRun < ProcessingRun
             % run the recon
             run = run.startProcessingRun(); % set start time
             run.reconstruction = ...
-                run.reconstruction.runReconstruction(run.simulationOrImagingScanRun, app);
+                run.reconstruction.runReconstruction(run, run.simulationOrImagingScanRun, app);
             run = run.endProcessingRun(); % set end time
             
             % set status string complete

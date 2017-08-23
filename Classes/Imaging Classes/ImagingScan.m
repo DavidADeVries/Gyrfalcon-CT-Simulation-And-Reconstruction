@@ -28,6 +28,19 @@ classdef ImagingScan < GyrfalconObject
         
         function object = createBlankObject(object)
             object = ImagingScan;
+        end        
+        
+        function numRays = getTotalNumberOfRays(imagingScan)
+            numSlices = length(imagingScan.scan.slices);
+            numAngles = length(imagingScan.scan.scanAngles);
+            numPerAngleTranslationXY = imagingScan.scan.perAngleTranslationResolution(1);
+            numPerAngleTranslationZ = imagingScan.scan.perAngleTranslationResolution(2);
+            numDetectorsXY = imagingScan.detector.wholeDetectorDimensions(1);
+            numDetectorsZ = imagingScan.detector.wholeDetectorDimensions(2);
+            
+            dims = [numSlices, numAngles, numPerAngleTranslationXY, numPerAngleTranslationZ, numDetectorsXY, numDetectorsZ];
+            
+            numRays = prod(dims(dims~=0));
         end
         
         function bool = isScanMultiplePositionMosiac(imagingScan)

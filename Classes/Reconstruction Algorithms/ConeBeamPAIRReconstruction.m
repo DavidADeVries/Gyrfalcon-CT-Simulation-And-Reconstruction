@@ -73,7 +73,7 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
             app.CBCT_PAIR_NumberRaysInBatchEditField.Value = recon.numberOfRaysInBatch;
         end
         
-        function recon = runReconstruction(recon, simulationOrImagingScanRun, app)
+        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
             if isempty(recon.alphaMatricesLoadPath)
                 alphaMatrixFolder = removeFileExtension(recon.alphaMatricesSaveFileName);
                 mkdir(recon.alphaMatricesSavePath, alphaMatrixFolder);
@@ -84,7 +84,8 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 % accordingly, saving it on disk for easy recall. It also orders data to
                 % correspond with the proper ray.
                 numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
-            
+                numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, false);
+                
                 rayTraceLoadPath = recon.rayTraceMatricesLoadPath;
                 
                 rayTraceSavePath = recon.rayTraceMatricesSavePath;
@@ -105,21 +106,27 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 alphaMatrixPath = recon.alphaMatricesLoadPath;
                 rayTracePath = recon.rayTraceMatricesLoadPath;
                 
-                 numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
+%                 numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
             end
+                        
+            rayExclusionMap_Top = loadRayExclusionMap(simulationOrImagingScanRun.savePath, true, true);
+            raysToExcludeForBatches_Top = getRaysToExclude(rayExclusionMap_Top, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), true, true);
             
-            error('DONE!');
 %             data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
 %             initialSolution_Top = data.dataSet(:,:,1:23);
             initialSolution_Top = findSmearSolution(...
-                recon, numBatches, alphaMatrixPath, rayTracePath, true, true);
-            %initialSolution_Bottom = findSmearSolution();
-            
+                recon, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), alphaMatrixPath, rayTracePath, raysToExcludeForBatches_Top, true, true);
             initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
             
+%             data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Smear Solution Opt CT.mat');
+%             initialSolution_Top = data.initialSolution_Top;
+
+            folder = reconRun.getCurrentSaveFolder();
+            mkdir(simulationOrImagingScanRun.savePath, folder);
+            
             reconstruction_Top = performIterativePairReconstruction(...
-                simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages, numBatches,...
-                alphaMatrixPath, initialSolution_Top, true, true);
+                simulationOrImagingScanRun, recon, reconRun.savePath, recon.numberPartitions, recon.numberIterations, recon.numberAverages, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(),...
+                alphaMatrixPath, initialSolution_Top, raysToExcludeForBatches_Top, true, true);
 %             reconstruction_Bottom = performIterativePairReconstruction(...
 %                 simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
 %                 alphaMatrixPath, initialSolution_Top, true);
@@ -128,3 +135,20 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
     
 end
 
+function rayExclusionMap = loadRayExclusionMap(simulationOrImagingScanRunPath, isConeBeam, createForTopHalf)
+    data = load(makePath(simulationOrImagingScanRunPath, Constants.Ray_Exclusion_Map_Directory, [Constants.Ray_Exclusion_Map_File_Name, Constants.Matlab_File_Extension]));
+    
+    rayExclusionMap = data.(Constants.Ray_Exclusion_Map_Var_Name);
+    
+    if isConeBeam
+        dims = size(rayExclusionMap);
+        
+        halfHeight = dims(1)/2;
+        
+        if createForTopHalf
+            rayExclusionMap = rayExclusionMap(1:halfHeight,:);
+        else
+            rayExclusionMap = rayExclusionMap(halfHeight+1:end,:);
+        end
+    end
+end

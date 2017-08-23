@@ -68,6 +68,10 @@ classdef SimulationRun < ProcessingRun
             phantom = run.simulation.phantom;
         end
         
+        function numRays = getTotalNumberOfRays(run)
+            numRays = run.simulation.getTotalNumberOfRays();
+        end
+        
         function app = setGUIForReconstructionRun(run, app)
             [scanGeometry, errorMsg] = run.findScanGeometry();
             

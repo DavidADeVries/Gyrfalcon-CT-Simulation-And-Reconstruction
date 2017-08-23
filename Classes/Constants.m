@@ -116,6 +116,10 @@ classdef Constants
         Hit_Vector_Indices_Var_Name = 'hitIndices';
         Hit_Vector_Lengths_Var_Name = 'hitLengths';
         
+        Ray_Exclusion_Map_Directory = 'Ray Exclusion Maps';
+        Ray_Exclusion_Map_File_Name = 'Ray Exclusion Map';
+        Ray_Exclusion_Map_Var_Name = 'rayExclusionMap';
+        
         Partition_Hit_Vectors_File_Name = 'Partition Hit Vectors';
         Partition_Original_Hit_Indices_Vector_Var_Name = 'originalHitIndices';
         Partition_Hit_Indices_Vector_Var_Name = 'hitIndices';

@@ -80,6 +80,19 @@ classdef Simulation < GyrfalconObject
             object = Simulation;
         end
         
+        function numRays = getTotalNumberOfRays(simulation)
+            numSlices = length(simulation.scan.slices);
+            numAngles = length(simulation.scan.scanAngles);
+            numPerAngleTranslationXY = simulation.scan.perAngleTranslationResolution(1);
+            numPerAngleTranslationZ = simulation.scan.perAngleTranslationResolution(2);
+            numDetectorsXY = simulation.detector.wholeDetectorDimensions(1);
+            numDetectorsZ = simulation.detector.wholeDetectorDimensions(2);
+            
+            dims = [numSlices, numAngles, numPerAngleTranslationXY, numPerAngleTranslationZ, numDetectorsXY, numDetectorsZ];
+            
+            numRays = prod(dims(dims~=0));
+        end
+        
         function simulation = setDefaultValues(simulation)
             phantom = Phantom;
             phantom = phantom.setDefaultValues();

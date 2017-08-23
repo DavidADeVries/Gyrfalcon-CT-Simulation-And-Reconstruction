@@ -81,6 +81,10 @@ classdef ImagingScanRun
         function setup = getImagingSetup(run)
             setup = run.imagingScan;
         end
+        
+        function numRays = getTotalNumberOfRays(run)
+            numRays = run.imagingScan.getTotalNumberOfRays();
+        end
             
         function phantom = getPhantom(run)
             phantom = []; % threre is no phantom return empty
