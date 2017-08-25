@@ -113,14 +113,19 @@ classdef Constants
         Number_Of_Voxels_In_Partitions_Var_Name = 'numVoxelsInPartitions';
         
         Hit_Vector_File_Name_Prefix = 'Hit Vector';
+        Condensed_Hit_Vector_File_Name_Prefix = 'Cond Hit Vector';
         Hit_Vector_Indices_Var_Name = 'hitIndices';
         Hit_Vector_Lengths_Var_Name = 'hitLengths';
         
         Ray_Exclusion_Map_Directory = 'Ray Exclusion Maps';
         Ray_Exclusion_Map_File_Name = 'Ray Exclusion Map';
+        Ray_Exclusion_Map_For_Batch_File_Name = 'Ray Exclusion Map';
+        
         Ray_Exclusion_Map_Var_Name = 'rayExclusionMap';
         
         Partition_Hit_Vectors_File_Name = 'Partition Hit Vectors';
+        Condensed_Partition_Hit_Vectors_File_Name = 'Cond_Partition Hit Vectors';
+        
         Partition_Original_Hit_Indices_Vector_Var_Name = 'originalHitIndices';
         Partition_Hit_Indices_Vector_Var_Name = 'hitIndices';
         Partition_Hit_Lengths_Vector_Var_Name = 'hitLengths';

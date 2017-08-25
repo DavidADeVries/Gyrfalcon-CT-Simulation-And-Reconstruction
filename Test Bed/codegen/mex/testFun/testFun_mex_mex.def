@@ -1,0 +1,15 @@
+LIBRARY testFun_mex.mexw64
+EXPORTS
+mexFunction
+mexfilerequiredapiversion
+emlrtMexFcnProperties
+testFun
+emxEnsureCapacity
+emxEnsureCapacity_cell_wrap_0
+emxFree_cell_wrap_0
+emxFree_real_T
+emxInit_cell_wrap_0
+emxInit_real_T
+testFun_initialize
+testFun_terminate
+testFun_atexit

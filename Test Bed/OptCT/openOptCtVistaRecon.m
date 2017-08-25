@@ -1,7 +1,8 @@
 function [] = openOptCtVistaRecon()
 % [] = openOptCtVistaRecon()
 
-path = 'C:\Users\MPRadmin\Git Repos\OptCT Data\FSRT1_singlespot\FSRT1_HR.vff';
+%path = 'C:\Users\MPRadmin\Git Repos\OptCT Data\FSRT1_singlespot\FSRT1_HR.vff';
+path = 'C:\Users\MPRadmin\Git Repos\OptCT Data\Brachy_with_cath\BTmicelledcatheterelectron_HR.vff';
 
 dataSize = [256 256 256];
 

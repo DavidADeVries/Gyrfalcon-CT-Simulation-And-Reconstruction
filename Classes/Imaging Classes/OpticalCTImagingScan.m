@@ -189,6 +189,7 @@ classdef OpticalCTImagingScan < ImagingScan
             isScanMosiac = false;
             positionName = makePositionName(1,1,isScanMosiac);
             saveFileName = makePositionFileName(positionName);
+            rayExclusionFileName = makeRayExclusionMapFileName(positionName);
             
             % only one slice, so make slice folder
             sliceNum = 1;
@@ -197,7 +198,11 @@ classdef OpticalCTImagingScan < ImagingScan
             mkdir(savePath, sliceFolder);
             savePath = makePath(savePath, sliceFolder);
             
-            % read, calibrate, and save each frame
+            % load up ray exclusion map for jar edges
+            data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Jar Edges Ray Exclusion Map (134x134).mat');
+            jarEdgesMap = data.(Constants.Ray_Exclusion_Map_Var_Name);
+            
+            % read, calibrate, and save each frame                        
             for i=1:numFrames
                 % import the data and ref frames
                 dataFilename = [dataPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
@@ -209,6 +214,8 @@ classdef OpticalCTImagingScan < ImagingScan
                 % apply dark frame
                 dataFrame = dataFrame - dataDarkFrame;
                 refFrame = refFrame - refDarkFrame;
+                
+                rayRejection = refFrame <= 7500;
                 
                 % convert to \sigma(delta_attenuation .* distance)
                 deltaAttenuationFrame = refFrame ./ dataFrame; % log = ln is matlab
@@ -223,6 +230,9 @@ classdef OpticalCTImagingScan < ImagingScan
                 
                 detectorData = interpolateOptCtFrameToProjectionDataSet(...
                     deltaAttenuationFrame, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
+                rayExclusionMap = interpolateOptCtFrameToProjectionDataSet(...
+                    rayRejection, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
+                rayExclusionMap = (rayExclusionMap ~= 0) | jarEdgesMap;
                 
                 % save it in the imaging scan run folder
                 angleFolder = makeAngleFolderName(round(anglesInDeg(i),2));
@@ -231,6 +241,7 @@ classdef OpticalCTImagingScan < ImagingScan
                 path = makePath(savePath, angleFolder, saveFileName);
                 
                 save(path, Constants.Detector_Data_Var_Name); % save 'detectorData'
+                save(makePath(savePath, angleFolder, rayExclusionFileName), Constants.Ray_Exclusion_Map_Var_Name); % save ray exclusion map
             end
                         
         end

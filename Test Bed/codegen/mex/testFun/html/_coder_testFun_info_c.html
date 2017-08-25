@@ -1,0 +1,108 @@
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>RTW Report - _coder_testFun_info.c</title>
+<script language="JavaScript" type="text/javascript" src="rtwreport_utils.js"></script>
+<script src="resources/eml_report_loadable_data.js"></script>
+</head>
+<body bgcolor="#eeeeee" onload="try {if (top) { if (top.rtwFileOnLoad) top.rtwFileOnLoad(window.document); else local_onload();}} catch(err) {};">
+<p>
+<table border="0" cellspacing="0" cellpadding="6" width="100%%" height="100%%"><tr><td width="100%%" valign="top" bgcolor="#ffffff">
+<h4>File: <a href="../interface/_coder_testFun_info.c" target="rtwreport_document_frame" id="linkToText_plain">_coder_testFun_info.c</a></h4>
+<pre id="RTWcode">
+<a name="1"><font color="#888888 "><i>    1   </i></font></a><font color="#117755"><i>/*</i></font>
+<a name="2"><font color="#888888 "><i>    2   </i></font></a><font color="#117755"><I> * Academic License - for use in teaching, academic research, and meeting</i></font>
+<a name="3"><font color="#888888 "><i>    3   </i></font></a><font color="#117755"><I> * course requirements at degree granting institutions only.  Not for</i></font>
+<a name="4"><font color="#888888 "><i>    4   </i></font></a><font color="#117755"><I> * government, commercial, or other organizational use.</i></font>
+<a name="5"><font color="#888888 "><i>    5   </i></font></a><font color="#117755"><I> *</i></font>
+<a name="6"><font color="#888888 "><i>    6   </i></font></a><font color="#117755"><I> * _coder_testFun_info.c</i></font>
+<a name="7"><font color="#888888 "><i>    7   </i></font></a><font color="#117755"><I> *</i></font>
+<a name="8"><font color="#888888 "><i>    8   </i></font></a><font color="#117755"><I> * Code generation for function '_coder_testFun_info'</i></font>
+<a name="9"><font color="#888888 "><i>    9   </i></font></a><font color="#117755"><I> *</i></font>
+<a name="10"><font color="#888888 "><i>   10   </i></font></a><font color="#117755"><I> */</i></font>
+<a name="11"><font color="#888888 "><i>   11   </i></font></a>
+<a name="12"><font color="#888888 "><i>   12   </i></font></a><font color="#117755"><i>/* Include files */</i></font>
+<a name="13"><font color="#888888 "><i>   13   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;rt_nonfinite.h&quot;</font>
+<a name="14"><font color="#888888 "><i>   14   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;testFun.h&quot;</font>
+<a name="15"><font color="#888888 "><i>   15   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;_coder_testFun_info.h&quot;</font>
+<a name="16"><font color="#888888 "><i>   16   </i></font></a>
+<a name="17"><font color="#888888 "><i>   17   </i></font></a><font color="#117755"><i>/* Function Definitions */</i></font>
+<a name="18"><font color="#888888 "><i>   18   </i></font></a>mxArray *<a name="fcn_emlrtMexFcnProperties">emlrtMexFcnProperties</a>(<font color="#112266"><b>void</b></font>)
+<a name="19"><font color="#888888 "><i>   19   </i></font></a><b>{</b>
+<a name="20"><font color="#888888 "><i>   20   </i></font></a>  mxArray *xResult;
+<a name="21"><font color="#888888 "><i>   21   </i></font></a>  mxArray *xEntryPoints;
+<a name="22"><font color="#888888 "><i>   22   </i></font></a>  <font color="#112266"><b>const</b></font> <font color="#112266"><b>char</b></font> * fldNames[4] = <b>{</b> <font color="#1122ff">&quot;Name&quot;</font>, <font color="#1122ff">&quot;NumberOfInputs&quot;</font>, <font color="#1122ff">&quot;NumberOfOutputs&quot;</font>,
+<a name="23"><font color="#888888 "><i>   23   </i></font></a>    <font color="#1122ff">&quot;ConstantInputs&quot;</font> <b>}</b>;
+<a name="24"><font color="#888888 "><i>   24   </i></font></a>
+<a name="25"><font color="#888888 "><i>   25   </i></font></a>  mxArray *xInputs;
+<a name="26"><font color="#888888 "><i>   26   </i></font></a>  <font color="#112266"><b>const</b></font> <font color="#112266"><b>char</b></font> * b_fldNames[4] = <b>{</b> <font color="#1122ff">&quot;Version&quot;</font>, <font color="#1122ff">&quot;ResolvedFunctions&quot;</font>, <font color="#1122ff">&quot;EntryPoints&quot;</font>,
+<a name="27"><font color="#888888 "><i>   27   </i></font></a>    <font color="#1122ff">&quot;CoverageInfo&quot;</font> <b>}</b>;
+<a name="28"><font color="#888888 "><i>   28   </i></font></a>
+<a name="29"><font color="#888888 "><i>   29   </i></font></a>  xEntryPoints = emlrtCreateStructMatrix(1, 1, 4, fldNames);
+<a name="30"><font color="#888888 "><i>   30   </i></font></a>  xInputs = emlrtCreateLogicalMatrix(1, 1);
+<a name="31"><font color="#888888 "><i>   31   </i></font></a>  emlrtSetField(xEntryPoints, 0, <font color="#1122ff">&quot;Name&quot;</font>, mxCreateString(<font color="#1122ff">&quot;testFun&quot;</font>));
+<a name="32"><font color="#888888 "><i>   32   </i></font></a>  emlrtSetField(xEntryPoints, 0, <font color="#1122ff">&quot;NumberOfInputs&quot;</font>, mxCreateDoubleScalar(1.0));
+<a name="33"><font color="#888888 "><i>   33   </i></font></a>  emlrtSetField(xEntryPoints, 0, <font color="#1122ff">&quot;NumberOfOutputs&quot;</font>, mxCreateDoubleScalar(1.0));
+<a name="34"><font color="#888888 "><i>   34   </i></font></a>  emlrtSetField(xEntryPoints, 0, <font color="#1122ff">&quot;ConstantInputs&quot;</font>, xInputs);
+<a name="35"><font color="#888888 "><i>   35   </i></font></a>  xResult = emlrtCreateStructMatrix(1, 1, 4, b_fldNames);
+<a name="36"><font color="#888888 "><i>   36   </i></font></a>  emlrtSetField(xResult, 0, <font color="#1122ff">&quot;Version&quot;</font>, mxCreateString(<font color="#1122ff">&quot;9.2.0.556344 (R2017a)&quot;</font>));
+<a name="37"><font color="#888888 "><i>   37   </i></font></a>  emlrtSetField(xResult, 0, <font color="#1122ff">&quot;ResolvedFunctions&quot;</font>, (mxArray *)
+<a name="38"><font color="#888888 "><i>   38   </i></font></a>                <a href="#fcn_emlrtMexFcnResolvedFunctionsInfo" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'fcn_emlrtMexFcnResolvedFunctionsInfo');" target="_self"><font color="#1122aa">emlrtMexFcnResolvedFunctionsInfo</font></a>());
+<a name="39"><font color="#888888 "><i>   39   </i></font></a>  emlrtSetField(xResult, 0, <font color="#1122ff">&quot;EntryPoints&quot;</font>, xEntryPoints);
+<a name="40"><font color="#888888 "><i>   40   </i></font></a>  <font color="#112266"><b>return</b></font> xResult;
+<a name="41"><font color="#888888 "><i>   41   </i></font></a><b>}</b>
+<a name="42"><font color="#888888 "><i>   42   </i></font></a>
+<a name="43"><font color="#888888 "><i>   43   </i></font></a><font color="#112266"><b>const</b></font> mxArray *<a name="fcn_emlrtMexFcnResolvedFunctionsInfo">emlrtMexFcnResolvedFunctionsInfo</a>(<font color="#112266"><b>void</b></font>)
+<a name="44"><font color="#888888 "><i>   44   </i></font></a><b>{</b>
+<a name="45"><font color="#888888 "><i>   45   </i></font></a>  <font color="#112266"><b>const</b></font> mxArray *nameCaptureInfo;
+<a name="46"><font color="#888888 "><i>   46   </i></font></a>  <font color="#112266"><b>const</b></font> <font color="#112266"><b>char</b></font> * data[19] = <b>{</b>
+<a name="47"><font color="#888888 "><i>   47   </i></font></a>    <font color="#1122ff">&quot;789ced5ccb6fe3c619e7b6bb791cd20a68d3a60fb44e1a042d366bc90f79bd690f6bbd655b322dc95eafb7814c91436956e49022a98775f2a9e8b17f40f75e14&quot;</font>
+<a name="48"><font color="#888888 "><i>   48   </i></font></a>    <font color="#1122ff">&quot;28da5b73e8c1ed297f409b43d0432f057aea2d402f054289a2571c7022daa2a8253d0308a3f147cd6fe6f337bfef9b17993bc5d21d8661be617e5e373f672f98&quot;</font>,
+<a name="49"><font color="#888888 "><i>   49   </i></font></a>    <font color="#1122ff">&quot;717acbca98d824ff1ae34cb8fcce24ff3e56b6d33de6aee377b6fcb7939c579001068655902002e5aedc009a59409c0caeaa111419220e19b57315301ad015a9&quot;</font>
+<a name="50"><font color="#888888 "><i>   50   </i></font></a>    <font color="#1122ff">&quot;0784b1448412a84119ec2b538502340b726e4a7455188946dfd32dc0b7ab5d99d15afacbe64ad305664a3f9784fedff5a89f5f12f413c3e4cfb21fa73f8a1fe9&quot;</font>,
+<a name="51"><font color="#888888 "><i>   51   </i></font></a>    <font color="#1122ff">&quot;40d3e325b6c20966bfe37968ac5480aae8f1fcb9267292a9b407e9da832a94bb126740b3b48384071560fe5d37b42e3ffa53bc067463250584b8617ec975d1aa&quot;</font>
+<a name="52"><font color="#888888 "><i>   52   </i></font></a>    <font color="#1122ff">&quot;3cdd9f33427b5ff3d81f3cb7d39bcc1b53a56f3fb6f10684fabceaef6d025e0c93f38a00b455681a958638695502a869b498d9fd9ed50e3c91da61271bef4f37&quot;</font>,
+<a name="53"><font color="#888888 "><i>   53   </i></font></a>    <font color="#1122ff">&quot;c4b3eb2fcfc0b3e5cf8afb2763d36135a5a971f2cac8c64d13daa9edefa4e295f5c4da432e6e288ad4500671204be3cffdb1b6e2f76d75c52d758d2c25383bb9&quot;</font>
+<a name="54"><font color="#888888 "><i>   54   </i></font></a>    <font color="#1122ff">&quot;f8f3179fff632758bb0c7a1c2c0f2fa87157caf5d9638dad159399ed4aa39c1caac2d0986a073b0367563b184239a8fa2f09bfa7fcef4c4e3b7cfff1bcbc6bd7&quot;</font>,
+<a name="55"><font color="#888888 "><i>   55   </i></font></a>    <font color="#1122ff">&quot;ff75025e6c22d1bbe3eecdcdf376fdaf61e59778964450ba0d09f8c7f345229e537e6d9e9760232e7386c435e20267706217c54d5d59c6c004caf36f3f1328cf&quot;</font>
+<a name="56"><font color="#888888 "><i>   56   </i></font></a>    <font color="#1122ff">&quot;879ee7ab5038e99c0ec4fda1de1407a5e7c516ea30d1e1793a8edddbefb4bb15dfe2fa770878314c8ec5f588d39a10f1adf6b2e2facb1be25d3b1eb88e9de82d&quot;</font>,
+<a name="57"><font color="#888888 "><i>   57   </i></font></a>    <font color="#1122ff">&quot;4e331dbe15d54f627b3cc4bfd25cd0f1c0c5b73eaafc9df2ff82f0e61d87df21e0c530f9f9a05f7cc4e5c46632c11f6495eaf35cf7613f1b1dfebf24fc3eace3&quot;</font>
+<a name="58"><font color="#888888 "><i>   58   </i></font></a>    <font color="#1122ff">&quot;9a64175eed901477bf39c9df71fcf5bdc756fec124ffd0b7f8ff1ea11db18944941465b46a48e37f72dc00a451d430d6d432e286bf1e7d40e3ffb0f3ff76e7e1&quot;</font>,
+<a name="59"><font color="#888888 "><i>   59   </i></font></a>    <font color="#1122ff">&quot;41ad236592ed54ab7698af1a9d4c86cf4587ffe938766f3f29febf20d4e7555f3f26e0c5303916ff433dd585925144e5ae0c34c82f8df73f9913ef8488e794fb&quot;</font>
+<a name="60"><font color="#888888 "><i>   60   </i></font></a>    <font color="#1122ff">&quot;b3be8fab6d55a6ebfcd1c00b8aff0f7a9df48e58e86dd70e37cff9ac8cd673a75281f2ffede2fff77de3ff1f10f062981ce37f9de7244e5bb5a3fee5edefcecb&quot;</font>,
+<a name="61"><font color="#888888 "><i>   61   </i></font></a>    <font color="#1122ff">&quot;ff4733f06cb93ffc7fdfd2db94ed04c8ffbf7ff23dcaff61e7ff466b8b3d419221541539db45858d4636b59ba7fc7f5bf9ff3784fabceaeb6704bc1826c7f89f&quot;</font>
+<a name="62"><font color="#888888 "><i>   62   </i></font></a>    <font color="#1122ff">&quot;5355e9bc3a26b35c178d37bc8b889538de3e3266b74f9db37ddf9cd13e5b2e4e5a516f714830270836fea773e23766e0db727ffc0359adb6a10568675ffc97ce&quot;</font>,
+<a name="63"><font color="#888888 "><i>   63   </i></font></a>    <font color="#1122ff">&quot;1742ef2f0afd4cba32d81e6e285c01ece68c6dfe404c45c85fd0f1edde2f6ff6b81ab979c4b2d691e83c62517856ba2d78741ee14ffd6198472cff1cd17bbeed&quot;</font>
+<a name="64"><font color="#888888 "><i>   64   </i></font></a>    <font color="#1122ff">&quot;0fbf4ec08b4d24661f554d117ce3f7bb58f9259e25e15bdcd8a1f8c5efc7443ca77c640fecbc06a16ab0c719203e515ac0f7017ec8d173a2a1e7f75661b3a426&quot;</font>,
+<a name="65"><font color="#888888 "><i>   65   </i></font></a>    <font color="#1122ff">&quot;734292ad6ea73787e2690bf49299e8f03b1dcfeeb99d9cf697a0fbc50cdd2f9e6eb7073f40f78b178847f78bfda99ffa01f7dc4e4efbdbf0edde8057fb33fbc9&quot;</font>
+<a name="66"><font color="#888888 "><i>   66   </i></font></a>    <font color="#1122ff">&quot;035daf4fba5c8748ed1aba7feb3cd79d07ccbb5e08b032833d67cb7db517772506bceec3fc3ff13fea0fc2ee0f40adadb53b25b4d92d2a1565bdc5f2837d3d42&quot;</font>,
+<a name="67"><font color="#888888 "><i>   67   </i></font></a>    <font color="#1122ff">&quot;eb3e747cbbf7cb9b3daed37b6537c4b3eb7fd5ee9f9c11da4bef9585038fde2bf3a77eea17dcfbe5cd1e7f7ee5177e4da8cfab1e7f42c08b6172cc2f8cdfac51&quot;</font>
+<a name="68"><font color="#888888 "><i>   68   </i></font></a>    <font color="#1122ff">&quot;565015a2a6040c0565a0b563b2ac75a4cb39f116e22788eb486eea0bdc4fd0f5a405e205e527328383bddda3a779cd486cf59f1ff3f0c96ef16984f615a89f70&quot;</font>,
+<a name="69"><font color="#888888 "><i>   69   </i></font></a>    <font color="#1122ff">&quot;ef97377bccf9367ff82e012f86c95dcf13659ba1bd87cc6265067bce96fbe3176c7505baaff0e2c53fa91f08bb1f4894fb0fe51a944ff76045c8ee65f8aa289e&quot;</font>
+<a name="70"><font color="#888888 "><i>   70   </i></font></a>    <font color="#1122ff">&quot;a7a2e307e838766fbfc3ee2e4a577caf12eaf3aaafb7b032833d67cba18eacad5063f426daf0be6fe28088e794dfe87c990807405015d33ce20e7d99114180f6&quot;</font>,
+<a name="71"><font color="#888888 "><i>   71   </i></font></a>    <font color="#1122ff">&quot;f1077a4e34fc3c9fdf689f573b4d28a56be976a5936ad6da47d908c5fb94e7dddb4fe279129e577dbd819599abe72c09d44568ce725a61e5f55d229e533e3faf&quot;</font>
+<a name="72"><font color="#888888 "><i>   72   </i></font></a>    <font color="#1122ff">&quot;5b7a5ac2bd11caeb0bc40bea3da2bd0ec8aa3d5e7f74d2df501456afae6d3c3d65a2c3ebe13ae7f792d7df15a1a61b220cd4fefe75e61bbfcf3a8f33e2ad51be&quot;</font>,
+<a name="73"><font color="#888888 "><i>   73   </i></font></a>    <font color="#1122ff">&quot;2c7effdd9c7839229e53ee07bf077c3eec13ba3effeaf2bad778bd7aae4239d9a93c59830d61b3787ac896d67a118ad7e9f87526d239ffb0afc75cf75c275d8f&quot;</font>
+<a name="74"><font color="#888888 "><i>   74   </i></font></a>    <font color="#1122ff">&quot;716f3f8ddb83c1a3eb31fed44fcff3bbe77672da5f21b0fbbb50079d2e278576bd7d8f88e794cff75e28f34b7ca2a9c9c24c80fbaa347e5f205e60f1fb51a76b&quot;</font>,
+<a name="75"><font color="#888888 "><i>   75   </i></font></a>    <font color="#1122ff">&quot;948bc7c74795eae196d6d929240147f7556fd1381ea515dfe278d2ff2786e5a60aea931ed7794503613d57f93111cf299fcbff5b06627b7f5c75419fbbda39a3&quot;</font>
+<a name="76"><font color="#888888 "><i>   76   </i></font></a>    <font color="#1122ff">&quot;f7b242cffb29bdb20164304c1d1792a75ce6101d1a5bb908ddd3bd24fc9e8e6b6772dae14fe97dac1be2d9f5d3fb588bc6b3d26dc1a3f7b1fca99faef3b8e776&quot;</font>,
+<a name="77"><font color="#888888 "><i>   77   </i></font></a>    <font color="#1122ff">&quot;72da5fc9373fe0fd5cbddc8008d47b803714ad0e2433384186cef8352f59f67b9dc519f8b6dc57fb212835607bfadb2f563ea3fe614178419ddf618bc5470765&quot;</font>
+<a name="78"><font color="#888888 "><i>   78   </i></font></a>    <font color="#1122ff">&quot;b6fff4b0ac412873fb48caab4c74fc031ddfeefdf2648f8fab57fee282509f573dfe888017c3e4e3c91232eaa2a2498aa2d6951ed04449e9d7f916e0dbf3ef0b&quot;</font>,
+<a name="79"><font color="#888888 "><i>   79   </i></font></a>    <font color="#1122ff">&quot;e329a8f9c31956c6f16cf95ceb8dd6b1b0afd05fa0f7b3fef2ef7bd43fbcaafec1ebfc41dfcb0eb299e190dd1dac6f96d613e9c39db54484e60fff21fcdeab1e&quot;</font>
+<a name="80"><font color="#888888 "><i>   80   </i></font></a>    <font color="#1122ff">&quot;7f45a83f86c9173daedffdea07ea2d20a9400bda5ef34b3b0fbaa47bc31009605044063d674668373d271a0c1e3d27ea4ffdd43f38dbebafbd167df30fb3f687&quot;</font>,
+<a name="81"><font color="#888888 "><i>   81   </i></font></a>    <font color="#1122ff">&quot;cdaecbdc20bce74a177a1fcc795e61aca925dc07fb233d571a7e7f200db64e41e2f941e208a612b5fe708ddb94d808ed3f537fe06cafbff78383f50710517fe0&quot;</font>
+<a name="82"><font color="#888888 "><i>   82   </i></font></a>    <font color="#1122ff">&quot;cd1f4044fd41b4f082f207c962a9adb6cb6060144ad5269bdf63f3092902e750bf042e7db4eb&quot;</font>,
+<a name="83"><font color="#888888 "><i>   83   </i></font></a>    <font color="#1122ff">&quot;&quot;</font> <b>}</b>;
+<a name="84"><font color="#888888 "><i>   84   </i></font></a>
+<a name="85"><font color="#888888 "><i>   85   </i></font></a>  nameCaptureInfo = NULL;
+<a name="86"><font color="#888888 "><i>   86   </i></font></a>  emlrtNameCaptureMxArrayR2016a(data, 40312U, &amp;nameCaptureInfo);
+<a name="87"><font color="#888888 "><i>   87   </i></font></a>  <font color="#112266"><b>return</b></font> nameCaptureInfo;
+<a name="88"><font color="#888888 "><i>   88   </i></font></a><b>}</b>
+<a name="89"><font color="#888888 "><i>   89   </i></font></a>
+<a name="90"><font color="#888888 "><i>   90   </i></font></a><font color="#117755"><i>/* End of code generation (_coder_testFun_info.c) */</i></font>
+<a name="91"><font color="#888888 "><i>   91   </i></font></a></pre>
+</td></tr></table>
+</p>
+</body>
+</html>

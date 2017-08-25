@@ -106,19 +106,19 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 alphaMatrixPath = recon.alphaMatricesLoadPath;
                 rayTracePath = recon.rayTraceMatricesLoadPath;
                 
-%                 numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
+%                 numBatches = divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
             end
                         
-            rayExclusionMap_Top = loadRayExclusionMap(simulationOrImagingScanRun.savePath, true, true);
-            raysToExcludeForBatches_Top = getRaysToExclude(rayExclusionMap_Top, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), true, true);
+%             rayExclusionMap_Top = loadRayExclusionMap(simulationOrImagingScanRun.savePath, true, true);
+%             raysToExcludeForBatches_Top = getRaysToExclude(rayExclusionMap_Top, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), true, true);
             
-%             data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
-%             initialSolution_Top = data.dataSet(:,:,1:23);
-            initialSolution_Top = findSmearSolution(...
-                recon, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), alphaMatrixPath, rayTracePath, raysToExcludeForBatches_Top, true, true);
+            data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
+            initialSolution_Top = data.dataSet(:,:,1:23);
+%             initialSolution_Top = findSmearSolution(...
+%                 recon, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), alphaMatrixPath, rayTracePath, true, true);
             initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
             
-%             data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Smear Solution Opt CT.mat');
+%             data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Cath Test)\Recon 1 (CBCT PAIR)\Initial Solution.mat');
 %             initialSolution_Top = data.initialSolution_Top;
 
             folder = reconRun.getCurrentSaveFolder();
@@ -126,7 +126,7 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
             
             reconstruction_Top = performIterativePairReconstruction(...
                 simulationOrImagingScanRun, recon, reconRun.savePath, recon.numberPartitions, recon.numberIterations, recon.numberAverages, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(),...
-                alphaMatrixPath, initialSolution_Top, raysToExcludeForBatches_Top, true, true);
+                alphaMatrixPath, rayTracePath, initialSolution_Top, true, true);
 %             reconstruction_Bottom = performIterativePairReconstruction(...
 %                 simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
 %                 alphaMatrixPath, initialSolution_Top, true);

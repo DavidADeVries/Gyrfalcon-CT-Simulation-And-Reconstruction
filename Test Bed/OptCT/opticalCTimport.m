@@ -1,7 +1,7 @@
 function [] = opticalCTimport()
 % [] = opticalCTimport()
 
-loadPath = 'C:\Users\MPRadmin\Git Repos\OptCT Data\FSRT1_singlespot';
+loadPath = 'C:\Users\MPRadmin\Git Repos\OptCT Data\Brachy_with_cath';
 
 dataPath = makePath(loadPath, 'data');
 refPath = makePath(loadPath, 'reference');
