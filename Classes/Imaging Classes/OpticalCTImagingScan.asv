@@ -221,7 +221,9 @@ classdef OpticalCTImagingScan < ImagingScan
                 catheterRejection = findRejectionMapWithoutFullVertical(refFrame, [50,690],[300,730]);
                 
                 rayRejection = (leftJarWallRejection | rightJarWallRejection | catheterRejection);
-                                
+                
+                figure(20
+                
                 % convert to \sigma(delta_attenuation .* distance)
                 deltaAttenuationFrame = refFrame ./ dataFrame; % log = ln is matlab
                 
@@ -426,7 +428,7 @@ function rejectionMap = findRejectionMapWithoutFullVertical(image, rowBounds, co
     
     maxRow = max(chosenRows); % lowest bound
     
-    rejectionBuffer = 1;
+    rejectionBuffer = 2;
     
     rejectionMap = zeros(size(image));
     
