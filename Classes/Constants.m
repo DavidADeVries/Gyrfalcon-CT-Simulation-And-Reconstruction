@@ -133,6 +133,17 @@ classdef Constants
         
         Projection_Values_For_Batch_File_Name = 'Batch Projection Values';
         Projection_Values_For_Batch_Var_Name = 'projectionValues';
+        
+        Rapid_Beta_Vector_Calculation_File_Name = 'Rapid Calculation Vectors';
+        
+        Rapid_Beta_Vector_Calculation_Hit_Indices_Var_Name = 'allHitIndices';
+        Rapid_Beta_Vector_Calculation_Hit_Lengths_Var_Name = 'allHitLengths';
+        Rapid_Beta_Vector_Calculation_Num_Hits_Var_Name = 'allNumHits';
+        Rapid_Beta_Vector_Calculation_Projection_Values_Var_Name = 'allProjectionValues';
+        Rapid_Beta_Vector_Calculation_Total_Num_Rays_Var_Name = 'totalNumValidRays';
+        
+        Full_Alpha_Matrix_File_Name = 'Full Alpha Matrix';
+        Full_Alpha_Matrix_Var_Name = 'alphaMatrix';
                 
         Round_Off_Error_Bound = 1E-9; %1nm
         Round_Off_Level = 10;
