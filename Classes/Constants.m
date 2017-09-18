@@ -96,6 +96,8 @@ classdef Constants
         Temporary_Gyrfalcon_Directory = 'Gyrfalcon-Data'
         
         Alpha_Matrix_File_Name_Prefix = 'Alpha Matrix';
+        Quick_Load_Alpha_Matrix_File_Name_Prefix = 'Alpha Matrix Quick';
+        
         Selection_Matrices_File_Name = 'Selection Matrices';
         
         Alpha_Matrix_CT_Suffix = 'CT';

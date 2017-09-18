@@ -106,20 +106,22 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 alphaMatrixPath = recon.alphaMatricesLoadPath;
                 rayTracePath = recon.rayTraceMatricesLoadPath;
                 
-%                 divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
+                divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
             end
                         
 %             rayExclusionMap_Top = loadRayExclusionMap(simulationOrImagingScanRun.savePath, true, true);
 %             raysToExcludeForBatches_Top = getRaysToExclude(rayExclusionMap_Top, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), true, true);
             
-%             data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
+%             data = load('E:\Data Files\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
 %             initialSolution_Top = data.dataSet(:,:,1:23);
-%             initialSolution_Top = findSmearSolution(...
-%                 recon, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), alphaMatrixPath, rayTracePath, true, true);
-%             initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
+            initialSolution_Top = findSmearSolution(...
+                recon, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), alphaMatrixPath, rayTracePath, true, true);
+            initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
             
-            data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Cath Test)\Recon 4 (CBCT PAIR)\Initial Solution.mat');
-            initialSolution_Top = data.initialSolution_Top;
+% OPT SMEAR SOLUTION PRELOADED
+%             data = load('E:\Data Files\Git Repos\Gyrfalcon Data\Smear Solution Opt CT 2.mat');
+%             initialSolution_Top = data.reconDataSet;
+%             initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
 
             folder = reconRun.getCurrentSaveFolder();
             mkdir(simulationOrImagingScanRun.savePath, folder);
