@@ -15,11 +15,11 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
         alphaMatricesSavePath = ''
         alphaMatricesSaveFileName = ''
         
-        numberPartitions = 500
-        numberIterations = 5
-        numberAverages = 3
+        numberPartitions = 64
+        numberIterations = 2
+        numberAverages = 5
         
-        numberOfRaysInBatch = 32768
+        numberOfRaysInBatch = 65536
     end
     
     methods(Static)
@@ -74,6 +74,7 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
         end
         
         function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
+            
             if isempty(recon.alphaMatricesLoadPath)
                 alphaMatrixFolder = removeFileExtension(recon.alphaMatricesSaveFileName);
                 mkdir(recon.alphaMatricesSavePath, alphaMatrixFolder);
@@ -83,8 +84,9 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 % the ray compute batches divided up the work. We'll reorganize the data
                 % accordingly, saving it on disk for easy recall. It also orders data to
                 % correspond with the proper ray.
-                numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
-                numBatches = divideProjectionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, false);
+               
+                divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
+               % numBatches = divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, false);
                 
                 rayTraceLoadPath = recon.rayTraceMatricesLoadPath;
                 
@@ -92,43 +94,29 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 rayTraceSaveFolder = removeFileExtension(recon.rayTraceMatricesSaveFileName);
                 
                 % one for top half, one for bottom half
-                [alphaMatrixPath, rayTracePath] = createAlphaMatrices(...
+                [alphaMatrixPath, rayTracePath] = createAlphaMatrices_Sparse(...
                     simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberAverages, recon.numberOfRaysInBatch, ...
                     recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName,...
                     rayTraceLoadPath, rayTraceSavePath, rayTraceSaveFolder,...
                     true);                
-                [alphaMatrixPath, rayTracePath] = createAlphaMatrices(...
-                    simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberAverages, recon.numberOfRaysInBatch, ...
-                    recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName,...
-                    rayTraceLoadPath, rayTraceSavePath, rayTraceSaveFolder,...
-                    false);
+%                 [alphaMatrixPath, rayTracePath] = createAlphaMatrices(...
+%                     simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberAverages, recon.numberOfRaysInBatch, ...
+%                     recon.alphaMatricesSavePath, recon.alphaMatricesSaveFileName,...
+%                     rayTraceLoadPath, rayTraceSavePath, rayTraceSaveFolder,...
+%                     false);
             else
                 alphaMatrixPath = recon.alphaMatricesLoadPath;
                 rayTracePath = recon.rayTraceMatricesLoadPath;
                 
-                divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
+%                 divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
             end
                         
-%             rayExclusionMap_Top = loadRayExclusionMap(simulationOrImagingScanRun.savePath, true, true);
-%             raysToExcludeForBatches_Top = getRaysToExclude(rayExclusionMap_Top, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), true, true);
-            
-%             data = load('E:\Data Files\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Initial Solution Head CT.mat');
-%             initialSolution_Top = data.dataSet(:,:,1:23);
-            initialSolution_Top = findSmearSolution(...
-                recon, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(), alphaMatrixPath, rayTracePath, true, true);
-            initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
-            
-% OPT SMEAR SOLUTION PRELOADED
-%             data = load('E:\Data Files\Git Repos\Gyrfalcon Data\Smear Solution Opt CT 2.mat');
-%             initialSolution_Top = data.reconDataSet;
-%             initialSolution_Top = reshape(initialSolution_Top, [numel(initialSolution_Top),1]);
-
             folder = reconRun.getCurrentSaveFolder();
             mkdir(simulationOrImagingScanRun.savePath, folder);
             
             reconstruction_Top = performIterativePairReconstruction(...
                 simulationOrImagingScanRun, recon, reconRun.savePath, recon.numberPartitions, recon.numberIterations, recon.numberAverages, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(),...
-                alphaMatrixPath, rayTracePath, initialSolution_Top, true, true);
+                alphaMatrixPath, rayTracePath, true, true);
 %             reconstruction_Bottom = performIterativePairReconstruction(...
 %                 simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
 %                 alphaMatrixPath, initialSolution_Top, true);

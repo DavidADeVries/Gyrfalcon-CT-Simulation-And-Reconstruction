@@ -1,4 +1,4 @@
-START_DIR = C:\Users\MPRadmin\GITREP~1\GYRFAL~1\MEXCOD~1
+START_DIR = E:\DATAFI~1\GITREP~1\GYRFAL~1\MEXCOD~1
 
 MATLAB_ROOT = C:\PROGRA~1\MATLAB\R2017a
 MAKEFILE = fastRayTrace_mex.mk
@@ -28,82 +28,120 @@ SYS_LIBS =
 
 #
 #====================================================================
-# gmake makefile fragment for building MEX functions using LCC
-# Copyright 2007-2016 The MathWorks, Inc.
+# gmake makefile fragment for building MEX functions using MinGW
+# Copyright 2015-2016 The MathWorks, Inc.
 #====================================================================
 #
+
+ifeq ($(COMPILER),gcc)
+  CC = $(COMPILER)
+  CXX = g++
+else
+  CXX = $(COMPILER)
+  CC = gcc
+endif
+
 SHELL = cmd
-OBJEXT = obj
-CC = $(COMPILER)
 LD = $(LINKER)
+OBJEXT = o
 .SUFFIXES: .$(OBJEXT)
 
-OBJLIST += $(SRC_FILES:.c=.$(OBJEXT))
-MEXSTUB = $(MEX_FILE_NAME_WO_EXT)2.$(OBJEXT)
-LCCSTUB = $(MEX_FILE_NAME_WO_EXT)_lccstub.$(OBJEXT)
+OBJLISTC = $(SRC_FILES:.c=.$(OBJEXT))
+OBJLISTCPP  = $(OBJLISTC:.cpp=.$(OBJEXT))
+OBJLIST  = $(OBJLISTCPP:.cu=.$(OBJEXT))
 
 target: $(TARGET)
 
-ML_INCLUDES = -I"$(MATLAB_ROOT)\simulink\include"
-ML_INCLUDES+= -I"$(MATLAB_ROOT)\toolbox\shared\simtargets"
+ML_INCLUDES = -I "$(MATLAB_ROOT)/simulink/include"
+ML_INCLUDES+= -I "$(MATLAB_ROOT)/toolbox/shared/simtargets"
 SYS_INCLUDE = $(ML_INCLUDES)
-
-LCC_ROOT = $(MATLAB_ROOT)\sys\lcc64\lcc64
 
 # Additional includes
 
-SYS_INCLUDE += -I"$(START_DIR)\codegen\mex\fastRayTrace"
-SYS_INCLUDE += -I"$(START_DIR)"
-SYS_INCLUDE += -I".\interface"
-SYS_INCLUDE += -I"$(MATLAB_ROOT)\extern\include"
-SYS_INCLUDE += -I"."
+SYS_INCLUDE += -I "$(START_DIR)\codegen\mex\fastRayTrace"
+SYS_INCLUDE += -I "$(START_DIR)"
+SYS_INCLUDE += -I ".\interface"
+SYS_INCLUDE += -I "$(MATLAB_ROOT)\extern\include"
+SYS_INCLUDE += -I "."
 
-EML_LIBS = libemlrt.lib libcovrt.lib libut.lib libmwmathutil.lib
-SYS_LIBS += $(EML_LIBS)
+EML_LIBS = -llibemlrt -llibcovrt -llibut -llibmwmathutil 
+SYS_LIBS += $(CLIBS) $(EML_LIBS)
 
-DIRECTIVES = $(MEX_FILE_NAME_WO_EXT)_mex.def
-
-COMP_FLAGS = $(COMPFLAGS)
-LINK_FLAGS0= $(subst $(MEXSTUB),$(LCCSTUB),$(LINKFLAGS))
-LINK_FLAGS = $(filter-out "mexFunction.def", $(LINK_FLAGS0))
-
-
+EXPORTFILE = $(MEX_FILE_NAME_WO_EXT)_mex.map
+EXPORTOPT = -Wl,--version-script,$(EXPORTFILE)
+LINK_FLAGS = $(filter-out /export:mexFunction, $(LINKFLAGS))
+COMP_FLAGS = $(COMPFLAGS) $(OMPFLAGS)
+CXX_FLAGS = $(COMPFLAGS) $(OMPFLAGS)
+LINK_FLAGS = $(LINKFLAGS) 
+LINK_FLAGS += $(OMPLINKFLAGS)
 ifeq ($(EMC_CONFIG),optim)
   COMP_FLAGS += $(OPTIMFLAGS)
+  CXX_FLAGS += $(OPTIMFLAGS)
   LINK_FLAGS += $(LINKOPTIMFLAGS)
 else
   COMP_FLAGS += $(DEBUGFLAGS)
+  CXX_FLAGS += $(DEBUGFLAGS)
   LINK_FLAGS += $(LINKDEBUGFLAGS)
 endif
 LINK_FLAGS += -o $(TARGET)
 LINK_FLAGS += 
 
-CFLAGS = $(COMP_FLAGS)   $(USER_INCLUDE) $(SYS_INCLUDE)
+CCFLAGS = $(COMP_FLAGS)   $(USER_INCLUDE) $(SYS_INCLUDE)
+CPPFLAGS = $(CXX_FLAGS) -std=c++11   $(USER_INCLUDE) $(SYS_INCLUDE)
 
 %.$(OBJEXT) : %.c
-	$(CC) $(CFLAGS) "$<"
+	$(CC) $(CCFLAGS) "$<"
+
+%.$(OBJEXT) : %.cpp
+	$(CXX) $(CPPFLAGS) "$<"
 
 # Additional sources
 
 %.$(OBJEXT) : $(MATLAB_ROOT)\extern\version/%.c
-	$(CC) -Fo"$@" $(CFLAGS) "$<"
+	$(CC) $(CCFLAGS) "$<"
 
 %.$(OBJEXT) : $(START_DIR)/%.c
-	$(CC) -Fo"$@" $(CFLAGS) "$<"
+	$(CC) $(CCFLAGS) "$<"
 
 %.$(OBJEXT) : $(START_DIR)\codegen\mex\fastRayTrace/%.c
-	$(CC) -Fo"$@" $(CFLAGS) "$<"
+	$(CC) $(CCFLAGS) "$<"
 
 %.$(OBJEXT) : interface/%.c
-	$(CC) -Fo"$@" $(CFLAGS) "$<"
+	$(CC) $(CCFLAGS) "$<"
 
 
 
-$(LCCSTUB) : $(LCC_ROOT)\mex\lccstub.c
-	$(CC) -Fo$(LCCSTUB) $(CFLAGS) "$<"
+%.$(OBJEXT) : $(MATLAB_ROOT)\extern\version/%.cpp
+	$(CXX) $(CPPFLAGS) "$<"
 
-$(TARGET): $(OBJLIST) $(LCCSTUB) $(MAKEFILE) $(DIRECTIVES)
-	$(LD) $(OBJLIST) $(LINK_FLAGS) $(LINKFLAGSPOST) $(SYS_LIBS) $(DIRECTIVES)
+%.$(OBJEXT) : $(START_DIR)/%.cpp
+	$(CXX) $(CPPFLAGS) "$<"
+
+%.$(OBJEXT) : $(START_DIR)\codegen\mex\fastRayTrace/%.cpp
+	$(CXX) $(CPPFLAGS) "$<"
+
+%.$(OBJEXT) : interface/%.cpp
+	$(CXX) $(CPPFLAGS) "$<"
+
+
+
+%.$(OBJEXT) : $(MATLAB_ROOT)\extern\version/%.cu
+	$(CC) $(CCFLAGS) "$<"
+
+%.$(OBJEXT) : $(START_DIR)/%.cu
+	$(CC) $(CCFLAGS) "$<"
+
+%.$(OBJEXT) : $(START_DIR)\codegen\mex\fastRayTrace/%.cu
+	$(CC) $(CCFLAGS) "$<"
+
+%.$(OBJEXT) : interface/%.cu
+	$(CC) $(CCFLAGS) "$<"
+
+
+
+
+$(TARGET): $(OBJLIST) $(MAKEFILE)
+	$(LD) $(EXPORTOPT) $(OBJLIST) $(LINK_FLAGS) $(SYS_LIBS)
 	@cmd /C "echo Build completed using compiler $(EMC_COMPILER)"
 
 #====================================================================

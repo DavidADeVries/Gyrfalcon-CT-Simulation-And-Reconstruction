@@ -1,15 +1,15 @@
 # Make settings for fastRayTrace 
-COMPILER=lcc64
-COMPFLAGS= -nodeclspec -Zp8 -dll -c -I"C:\PROGRA~1\MATLAB\R2017a\sys\lcc64\lcc64\include64" -DMATLAB_MEX_FILE -noregistrylookup
-OPTIMFLAGS=-DNDEBUG
-DEBUGFLAGS=-g2
-LINKER=lcclnk64
-LINKFLAGS= -dll -L"C:\PROGRA~1\MATLAB\R2017a\sys\lcc64\lcc64\lib64" -L"C:\PROGRA~1\MATLAB\R2017a\extern\lib\win64\microsoft" -entry LibMain "fastRayTrace_mex2.obj"
-LINKOPTIMFLAGS=-s
-LINKDEBUGFLAGS=
+COMPILER=C:\ProgramData\MATLAB\SupportPackages\R2017a\3P.instrset\mingw_492.instrset\bin\gcc
+COMPFLAGS=-c -fexceptions -fno-omit-frame-pointer -DTARGET_API_VERSION=700   -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE 
+OPTIMFLAGS=-O -DNDEBUG
+DEBUGFLAGS=-g
+LINKER=C:\ProgramData\MATLAB\SupportPackages\R2017a\3P.instrset\mingw_492.instrset\bin\gcc
+LINKFLAGS=-m64 -Wl,--no-undefined -shared -L"C:\Program Files\MATLAB\R2017a\extern\lib\win64\mingw64" -llibmx -llibmex -llibmat -lm -llibmwlapack -llibmwblas 
+LINKOPTIMFLAGS=
+LINKDEBUGFLAGS=-g
 MATLAB_ARCH=win64
 BORLAND=
 OMPFLAGS= 
 OMPLINKFLAGS= 
-EMC_COMPILER=lcc64
+EMC_COMPILER=mingw64
 EMC_CONFIG=optim

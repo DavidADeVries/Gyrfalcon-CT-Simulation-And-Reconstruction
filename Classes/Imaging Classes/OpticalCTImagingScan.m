@@ -199,12 +199,24 @@ classdef OpticalCTImagingScan < ImagingScan
             savePath = makePath(savePath, sliceFolder);
             
             % load up ray exclusion map for jar edges
-            data = load('C:\Users\MPRadmin\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Jar Edges Ray Exclusion Map (134x134).mat');
+            data = load('E:\Data Files\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Jar Edges Ray Exclusion Map (134x134).mat');
             jarEdgesMap = data.(Constants.Ray_Exclusion_Map_Var_Name);
+            
+            %some constants
+            gelBathCutoff = 40000;
+            gelBathSpeckCutoff = 1000;
+            
+            catheterCutoff = 4000;
+            catheterSpeckCutoff = 500;
+            
+            jarEdgeOutsideBuffer = 5; %pixels
+            jarEdgeInsideBuffer = 25; %pixels
+            catheterBuffer = 3;
             
             % read, calibrate, and save each frame                        
             for i=1:numFrames
                 % import the data and ref frames
+                
                 dataFilename = [dataPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
                 refFilename = [refPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
                 
@@ -213,14 +225,29 @@ classdef OpticalCTImagingScan < ImagingScan
                                 
                 % apply dark frame
                 dataFrame = dataFrame - dataDarkFrame;
-                refFrame = refFrame - refDarkFrame;                
+                refFrame = refFrame - refDarkFrame;
                 
-                leftJarWallRejection = findRejectionMap(refFrame, [50,690], [120,300]);
-                rightJarWallRejection = findRejectionMap(refFrame, [50,690], [730,910]);
                 
-                catheterRejection = findRejectionMapWithoutFullVertical(refFrame, [50,690],[300,730]);
+                isBathMap = (dataFrame > gelBathCutoff) | (refFrame > gelBathCutoff);
+                isBathMap = bwareaopen(isBathMap, gelBathSpeckCutoff);
                 
-                rayRejection = (leftJarWallRejection | rightJarWallRejection | catheterRejection);
+                leftJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'left');
+                rightJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'right');
+                
+                catheterMap = (dataFrame < catheterCutoff) | (refFrame < catheterCutoff);
+                catheterMap = bwareaopen(catheterMap, catheterSpeckCutoff);
+                catheterMap = imdilate(catheterMap, ones(1+2*catheterBuffer));
+                
+                rayRejection = leftJarWallMap | rightJarWallMap | catheterMap;
+                
+%                 reject = bwareaopen(abs(gradient(refFrame-dataFrame)) > 1000,150) | (refFrame < 5000);
+%                 
+%                 leftJarWallRejection = findRejectionMap(reject, [50,690], [120,300]);
+%                 rightJarWallRejection = findRejectionMap(reject, [50,690], [730,910]);
+%                 
+%                 catheterRejection = findRejectionMapWithoutFullVertical(reject, [50,690],[300,730]);
+%                 
+%                 rayRejection = (leftJarWallRejection | rightJarWallRejection | catheterRejection);
                                 
                 % convert to \sigma(delta_attenuation .* distance)
                 deltaAttenuationFrame = refFrame ./ dataFrame; % log = ln is matlab
@@ -229,15 +256,27 @@ classdef OpticalCTImagingScan < ImagingScan
                 % puts axis of rotation in centre of image
                 
                 deltaAttenuationFrame = applyAxisOfRotationCorrection(deltaAttenuationFrame, aorCorrection);
+                rayRejection = applyAxisOfRotationCorrection(rayRejection, aorCorrection);
+                
+                deltaAttenuationFrame(rayRejection) = 0; % these ray values cannot be used, but since we want to interpolate the imaging data, we'll set them to zero
+                interpolationPixelWeighting = ~rayRejection; % this way we can still interpolate, and as long as least one pixel/ray is not rejected, we can have a value.
                 
                 % interpolate large frame onto the desired target detector
                 % size and pixel res
                 
                 detectorData = interpolateOptCtFrameToProjectionDataSet(...
-                    deltaAttenuationFrame, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
-                rayExclusionMap = interpolateOptCtFrameToProjectionDataSet(...
-                    rayRejection, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
-                rayExclusionMap = (rayExclusionMap ~= 0) | jarEdgesMap;
+                    deltaAttenuationFrame, interpolationPixelWeighting, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
+                
+                rayExclusionMap = isnan(detectorData); % if is NaN, means that only rejected rays contributed
+                detectorData(rayExclusionMap) = 0; %we'll set NaN values to 0 to keep data valid for display, we'll have the rayExclusionMap to keep track of these values.
+                
+                % set some maps so that we can figure out which pixels/rays
+                % should be rejected
+%                 interpolationPixelWeighting = ones(size(rayRejection)); % no 0s because we want to view all "rays" as valid, with valid rays having value 1, and non-valid having value 0
+%                 
+%                 rayExclusionMap = interpolateOptCtFrameToProjectionDataSet(...
+%                     ~rayRejection, interpolationPixelWeighting, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM);
+%                 rayExclusionMap = (rayExclusionMap == 0); % if an interpolated pixel/ray is 0, it means only rejected rays contributed (see all valid rays had value 1)
                 
                 % save it in the imaging scan run folder
                 angleFolder = makeAngleFolderName(round(anglesInDeg(i),2));
@@ -268,6 +307,72 @@ function image = readOptCtFrameBmp(path, frameDims)
     image = double(image); %convert to double so we can do math!
 end
 
+function map = getJarWallMap(isBathMap, outsideBuffer, insideBuffer, sideString)
+    dims = size(isBathMap);
+    width = dims(2);
+    
+    split = floor(width/2);
+    
+    map = false & zeros(dims);
+    
+    switch sideString
+        case 'left'
+            subMap = isBathMap(:, 1:split);
+            
+            [min, max] = getMinAndMaxRightMostValues(subMap);
+            min = min - outsideBuffer;
+            max = max + insideBuffer;
+            
+            map(:,min:max) = true;
+        case 'right'
+            subMap = isBathMap(:, split:end);
+            
+            [min, max] = getMinAndMaxLeftMostValues(subMap);
+            min = (split - 1) + min - insideBuffer;
+            max = (split - 1) + max + outsideBuffer;
+            
+            map(:,min:max) = true;
+        otherwise
+            error('String must be left or right');
+    end
+end
+
+function [minVal, maxVal] = getMinAndMaxRightMostValues(map)
+    dims = size(map);
+    
+    numRows = dims(1);
+    numCols = dims(2);
+    
+    colIndices = repmat(1:numCols, numRows, 1);
+    
+    map = colIndices .* map;
+    invalidRows = (sum(map,2) == 0); % row has no true pixels
+    
+    [~, rightmostColIndices] = max(map,[],2); %take max along rows, get col index of the max value in each row (which would be the rightmost pixel)
+    rightmostColIndices(invalidRows) = [];
+    
+    minVal = min(rightmostColIndices);
+    maxVal = max(rightmostColIndices);
+end
+
+function [minVal, maxVal] = getMinAndMaxLeftMostValues(map)
+    dims = size(map);
+    
+    numRows = dims(1);
+    numCols = dims(2);
+    
+    colIndices = repmat(1:numCols, numRows, 1);
+    
+    map = -(colIndices-numCols-1) .* map; % do some adjustment so that left most pixels have higher col values
+    invalidRows = (sum(map,2) == 0); % row has no true pixels
+    
+    [~, leftmostColIndices] = max(map,[],2); %take max along rows, get col index of the max value in each row (which would be the leftmost pixel)
+    leftmostColIndices(invalidRows) = [];
+    
+    minVal = min(leftmostColIndices);
+    maxVal = max(leftmostColIndices);
+end
+
 function frames = applyAxisOfRotationCorrection(frames, correction)
 
     %correction gives number of pixels to shift by, correction is negative
@@ -281,7 +386,7 @@ function frames = applyAxisOfRotationCorrection(frames, correction)
 
 end
 
-function projectionDataSet = interpolateOptCtFrameToProjectionDataSet(frame, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM)
+function projectionDataSet = interpolateOptCtFrameToProjectionDataSet(frame, interpolationWeighting, detectorPixelDimsInM, targetDetectorSize, targetPixelDimsInM)
 
 frameDims = size(frame);
 detectorSize = [frameDims(2), frameDims(1)];
@@ -356,12 +461,13 @@ for x=1:targetDetectorSize(1)
         frameSelect = sub2ind(frameDims, rowIndex, colIndex);
                 
         pixelVals = frame(frameSelect);
+        weightVals = interpolationWeighting(frameSelect);
         
-        totalArea = sum(sum(areas));
+        totalArea = sum(sum(areas .* weightVals));
         
         areasNorm = areas ./ totalArea;
         
-        weightedPixelVals = pixelVals .* areasNorm;
+        weightedPixelVals = pixelVals .* weightVals .* areasNorm;
         
         projectionDataSet(y,x) = sum(sum(weightedPixelVals));        
     end
@@ -372,14 +478,16 @@ end
 
 % HELPER FUNCTIONS
 function rejectionMap = findRejectionMap(image, rowBounds, colBounds)
-    gradientBound = 10000;
-    pixelFleckBound = 100;
+%     gradientBound = 10000;
+%     pixelFleckBound = 100;
+%     
+%     gradImage = imgradient(image(rowBounds(1):rowBounds(2), colBounds(1):colBounds(2))) >= gradientBound;
+%     
+%     % get rid of any tiny flecks that could mess us up
+%     featureMap = bwareaopen(gradImage, pixelFleckBound);
     
-    gradImage = imgradient(image(rowBounds(1):rowBounds(2), colBounds(1):colBounds(2))) >= gradientBound;
-    
-    % get rid of any tiny flecks that could mess us up
-    featureMap = bwareaopen(gradImage, pixelFleckBound);
-    
+    featureMap = image(rowBounds(1):rowBounds(2), colBounds(1):colBounds(2));
+
     numPixels = numel(featureMap);
     indices = 1:numPixels;
     
@@ -403,14 +511,16 @@ function rejectionMap = findRejectionMap(image, rowBounds, colBounds)
 end
 
 function rejectionMap = findRejectionMapWithoutFullVertical(image, rowBounds, colBounds)
-    gradientBound = 10000;
-    pixelFleckBound = 100;
+%     gradientBound = 10000;
+%     pixelFleckBound = 100;
+%     
+%     gradImage = imgradient(image(rowBounds(1):rowBounds(2), colBounds(1):colBounds(2))) >= gradientBound;
+%     
+%     % get rid of any tiny flecks that could mess us up
+%     featureMap = bwareaopen(gradImage, pixelFleckBound);
     
-    gradImage = imgradient(image(rowBounds(1):rowBounds(2), colBounds(1):colBounds(2))) >= gradientBound;
-    
-    % get rid of any tiny flecks that could mess us up
-    featureMap = bwareaopen(gradImage, pixelFleckBound);
-    
+    featureMap = image(rowBounds(1):rowBounds(2), colBounds(1):colBounds(2));
+
     numPixels = numel(featureMap);
     indices = 1:numPixels;
     
