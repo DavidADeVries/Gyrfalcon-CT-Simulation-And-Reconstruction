@@ -22,6 +22,16 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
         numberOfRaysInBatch = 65536
     end
     
+    properties(Constant)
+        reconValuesRootDirectory = 'Matrices and Vectors'
+        
+        projectionValuesSubDirectory = 'Projection Values'
+        rayExclusionMapsSubDirectory = 'Ray Exclusion Maps'
+        iterationSolutionsSubDirectory = 'Iteration Solutions'
+        
+        reconIterationDirectory = 'Iteration ';
+    end
+    
     methods(Static)
         function handle = getSettingsTabHandle(app)
             handle = app.ConeBeamPAIR_SettingsTab;
@@ -73,7 +83,57 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
             app.CBCT_PAIR_NumberRaysInBatchEditField.Value = recon.numberOfRaysInBatch;
         end
         
+        function [] = createReconComputationDirectories(recon, reconRun, numIterations)
+            mkdir(reconRun.savePath, recon.reconValuesRootDirectory);
+            
+            rootPath = makePath(reconRun.savePath, recon.reconValuesRootDirectory);
+        
+            mkdir(rootPath, recon.projectionValuesSubDirectory);
+            mkdir(rootPath, recon.rayExclusionMapsSubDirectory);
+            mkdir(rootPath, recon.iterationSolutionsSubDirectory);
+            
+            for i=1:numIterations
+                folder = recon.getIterationDirectoryName(i);
+                
+                mkdir(recon.getProjectionValuesSavePath(reconRun), folder);
+                mkdir(recon.getRayExclusionMapsSavePath(reconRun), folder);
+            end
+        end
+        
+        function directory = getIterationDirectoryName(recon, iterationNum)
+            directory = [recon.reconIterationDirectory, num2str(iterationNum)];
+        end
+        
+        function savePath  = getReconValuesRootSavePath(recon, reconRun)
+            savePath = makePath(reconRun.savePath, recon.reconValuesRootDirectory);
+        end
+        
+        function savePath  = getProjectionValuesSavePath(recon, reconRun)
+            savePath = makePath(reconRun.savePath, recon.reconValuesRootDirectory, recon.projectionValuesSubDirectory);
+        end
+        
+        function savePath = getRayExclusionMapsSavePath(recon, reconRun)
+            savePath = makePath(reconRun.savePath, recon.reconValuesRootDirectory, recon.rayExclusionMapsSubDirectory);
+        end
+        
+        function path = getProjectionValuesPathForIteration(recon, reconstructionRun, iter)
+            path = makePath(recon.getProjectionValuesSavePath(reconstructionRun), recon.getIterationDirectoryName(iter));
+        end
+        
+        function path = getRayExclusionMapsPathForIteration(recon, reconstructionRun, iter)
+            path = makePath(recon.getRayExclusionMapsSavePath(reconstructionRun), recon.getIterationDirectoryName(iter));
+        end
+        
         function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
+            
+            alphaMatrixPathRoot = 'E:\Data Files\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Alpha Matrices (Opt CT 256x256 - ';
+            rayTracePathRoot = 'E:\Data Files\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Ray Trace Hit Matrices (Opt CT 256x256 - ';
+            reconSavePathRoot = 'E:\Data Files\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Catheter In High Res)\Recon 3 (CBCT PAIR)\Matrices and Vectors\Iteration Solutions\Solution (Opt CT 256x256 - ';
+            
+            reconRun.createReconDirectory();
+            
+            numIters = recon.numberIterations + 1;
+            recon.createReconComputationDirectories(reconRun, numIters);
             
             if isempty(recon.alphaMatricesLoadPath)
                 alphaMatrixFolder = removeFileExtension(recon.alphaMatricesSaveFileName);
@@ -108,14 +168,27 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 alphaMatrixPath = recon.alphaMatricesLoadPath;
                 rayTracePath = recon.rayTraceMatricesLoadPath;
                 
-%                 divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
+                projectionCopyFromPath = makePath(recon.getProjectionValuesSavePath(reconRun), recon.getIterationDirectoryName(1));
+                rayExclusionCopyFromPath = makePath(recon.getRayExclusionMapsSavePath(reconRun), recon.getIterationDirectoryName(1));
+                                
+                divideProjectionAndRayExclusionDataForBatches(...
+                    simulationOrImagingScanRun, recon, reconRun,...
+                    projectionCopyFromPath, rayExclusionCopyFromPath,...
+                    recon.numberOfRaysInBatch, true, true);
+                
+                for iteration=2:numIters
+                    projectionCopyToPath = makePath(recon.getProjectionValuesSavePath(reconRun), recon.getIterationDirectoryName(iteration));
+                    rayExclusionCopyToPath = makePath(recon.getRayExclusionMapsSavePath(reconRun), recon.getIterationDirectoryName(iteration));
+                    
+                    copyfile(projectionCopyFromPath, projectionCopyToPath);
+                    copyfile(rayExclusionCopyFromPath, rayExclusionCopyToPath);
+                end
             end
                         
-            folder = reconRun.getCurrentSaveFolder();
-            mkdir(simulationOrImagingScanRun.savePath, folder);
             
             reconstruction_Top = performIterativePairReconstruction(...
-                simulationOrImagingScanRun, recon, reconRun.savePath, recon.numberPartitions, recon.numberIterations, recon.numberAverages, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(),...
+                simulationOrImagingScanRun, recon, reconRun, reconRun.savePath, recon.numberPartitions, recon.numberIterations, recon.numberAverages, recon.numberOfRaysInBatch, simulationOrImagingScanRun.getTotalNumberOfRays(),...
+                alphaMatrixPathRoot, rayTracePathRoot, reconSavePathRoot,...
                 alphaMatrixPath, rayTracePath, true, true);
 %             reconstruction_Bottom = performIterativePairReconstruction(...
 %                 simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...

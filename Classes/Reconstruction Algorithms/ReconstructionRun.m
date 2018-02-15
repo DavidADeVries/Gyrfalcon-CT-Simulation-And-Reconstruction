@@ -166,6 +166,14 @@ classdef ReconstructionRun < ProcessingRun
             currentFolder = getLastItemFromPath(run.savePath);
         end
         
+        function [] = createReconDirectory(run)
+            newFolder = run.getCurrentSaveFolder();
+            
+            path = removeLastItemFromPath(run.savePath);
+            
+            mkdir(path, newFolder);
+        end
+        
         function [] = runReconstruction(run, app)
             run = run.createFromGUI(app);
             

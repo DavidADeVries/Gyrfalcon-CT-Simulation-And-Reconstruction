@@ -48,6 +48,30 @@ classdef ImagingScanRun
             
         end
         
+        function run = loadData(run, basePath) %use given basePath in case files are moved around
+            scan = run.imagingScan;
+            
+            numSlices = length(scan.scan.slices);
+                        
+            sliceData = cell(1, numSlices);
+            
+            for i=1:numSlices
+                sliceFolder = makeSliceFolderName(i);
+                
+                path = makePath(basePath, sliceFolder);
+                
+                data = SliceData;
+                
+                data = data.loadData(path, scan);
+                
+                sliceData{i} = data;
+            end
+            
+            run.sliceData = sliceData;
+            
+        end 
+        
+        
         function app = setGUI(run, app)
             if isempty(run.savePath) % not yet set
                 app.ImagingScanRunSavePathEditField.Value = 'Not Selected...';
@@ -89,30 +113,7 @@ classdef ImagingScanRun
         function phantom = getPhantom(run)
             phantom = []; % threre is no phantom return empty
         end
-        
-        function run = loadData(run, basePath) %use given basePath in case files are moved around
-%             imagingScan = run.imagingScan;
-%             
-%             numSlices = length(imagingScan.scan.slices);
-%                         
-%             sliceData = cell(1, numSlices);
-%             
-%             for i=1:numSlices
-%                 sliceFolder = makeSliceFolderName(i);
-%                 
-%                 path = makePath(basePath, sliceFolder);
-%                 
-%                 data = SliceData;
-%                 
-%                 data = data.loadData(path, imagingScan);
-%                 
-%                 sliceData{i} = data;
-%             end
-%             
-%             run.sliceData = sliceData;
-            
-        end 
-        
+                
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())
                 app.SimulationViewerFilePathLabel.Text = 'No Run Selected';

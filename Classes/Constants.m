@@ -133,6 +133,9 @@ classdef Constants
         Partition_Hit_Lengths_Vector_Var_Name = 'hitLengths';
         Partition_Num_Hits_Vector_Var_Name = 'numHits';
         
+        PAIR_Zero_Bound_File_Name = 'Zero Bound';
+        PAIR_Zero_Bound_Var_Name = 'zeroBound';
+        
         Projection_Values_For_Batch_File_Name = 'Batch Projection Values';
         Projection_Values_For_Batch_Var_Name = 'projectionValues';
         
