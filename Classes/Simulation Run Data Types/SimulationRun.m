@@ -130,7 +130,9 @@ classdef SimulationRun < ProcessingRun
                 run.computerInfo.numCoresUsed = 1;
             end
             
-            if run.performanceType == SimulationRunPerformanceTypes.low
+            if ...
+                    run.performanceType == SimulationRunPerformanceTypes.low ||...
+                    run.performanceType == SimulationRunPerformanceTypes.highWithGPU
                 run.useMexCode = false; 
             else
                 run.useMexCode = app.SimulationRunUseMEXCodeCheckBox.Value;

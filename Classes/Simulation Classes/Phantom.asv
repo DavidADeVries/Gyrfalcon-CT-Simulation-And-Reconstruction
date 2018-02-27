@@ -163,7 +163,7 @@ classdef Phantom < GyrfalconObject
             locationInM = units.convertToM(location);
         end
         
-        function centreLocationInM = getCentreLocationInM(phant)
+        function locationInM = getCentreLocationInM(phant)
             % get corner location in m
             units = phant.locationUnits;
             location = phant.location;

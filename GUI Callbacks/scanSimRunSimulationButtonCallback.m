@@ -45,7 +45,9 @@ if ~isempty(simulationRun) && simulationRun.isValidForSave()
             simulationRun,...
             app);            
         case SimulationRunPerformanceTypes.highWithGPU
-            error('Run performance type of "High with GPU" is invalid in this release. No simulation can be run.');
+            simulationRun = simulation.runScanSimulationHighPerformanceOnGPU(...
+                simulationRun,...
+                app);
         otherwise
             error('No run performance selected. No simulation can be run.');
     end

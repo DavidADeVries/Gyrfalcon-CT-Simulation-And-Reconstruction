@@ -9,7 +9,7 @@ else
 end
 
 % use MEX code checkbox
-if performanceType == SimulationRunPerformanceTypes.low
+if performanceType == SimulationRunPerformanceTypes.low || performanceType == SimulationRunPerformanceTypes.highWithGPU
     app.SimulationRunUseMEXCodeCheckBox.Enable = 'off';
 else
     app.SimulationRunUseMEXCodeCheckBox.Enable = 'on';

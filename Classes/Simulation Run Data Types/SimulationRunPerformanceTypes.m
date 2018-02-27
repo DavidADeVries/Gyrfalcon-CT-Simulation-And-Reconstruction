@@ -21,8 +21,8 @@ classdef SimulationRunPerformanceTypes
             'Computations are performed using the same MATLAB optimizations are with High Performance, though the are distributed between the specified number of CPUs. These CPUs will work in parallel, each using MATLAB optimization. How the work is split between the CPUs is dependent on the number of CPUs, amount of RAM available, and the number of slices, scan angles, per angle translation, and detector size.')
         
         highWithGPU (...
-            'High with GPU',...
-            'At current, it is unknown how to accelerate the required computation of ray traces with a GPU with MATLAB, and so this functionality is unavailable.') %second derivative not continuous
+            'High with GPU (TIGRE)',...
+            'Computations are performed with the TIGRE open-source MATLAB package which uses a heavily optimized GPU ray trace algorithm. Some geometries are not available with this setting.')
     end
         
     methods        
