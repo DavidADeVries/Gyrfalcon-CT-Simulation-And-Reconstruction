@@ -58,11 +58,7 @@ classdef FirstGenFilteredBackprojectionReconstruction < Reconstruction
         function [filterTypes, filterTypeStrings] = getFilterTypes(recon)
             [filterTypes, filterTypeStrings] = enumeration(FirstGenFilterTypes);
         end
-        
-        function recon = changeSettings(recon)
-            recon = firstGenFilteredBackprojectionReconSettingsGUI(recon);
-        end
-        
+                
         function string = getNameString(recon)
             string = '1st Gen. FBP';
         end

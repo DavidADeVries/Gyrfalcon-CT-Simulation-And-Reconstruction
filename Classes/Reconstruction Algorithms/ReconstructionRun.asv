@@ -184,13 +184,18 @@ classdef ReconstructionRun < ProcessingRun
             
             app = updateStatusOutput(app, newString, newLine);
             
-            app.StatusOutputLamp.Color = [1 1 0]; % yellow
-            
             % run the recon
             run = run.startProcessingRun(); % set start time
             run.reconstruction = ...
                 run.reconstruction.runReconstruction(run, run.simulationOrImagingScanRun, app);
             run = run.endProcessingRun(); % set end time
+            
+            % set status string complete
+            
+            newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
             
             
             % perform the recon of the 3D data-set from recon'ed
@@ -203,16 +208,7 @@ classdef ReconstructionRun < ProcessingRun
            % run = run.calculateReconPhantomDataSet();
             
             % save files
-            run.saveReconstructionValues();
-            
-            % set status string complete
-            
-            newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
-            newLine = true;
-            
-            app = updateStatusOutput(app, newString, newLine); 
-            
-            app.StatusOutputLamp.Color = [0 1 0]; % green
+            run.saveReconstructionValues();                
         end
         
         function run = calculateReconPhantomDataSet(run)
@@ -237,8 +233,8 @@ classdef ReconstructionRun < ProcessingRun
             run.reconstruction.saveOuput(run.savePath);
             
             % save this, the reconstruction run
-            filename = [getLastItemFromPath(run.savePath), Constants.Matlab_File_Extension];
-            save(makePath(run.savePath, filename), Constants.Processing_Run_Var_Name);
+            filename = 
+            save(makePath(run.savePath, run.saveFileName), Constants.Processing_Run_Var_Name);
             
         end
         

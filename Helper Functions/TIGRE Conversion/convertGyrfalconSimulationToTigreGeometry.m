@@ -42,25 +42,25 @@ end
 
 % ** PHYSICAL GEOMETRY **
 
-originToSourceInM = gyrfalconSimulation.source.getDistanceBetweenOriginAndSourceCentrePointInM();
-originToDetectorInM = gyrfalconSimulation.detector.getDistanceBetweenOriginAndDetectorCentrePointInM();
-
 % distances
-tigreGeometry.DSD = (originToSourceInM + originToDetectorInM) * Constants.m_to_mm;
-tigreGeometry.DSO = originToSourceInM * Constants.m_to_mm;
+[DSD, DSO] = getTigreDsdAndDSO(gyrfalconSimulation.source, gyrfalconSimulation.detector);
+
+tigreGeometry.DSD = DSD;
+tigreGeometry.DSO = DSO;
 
 % detector params
-tigreGeometry.nDetector = (gyrfalconSimulation.detector.wholeDetectorDimensions)';
-tigreGeometry.dDetector = (gyrfalconSimulation.detector.getSingleDetectorDimensionsInM * Constants.m_to_mm)';
-tigreGeometry.sDetector = tigreGeometry.nDetector.*tigreGeometry.dDetector;
+[nDetector, dDetector, sDetector] = getTigreDetectorValues(gyrfalconSimulation.detector);
+
+tigreGeometry.nDetector = nDetector;
+tigreGeometry.dDetector = dDetector;
+tigreGeometry.sDetector = sDetector;
 
 % image/phantom params
-nVoxel = (gyrfalconSimulation.phantom.dataSet.getSize())';
-nVoxel([1,2]) = nVoxel([2,1]);
+[nVoxel, dVoxel, sVoxel] = getTigreVoxelValues(gyrfalconSimulation.phantom.dataSet.getSize(), gyrfalconSimulation.phantom.getVoxelDimensionsInM());
 
-tigreGeometry.nVoxel = (gyrfalconSimulation.phantom.dataSet.getSize())';
-tigreGeometry.dVoxel = (gyrfalconSimulation.phantom.getVoxelDimensionsInM * Constants.m_to_mm)';
-tigreGeometry.sVoxel = tigreGeometry.nVoxel.*tigreGeometry.dVoxel;
+tigreGeometry.nVoxel = nVoxel;
+tigreGeometry.dVoxel = dVoxel;
+tigreGeometry.sVoxel = sVoxel;
 
 % phantom offset
 % Gyrfalcon gives (x,y,z) of min-x, max-y, max-z corner
@@ -85,11 +85,10 @@ end
 % ** PHANTOM **
 
 tigrePhantom = gyrfalconSimulation.scan.beamCharacterization.calibratedPhantomDataSet{1};
-tigrePhantom = single(tigrePhantom);
+tigrePhantom = single(tigrePhantom .* (1 / Constants.m_to_mm));
 
 % ** SCAN ANGLES **
-anglesInDeg = -gyrfalconSimulation.scan.getScanAnglesInDegrees; % flip for TIGRE
-tigreAnglesInRadians = anglesInDeg .* Constants.deg_to_rad;
+tigreAnglesInRadians = getTigreAngles(gyrfalconSimulation.scan);
 
 % ** NOISE LEVELS **
 % Poisson (Scatter) Noise

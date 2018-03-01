@@ -80,6 +80,7 @@ classdef Constants
         
         Recon_Slices_Folder_Name = 'Slices';
         Recon_Slices_File_Name = 'Slice';
+        Recon_Slice_Data_Var_Name = 'reconData';
         
         FBP_Recon_Sinograms_Folder_Name = 'Sinograms';
         FBP_Recon_Sinograms_File_Name = 'Slice Sinogram';
@@ -152,6 +153,8 @@ classdef Constants
                 
         Round_Off_Error_Bound = 1E-9; %1nm
         Round_Off_Level = 10;
+        
+        Infinite_Radon_Sum_Approximation = 1E10;
     end
     
     methods

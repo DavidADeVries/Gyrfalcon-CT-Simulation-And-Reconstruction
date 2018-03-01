@@ -6,6 +6,8 @@ function [imgData] = openOptCtVistaRecon(path)
 %path = 'G:\__Gryfalcon Transfer\Flood Field Test (Flood, Pre)\Flood Field Test (Flood, Pre)_HR.vff';
 % path = 'G:\__Gryfalcon Transfer\Flood Field Test (Flood, Post)\Flood Field Test (Flood, Post)_HR.vff';
 
+% path = 'F:\20180201_590nm_distortion_6pg_HR.vff';
+
 dataSize = [256 256 256];
 
 fid = fopen(path, 'r');

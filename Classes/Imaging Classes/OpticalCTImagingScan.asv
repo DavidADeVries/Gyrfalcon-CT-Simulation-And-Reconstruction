@@ -78,6 +78,15 @@ classdef OpticalCTImagingScan < ImagingScan
             imagingScan.usedLightSourceColour = app.OptCtSettings_LightSourceColourDropDown.Value;
         end
         
+        function radonSumData = convertProjectionDataToRadonSumData(imagingScan, projectionData)
+            % data is stored as: (I_0 / I)
+            % want to get: sum(\del
+            
+            projectionImage(projectionImage<1) = 1;
+                projectionImage = log(projectionImage);
+            
+        end
+        
         function dimsInM = getTargetPixelDimensionsInM(imagingScan)
             xyDim = imagingScan.targetPixelDimensions(1);
             zDim = imagingScan.targetPixelDimensions(2);
@@ -209,8 +218,8 @@ classdef OpticalCTImagingScan < ImagingScan
             catheterCutoff = 4000;
             catheterSpeckCutoff = 500;
             
-            jarEdgeOutsideBuffer = 5; %pixels
-            jarEdgeInsideBuffer = 50;%25; %pixels
+            jarEdgeOutsideBuffer = 10; %pixels
+            jarEdgeInsideBuffer = 20;%25; %pixels
             catheterBuffer = 3;
             
             % read, calibrate, and save each frame                        
@@ -238,7 +247,7 @@ classdef OpticalCTImagingScan < ImagingScan
 %                 catheterMap = bwareaopen(catheterMap, catheterSpeckCutoff);
 %                 catheterMap = imdilate(catheterMap, ones(1+2*catheterBuffer));
                 
-                rayRejection = leftJarWallMap | rightJarWallMap;% | catheterMap;
+                rayRejection = false & (leftJarWallMap | rightJarWallMap);% | catheterMap;
                                
                 % convert to \sigma(delta_attenuation .* distance)
                 deltaAttenuationFrame = refFrame ./ dataFrame; % log = ln is matlab
@@ -260,7 +269,7 @@ classdef OpticalCTImagingScan < ImagingScan
                 
                 rayExclusionMap = isnan(detectorData); % if is NaN, means that only rejected rays contributed
                 % DISABLED!
-                %detectorData(rayExclusionMap) = 0; %we'll set NaN values to 0 to keep data valid for display, we'll have the rayExclusionMap to keep track of these values.
+                detectorData(rayExclusionMap) = 0; %we'll set NaN values to 0 to keep data valid for display, we'll have the rayExclusionMap to keep track of these values.
                 
                 % set some maps so that we can figure out which pixels/rays
                 % should be rejected

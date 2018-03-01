@@ -908,14 +908,20 @@ classdef Simulation < GyrfalconObject
                 convertGyrfalconSimulationToTigreGeometry(simulation);
                                     
             % COMPUTE PROJECTIONS WITH TIGRE
-            projections = Ax(tigrePhantom, tigreGeometry, tigreAngles, 'ray-voxel');
+            radonProjections = Ax(tigrePhantom, tigreGeometry, tigreAngles, 'ray-voxel');
             
             % ADD NOISE IF NEEDED
             if simulation.scatteringNoiseLevel ~= 0 && simulation.detectorNoiseLevel ~= 0
-                projections = addCTnoise(projections, 'Poisson', tigrePoissionNoise, 'Gaussian', tigreGaussianNoise);
+                radonProjections = addCTnoise(radonProjections, 'Poisson', tigrePoissionNoise, 'Gaussian', tigreGaussianNoise);
             end            
             
-            projections = double(projections);
+            radonProjections = double(radonProjections);
+            
+            % CONVERT RADON PROJECTIONS TO TRUE INTENSITY
+            
+            startingIntensity = simulation.scan.beamCharacterization.rawIntensity();
+            
+            projections = startingIntensity .* exp(-radonProjections);
             
             % SAVE FILES
             
@@ -958,6 +964,14 @@ classdef Simulation < GyrfalconObject
             end
         end
         
+        function radonSumData = convertProjectionDataToRadonSumData(simulation, projectionData)
+            % data is stored as: I
+            % want to get: sum(\mu x)
+            
+            I_0 = simulation.scan.beamCharacterization.rawIntensity();
+            
+            radonSumData = -log(projectionData./I_0);
+        end
     end
     
 end
