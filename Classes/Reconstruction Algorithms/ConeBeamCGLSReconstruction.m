@@ -1,9 +1,9 @@
-classdef ConeBeamSIRTReconstruction < Reconstruction
-    % ConeBeamSIRTReconstruction
+classdef ConeBeamCGLSReconstruction < Reconstruction
+    % ConeBeamCGLSReconstruction
     
     properties
-        displayName = 'SIRT Algorithm [TIGRE]'
-        fullName = 'SIRT Algorithm (CBCT)'
+        displayName = 'CGLS Algorithm [TIGRE]'
+        fullName = 'CGLS Algorithm (CBCT)'
         
         % reconstruction settings (for Gyrfalcon)
         useRayRejection = false
@@ -12,34 +12,30 @@ classdef ConeBeamSIRTReconstruction < Reconstruction
         numberOfIterations = 25
         forwardProjectionAccuracy = 0.5
         
-        % specific for SIRT
-        lambda = 1
-        lambdaReduction = 0.95
+        % specific for CGLS
         initialImage = TigreInitialImageChoices.none
         verbosity = true
     end
-    
+        
     methods(Static)
         function handle = getSettingsTabHandle(app)
-            handle = app.ConeBeamSIRTSettingsTab;
+            handle = app.ConeBeamCGLSSettingsTab;
         end
     end
     
     methods
         function string = getNameString(recon)
-            string = 'CBCT SIRT';
+            string = 'CBCT CGLS';
         end     
         
         function recon = createFromGUIForSubClass(recon, app)
-            recon.useRayRejection = app.CBCT_SIRT_RayRejectionCheckBox.Value;
+            recon.useRayRejection = app.CBCT_CGLS_RayRejectionCheckBox.Value;
             
-            recon.numberOfIterations = app.CBCT_SIRT_NumberOfIterationsEditField.Value;
-            recon.forwardProjectionAccuracy = app.CBCT_SIRT_ForwardProjectionAccuracyEditField.Value;
+            recon.numberOfIterations = app.CBCT_CGLS_NumberOfIterationsEditField.Value;
+            recon.forwardProjectionAccuracy = app.CBCT_CGLS_ForwardProjectionAccuracyEditField.Value;
             
-            recon.lambda = app.CBCT_SIRT_LambdaEditField.Value;
-            recon.lambdaReduction = app.CBCT_SIRT_LambdaReductionEditField.Value;
-            recon.initialImage = app.CBCT_SIRT_InitialImageDropDown.Value;
-            recon.verbosity = app.CBCT_SIRT_VerboseCheckBox.Value;
+            recon.initialImage = app.CBCT_CGLS_InitialImageDropDown.Value;
+            recon.verbosity = app.CBCT_CGLS_VerboseCheckBox.Value;
         end
         
         function app = setGUI(recon, app)
@@ -51,20 +47,18 @@ classdef ConeBeamSIRTReconstruction < Reconstruction
             
             % set drop-down options
             setDropDownOptions(...
-                app.CBCT_SIRT_InitialImageDropDown,...
+                app.CBCT_CGLS_InitialImageDropDown,...
                 enumeration('TigreInitialImageChoices'),...
                 'displayString');
             
             % set settings  
-            app.CBCT_SIRT_RayRejectionCheckBox.Value = recon.useRayRejection;
+            app.CBCT_CGLS_RayRejectionCheckBox.Value = recon.useRayRejection;
             
-            app.CBCT_SIRT_NumberOfIterationsEditField.Value = recon.numberOfIterations;
-            app.CBCT_SIRT_ForwardProjectionAccuracyEditField.Value = recon.forwardProjectionAccuracy;
+            app.CBCT_CGLS_NumberOfIterationsEditField.Value = recon.numberOfIterations;
+            app.CBCT_CGLS_ForwardProjectionAccuracyEditField.Value = recon.forwardProjectionAccuracy;
             
-            app.CBCT_SIRT_LambdaEditField.Value = recon.lambda;
-            app.CBCT_SIRT_LambdaReductionEditField.Value = recon.lambdaReduction;
-            app.CBCT_SIRT_InitialImageDropDown.Value = recon.initialImage;
-            app.CBCT_SIRT_VerboseCheckBox.Value = recon.verbosity;
+            app.CBCT_CGLS_InitialImageDropDown.Value = recon.initialImage;
+            app.CBCT_CGLS_VerboseCheckBox.Value = recon.verbosity;
         end
                 
         function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
@@ -82,21 +76,15 @@ classdef ConeBeamSIRTReconstruction < Reconstruction
                     rejectionMaps(:,:,i) = single(~rayExclusionMap);
                 end
                 
-                reconDataSet = SIRT_withRayRejection(projections, rejectionMaps, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = CGLS_withRayRejection(projections, rejectionMaps, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
-                    'lambda', recon.lambda,...
-                    'lambda_red', recon.lambdaReduction,...
                     'Init', recon.initialImage.tigreString,...
-                    'Verbose', recon.verbosity,...
-                    'OrderStrategy', recon.orderStrategy.tigreString);
+                    'Verbose', recon.verbosity);
             else
-                reconDataSet = SIRT(projections, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = CGLS(projections, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
-                    'lambda', recon.lambda,...
-                    'lambda_red', recon.lambdaReduction,...
                     'Init', recon.initialImage.tigreString,...
-                    'Verbose', recon.verbosity,...
-                    'OrderStrategy', recon.orderStrategy.tigreString);
+                    'Verbose', recon.verbosity);
             end
             
             % convert data set to Gyrfalcon units
