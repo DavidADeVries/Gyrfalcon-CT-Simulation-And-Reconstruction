@@ -126,7 +126,18 @@ classdef ReconstructionRun < ProcessingRun
             % interpolation type drop-down
             app.ReconstructionRun3DInterpolationTypeDropDown.Value = run.reconstruction.reconDataSetInterpolationType;
                         
+            % detector interpolation
             
+            app.ReconstructionRunWholeDetectorDimsXYEditField.Value = run.reconstruction.processingWholeDetectorDimensions(1);
+            app.ReconstructionRunWholeDetectorDimsZEditField.Value = run.reconstruction.processingWholeDetectorDimensions(2);
+                        
+            app.ReconstructionRunPixelDimsXYEditField.Value = run.reconstruction.processingSingleDetectorDimensions(1);
+            app.ReconstructionRunPixelDimsZEditField.Value = run.reconstruction.processingSingleDetectorDimensions(2);
+            
+            % ray rejection
+            
+            app.ReconstructionRunUseRayExclusionCheckBox.Value = run.reconstruction.useRayRejection;
+                        
             % number of CPUs
             app.ReconstructionRunNumCPUsEditField.Value = run.computerInfo.numCoresUsed;
             app.ReconstructionRunNumCPUsEditField.Limits = [1 run.computerInfo.cpuNumCores];
@@ -153,7 +164,8 @@ classdef ReconstructionRun < ProcessingRun
             run.reconstruction = Reconstruction();
             
             phantom = [];
-            run.reconstruction = run.reconstruction.setReconDataSetDefaults(phantom);
+            detector = [];
+            run.reconstruction = run.reconstruction.setReconDataSetDefaults(phantom, detector);
             
             run.simulationOrImagingScanRun = [];
             
@@ -188,8 +200,36 @@ classdef ReconstructionRun < ProcessingRun
             
             % run the recon
             run = run.startProcessingRun(); % set start time
-            run.reconstruction = ...
-                run.reconstruction.runReconstruction(run, run.simulationOrImagingScanRun, app);
+            
+            % interpolation projection data
+            
+            newString = ' Interpolating Projection Data...';
+            newLine = true;            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                run.reconstruction.organizeDataForReconstruction(run.simulationOrImagingScanRun);
+            run.simulationOrImagingScanRun = simulationOrImagingScanRun;
+            app.workspace.reconstructionRun.simulationOrImagingScanRun.sliceData = {};
+                        
+            newString = 'Complete';
+            newLine = false;            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            % run recon
+                        
+            newString = ' Running Reconstruction...';
+            newLine = true;            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            run.reconstruction = run.reconstruction.runReconstruction(...
+                run, run.simulationOrImagingScanRun, app,...
+                projectionData, rayRejectionMaps);
+            
+            newString = ' Complete';
+            newLine = false;            
+            app = updateStatusOutput(app, newString, newLine);
+            
             run = run.endProcessingRun(); % set end time
             
             

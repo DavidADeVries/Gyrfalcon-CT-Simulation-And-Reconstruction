@@ -4,10 +4,7 @@ classdef ConeBeamSIRTReconstruction < Reconstruction
     properties
         displayName = 'SIRT Algorithm [TIGRE]'
         fullName = 'SIRT Algorithm (CBCT)'
-        
-        % reconstruction settings (for Gyrfalcon)
-        useRayRejection = false
-        
+                
         % reconstruction settings (for TIGRE)
         numberOfIterations = 25
         forwardProjectionAccuracy = 0.5

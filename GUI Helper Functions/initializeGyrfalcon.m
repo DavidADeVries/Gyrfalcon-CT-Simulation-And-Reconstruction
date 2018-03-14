@@ -33,9 +33,6 @@ InterpolationTypes.setDropDown(app.Gen1FBP_InterpolationTypeDropDown);
 
 ImagingScanTypes.setDropDown(app.ImagingScanTypeDropDown);
 
-Units.setPlanarUnitsDropDown(app.OptCtSettings_DetectorPixelDimsXYUnitsDropDown);
-Units.setPlanarUnitsDropDown(app.OptCtSettings_DetectorPixelDimsZUnitsDropDown);
-
 OpticalWavelengthColoursForVistaScanner.setDropDown(app.OptCtSettings_LightSourceColourDropDown);
 
 % *******************************

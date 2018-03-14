@@ -113,6 +113,10 @@ classdef ImagingScanRun
         function phantom = getPhantom(run)
             phantom = []; % threre is no phantom return empty
         end
+        
+        function detector = getDetector(run)
+            detector = run.imagingScan.detector;
+        end
                 
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())

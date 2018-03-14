@@ -2,10 +2,10 @@ function [] = renameFiles()
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
-path = 'E:\Data Files\Git Repos\OptCT Data\Two Jar Test (With Cath - Pre)\data\';
+path = 'G:\CATH 002 With Catheter Ref\reference\';
 
-oldPrefix = 'Two Jar Test (With Cath)_REF_';
-newPrefix = 'Two Jar Test (With Cath - Pre)_DATA_';
+oldPrefix = 'CATH 002 Flood Field_REF_';
+newPrefix = 'CATH 002 With Catheter Ref_REF_';
 
 for i=1:410
     numString = getNumString(i);
@@ -15,6 +15,9 @@ for i=1:410
     
     movefile([path, oldFilename], [path, newFilename]);
 end
+
+movefile([path, oldPrefix, 'Info.xml'], [path, newPrefix, 'Info.xml']);
+movefile([path, oldPrefix, 'dark.bmp'], [path, newPrefix, 'dark.bmp']);
 
 end
 

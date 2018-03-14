@@ -56,9 +56,8 @@ classdef AngleData
                 for xy=1:numPositions(1) %in xy
                     for z=1:numPositions(2) % in z
                         positionName = makePositionName(z, xy, isScanMosiac);
-                        positionFileName = makePositionFileName(positionName);
                         
-                        path = makePath(basePath, positionFileName);
+                        path = makePath(basePath, positionName);
                         
                         data = PositionData;
                         

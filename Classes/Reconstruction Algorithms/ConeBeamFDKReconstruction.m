@@ -9,6 +9,7 @@ classdef ConeBeamFDKReconstruction < Reconstruction
         % specific for FDK
         parker = false
         filter = TigreFilterTypes.ramLakFilter
+        forwardProjectionAccuracy = 0.5
     end
     
     methods(Static)
@@ -51,7 +52,6 @@ classdef ConeBeamFDKReconstruction < Reconstruction
                
             % run reconstruction            
                 reconDataSet = FDK(projections, tigreGeometry, tigreAnglesInRadians,...
-                    recon.numberOfIterations,...
                     'parker', recon.parker,...
                     'filter', recon.filter.tigreString);
             

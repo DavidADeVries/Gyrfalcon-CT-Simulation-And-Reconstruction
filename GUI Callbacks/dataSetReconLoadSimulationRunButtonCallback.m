@@ -27,7 +27,9 @@ if ~all(fileName == 0) % have a selection
             if ~isempty(scanGeometry)
                 choice = scanGeometry.getDefaultAlgorithmChoice();
                 
-                choice = choice.setReconDataSetDefaults(simulationOrImagingScanRun.getPhantom());
+                choice = choice.setReconDataSetDefaults(...
+                    simulationOrImagingScanRun.getPhantom(),...
+                    simulationOrImagingScanRun.getDetector());
                 
                 reconRun = ReconstructionRun;
                 

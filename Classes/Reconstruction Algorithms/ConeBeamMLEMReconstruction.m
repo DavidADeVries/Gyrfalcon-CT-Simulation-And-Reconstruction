@@ -4,10 +4,7 @@ classdef ConeBeamMLEMReconstruction < Reconstruction
     properties
         displayName = 'MLEM Algorithm [TIGRE]'
         fullName = 'MLEM Algorithm (CBCT)'
-        
-        % reconstruction settings (for Gyrfalcon)
-        useRayRejection = false
-        
+                
         % reconstruction settings (for TIGRE)
         numberOfIterations = 25
         forwardProjectionAccuracy = 0.5

@@ -4,10 +4,7 @@ classdef ConeBeamSART_TVReconstruction < Reconstruction
     properties
         displayName = 'SART-TV Algorithm [TIGRE]'
         fullName = 'SART-TV Algorithm (CBCT)'
-        
-        % reconstruction settings (for Gyrfalcon)
-        useRayRejection = false
-        
+                
         % reconstruction settings (for TIGRE)
         numberOfIterations = 25
         forwardProjectionAccuracy = 0.5

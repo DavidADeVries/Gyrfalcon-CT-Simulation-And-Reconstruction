@@ -4,10 +4,7 @@ classdef ConeBeamCGLSReconstruction < Reconstruction
     properties
         displayName = 'CGLS Algorithm [TIGRE]'
         fullName = 'CGLS Algorithm (CBCT)'
-        
-        % reconstruction settings (for Gyrfalcon)
-        useRayRejection = false
-        
+                
         % reconstruction settings (for TIGRE)
         numberOfIterations = 25
         forwardProjectionAccuracy = 0.5

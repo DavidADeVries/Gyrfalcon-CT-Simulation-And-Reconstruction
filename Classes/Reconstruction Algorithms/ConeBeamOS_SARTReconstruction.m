@@ -5,9 +5,6 @@ classdef ConeBeamOS_SARTReconstruction < Reconstruction
         displayName = 'OS-SART Algorithm [TIGRE]'
         fullName = 'OS-SART Algorithm (CBCT)'
         
-        % reconstruction settings (for Gyrfalcon)
-        useRayRejection = false
-        
         % reconstruction settings (for TIGRE)
         numberOfIterations = 25
         forwardProjectionAccuracy = 0.5
