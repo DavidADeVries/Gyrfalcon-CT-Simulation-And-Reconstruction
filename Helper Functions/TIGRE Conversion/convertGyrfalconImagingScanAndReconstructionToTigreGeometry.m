@@ -8,7 +8,7 @@ tigreGeometry.DSD = DSD;
 tigreGeometry.DSO = DSO;
 
 % detector params
-[nDetector, dDetector, sDetector] = getTigreDetectorValues(gyrfalconImagingScan.detector);
+[nDetector, dDetector, sDetector] = getTigreDetectorValues(gyrfalconReconstruction);
 
 tigreGeometry.nDetector = nDetector;
 tigreGeometry.dDetector = dDetector;

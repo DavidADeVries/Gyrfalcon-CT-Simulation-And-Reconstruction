@@ -116,27 +116,28 @@ classdef ScanGeometries
                     
                     projectionData = zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
                     rayRejectionMaps = false & zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
-                    
-                    angleData = simulationOrImagingScanRun.sliceData{1,1}.angleData;
-                    
+                                        
                     origSingleDetectorDimensionsInM = simulationOrImagingScanRun.getImagingSetup().detector.getSingleDetectorDimensionsInM();
                     
                     targetSingleDetectorDimensionsInM = reconstruction.getSingleDetectorDimensionsInM();
                     
                     useRayRejection = reconstruction.useRayRejection;
+                                        
+                    p = parpool();
                     
-                    %p = parpool();
-                    
-                    for i=1:numAngles
+                    parfor i=1:numAngles
+                        [detectorData, rayRejectionMap] = loadProjectionAndRayExclusionMapDataFiles(...
+                            simulationOrImagingScanRun, 1, angles(i), 1, 1);
+                        
                         [projectionData(:,:,i), rayRejectionMaps(:,:,i)] = interpolateProjectionDataForReconstruction(...
-                            angleData{1,i}.positionData{1,1}.detectorData,...
-                            angleData{1,i}.positionData{1,1}.rayRejectionMap,...
+                            detectorData,...
+                            rayRejectionMap,...
                             useRayRejection,...
                             origSingleDetectorDimensionsInM,...
                             targetDetectorDims, targetSingleDetectorDimensionsInM);
                     end
                     
-                   % delete(p);
+                   delete(p);
                 otherwise
                     error('Invalid Scan Geometry');
             end

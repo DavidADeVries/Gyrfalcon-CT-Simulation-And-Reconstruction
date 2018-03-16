@@ -16,9 +16,9 @@ if ~all(fileName == 0) % have a selection
         simulationOrImagingScanRun = loadedData.(Constants.Processing_Run_Var_Name);
         
         if isa(simulationOrImagingScanRun, class(SimulationRun)) || isa(simulationOrImagingScanRun, class(ImagingScanRun))% we're good!
-            h = popupMessage('Loading projection data...', 'Loading...');
-            simulationOrImagingScanRun = simulationOrImagingScanRun.loadData(pathName);
-            delete(h);
+%             h = popupMessage('Loading projection data...', 'Loading...');
+%             simulationOrImagingScanRun = simulationOrImagingScanRun.loadData(pathName);
+%             delete(h);
             
             workspace = app.workspace.createFromGUI(app);
                         

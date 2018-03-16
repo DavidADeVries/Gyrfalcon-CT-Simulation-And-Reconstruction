@@ -60,7 +60,7 @@ classdef Reconstruction
             y = app.ReconstructionRunSlicePixelDimsYEditField.Value;
             z = app.ReconstructionRunSlicePixelDimsZEditField.Value;
             
-            recon.reconSliceVoxelDimensions= [x, y, z] .* Constants.mm_to_m;
+            recon.reconSliceVoxelDimensions= [x, y, z];
             
             x = app.ReconstructionRunDataSetDimsXEditField.Value;
             y = app.ReconstructionRunDataSetDimsYEditField.Value;
@@ -107,14 +107,14 @@ classdef Reconstruction
             end
             
             recon.reconSliceDimensions = dims(1:3);
-            recon.reconSliceVoxelDimensions = recon.reconSliceVoxelDimensionUnits.convertFromM(voxelDimsInM(1:3));
+            recon.reconSliceVoxelDimensions = voxelDimsInM(1:3);
                         
             recon.reconDataSetDimensions = dims;
-            recon.reconDataSetVoxelDimensions = recon.reconDataSetVoxelDimensionUnits.convertFromM(voxelDimsInM);
+            recon.reconDataSetVoxelDimensions = voxelDimsInM;
                     
             if ~isempty(detector)
                 recon.processingWholeDetectorDimensions = detector.wholeDetectorDimensions;
-                recon.processingSingleDetectorDimensions = detector.getSingleDetectorDimensionsInM();
+                recon.processingSingleDetectorDimensions = recon.processingSingleDetectorUnits.convertFromM(detector.getSingleDetectorDimensionsInM());
             else
                 recon.processingWholeDetectorDimensions = [256 256];
                 recon.processingSingleDetectorDimensions = [0.5 0.5];

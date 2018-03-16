@@ -58,27 +58,19 @@ classdef ConeBeamCGLSReconstruction < Reconstruction
             app.CBCT_CGLS_VerboseCheckBox.Value = recon.verbosity;
         end
                 
-        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
+        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, projectionData, rayRejectionMaps)
             % get everything converted for TIGRE
-            [projections, tigreGeometry, tigreAnglesInRadians] = getValuesForTigreReconstruction(recon, simulationOrImagingScanRun);
-               
+            [projectionData, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians] = ...
+                getValuesForTigreReconstruction(recon, simulationOrImagingScanRun, projectionData, rayRejectionMaps);
+            
             % run reconstruction
-            if recon.useRayRejection
-                rejectionMaps = single(zeros(size(projections)));
-                anglesInDeg = simulationOrImagingScanRun.scan.getScanAnglesInDegrees();
-                
-                for i=1:length(anglesInDeg)
-                    [~, rayExclusionMap] = loadProjectionAndRayExclusionMapDataFiles(simulationOrImagingScanRun, 1, anglesInDeg(i), 1, 1);
-                    
-                    rejectionMaps(:,:,i) = single(~rayExclusionMap);
-                end
-                
-                reconDataSet = CGLS_withRayRejection(projections, rejectionMaps, tigreGeometry, tigreAnglesInRadians,...
+            if recon.useRayRejection                                
+                reconDataSet = CGLS_withRayRejection(projectionData, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
                     'Init', recon.initialImage.tigreString,...
                     'Verbose', recon.verbosity);
             else
-                reconDataSet = CGLS(projections, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = CGLS(projectionData, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
                     'Init', recon.initialImage.tigreString,...
                     'Verbose', recon.verbosity);

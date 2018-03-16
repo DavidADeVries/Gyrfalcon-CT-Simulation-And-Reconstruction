@@ -46,12 +46,13 @@ classdef ConeBeamFDKReconstruction < Reconstruction
             app.CBCT_FDK_ParkerCheckBox.Value = recon.parker;
         end
                 
-        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
+        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, projectionData, rayRejectionMaps)
             % get everything converted for TIGRE
-            [projections, tigreGeometry, tigreAnglesInRadians] = getValuesForTigreReconstruction(recon, simulationOrImagingScanRun);
-               
+            [projectionData, ~, tigreGeometry, tigreAnglesInRadians] = ...
+                getValuesForTigreReconstruction(recon, simulationOrImagingScanRun, projectionData, rayRejectionMaps);
+            
             % run reconstruction            
-                reconDataSet = FDK(projections, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = FDK(projectionData, tigreGeometry, tigreAnglesInRadians,...
                     'parker', recon.parker,...
                     'filter', recon.filter.tigreString);
             

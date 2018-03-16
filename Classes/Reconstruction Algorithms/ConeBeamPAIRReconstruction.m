@@ -15,6 +15,8 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
         alphaMatricesSavePath = ''
         alphaMatricesSaveFileName = ''
         
+        zeroBound = 0.0027
+        
         numberPartitions = 64
         numberIterations = 2
         numberAverages = 5
@@ -124,14 +126,14 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
             path = makePath(recon.getRayExclusionMapsSavePath(reconstructionRun), recon.getIterationDirectoryName(iter));
         end
         
-        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app)
+        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, projectionData, rayRejectionMaps)
             
             alphaMatrixPathRoot = 'E:\Data Files\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Alpha Matrices (Opt CT 256x256 - ';
             rayTracePathRoot = 'E:\Data Files\Git Repos\Gyrfalcon Data\Alpha and Ray Trace Matrices\Ray Trace Hit Matrices (Opt CT 256x256 - ';
-            reconSavePathRoot = 'E:\Data Files\Git Repos\Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Catheter In High Res)\Recon 3 (CBCT PAIR)\Matrices and Vectors\Iteration Solutions\Solution (Opt CT 256x256 - ';
             
-            reconRun.createReconDirectory();
             
+            reconSavePathRoot = makePath(reconRun.savePath, 'Matrices and Vectors', 'Iteration Solutions', 'Solution (');
+                        
             numIters = recon.numberIterations + 1;
             recon.createReconComputationDirectories(reconRun, numIters);
             
@@ -146,7 +148,7 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
                 % correspond with the proper ray.
                
                 divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, true);
-               % numBatches = divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, false);
+               % divideProjectionAndRayExclusionDataForBatches(simulationOrImagingScanRun, recon, alphaMatrixPath, recon.numberOfRaysInBatch, true, false);
                 
                 rayTraceLoadPath = recon.rayTraceMatricesLoadPath;
                 
@@ -193,6 +195,10 @@ classdef ConeBeamPAIRReconstruction < Reconstruction
 %             reconstruction_Bottom = performIterativePairReconstruction(...
 %                 simulationOrImagingScanRun, recon, recon.numberPartitions, recon.numberIterations, recon.numberAverages,...
 %                 alphaMatrixPath, initialSolution_Top, true);
+
+            
+            % set to the Reconstruction object
+            recon.reconDataSetSlices = {reconstruction_Top};
         end
     end
     

@@ -9,6 +9,8 @@ classdef GyrfalconWorkspace < GyrfalconObject
         
         reconstructionRun
         
+        reconstructionRunQueue = {}
+        
         imagingScanRun
         
         simulationRunForViewing
@@ -56,6 +58,8 @@ classdef GyrfalconWorkspace < GyrfalconObject
             scanRun = scanRun.setDefaultValues();
             
             workspace.imagingScanRun = scanRun;
+            
+            workspace.reconstructionRunQueue = {};
         end
         
         function [saved, workspaceForGUI, workspaceForParent, workspaceForSaving] = saveChildrenObjects(workspace, defaultSavePath)

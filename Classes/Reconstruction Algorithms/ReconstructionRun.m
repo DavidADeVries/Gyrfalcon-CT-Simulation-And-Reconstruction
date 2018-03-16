@@ -106,7 +106,7 @@ classdef ReconstructionRun < ProcessingRun
             app.ReconstructionRunSliceDimsZEditField.Value = run.reconstruction.reconSliceDimensions(3);
             
             % convert to mm
-            pixelDimsInMM = Units.mm.convertFromM(run.reconstruction.getReconSliceVoxelDimensionsInM());
+            pixelDimsInMM = run.reconstruction.reconSliceVoxelDimensions;
             
             app.ReconstructionRunSlicePixelDimsXEditField.Value = pixelDimsInMM(1);
             app.ReconstructionRunSlicePixelDimsYEditField.Value = pixelDimsInMM(2);
@@ -117,7 +117,7 @@ classdef ReconstructionRun < ProcessingRun
             app.ReconstructionRunDataSetDimsZEditField.Value = run.reconstruction.reconDataSetDimensions(3);
             
             % convert to mm
-            voxelDimsInMM = Units.mm.convertFromM(run.reconstruction.getReconDataSetVoxelDimensionsInM());
+            voxelDimsInMM = run.reconstruction.reconDataSetVoxelDimensions;
             
             app.ReconstructionRunDataSetVoxelDimsXEditField.Value = voxelDimsInMM(1);
             app.ReconstructionRunDataSetVoxelDimsYEditField.Value = voxelDimsInMM(2);
@@ -177,7 +177,7 @@ classdef ReconstructionRun < ProcessingRun
         function currentFolder = getCurrentSaveFolder(run)
             currentFolder = getLastItemFromPath(run.savePath);
         end
-        
+                 
         function [] = createReconDirectory(run)
             newFolder = run.getCurrentSaveFolder();
             
@@ -191,7 +191,7 @@ classdef ReconstructionRun < ProcessingRun
             
             % set status string with recon running
             
-            newString = ['Reconstruction Run Start (', convertTimestampToString(now), ')'];
+            newString = [' Reconstruction Run Start (', convertTimestampToString(now), ')'];
             newLine = true;
             
             app = updateStatusOutput(app, newString, newLine);
@@ -203,7 +203,7 @@ classdef ReconstructionRun < ProcessingRun
             
             % interpolation projection data
             
-            newString = ' Interpolating Projection Data...';
+            newString = '  Interpolating Projection Data...';
             newLine = true;            
             app = updateStatusOutput(app, newString, newLine);
             
@@ -218,7 +218,7 @@ classdef ReconstructionRun < ProcessingRun
             
             % run recon
                         
-            newString = ' Running Reconstruction...';
+            newString = '  Running Reconstruction...';
             newLine = true;            
             app = updateStatusOutput(app, newString, newLine);
             
@@ -226,7 +226,7 @@ classdef ReconstructionRun < ProcessingRun
                 run, run.simulationOrImagingScanRun, app,...
                 projectionData, rayRejectionMaps);
             
-            newString = ' Complete';
+            newString = 'Complete';
             newLine = false;            
             app = updateStatusOutput(app, newString, newLine);
             
@@ -247,7 +247,7 @@ classdef ReconstructionRun < ProcessingRun
             
             % set status string complete
             
-            newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
+            newString = [' Reconstruction Run Complete (', convertTimestampToString(now), ')'];
             newLine = true;
             
             app = updateStatusOutput(app, newString, newLine); 
@@ -277,9 +277,12 @@ classdef ReconstructionRun < ProcessingRun
             run.reconstruction.saveOuput(run.savePath);
             
             % save this, the reconstruction run
+            run.saveReconstructionRunFile();
+        end
+        
+        function [] = saveReconstructionRunFile(run)            
             filename = [getLastItemFromPath(run.savePath), Constants.Matlab_File_Extension];
             save(makePath(run.savePath, filename), Constants.Processing_Run_Var_Name);
-            
         end
         
     end
