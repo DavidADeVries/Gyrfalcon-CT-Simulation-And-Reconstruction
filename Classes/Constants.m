@@ -150,6 +150,8 @@ classdef Constants
         
         Full_Alpha_Matrix_File_Name = 'Full Alpha Matrix';
         Full_Alpha_Matrix_Var_Name = 'alphaMatrix';
+        
+        Projection_Data_Cache_Folder = 'Cached Projections';
                 
         Round_Off_Error_Bound = 1E-9; %1nm
         Round_Off_Level = 10;

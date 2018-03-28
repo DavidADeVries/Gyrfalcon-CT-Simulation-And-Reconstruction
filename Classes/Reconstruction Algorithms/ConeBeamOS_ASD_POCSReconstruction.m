@@ -34,9 +34,7 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
             string = 'CBCT OS-ASD-POCS';
         end     
         
-        function recon = createFromGUIForSubClass(recon, app)
-            recon.useRayRejection = app.CBCT_OSASDPOCS_RayRejectionCheckBox.Value;
-            
+        function recon = createFromGUIForSubClass(recon, app)            
             recon.numberOfIterations = app.CBCT_OSASDPOCS_NumberOfIterationsEditField.Value;
             recon.forwardProjectionAccuracy = app.CBCT_OSASDPOCS_ForwardProjectionAccuracyEditField.Value;
             

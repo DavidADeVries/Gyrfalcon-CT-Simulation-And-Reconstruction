@@ -173,12 +173,15 @@ classdef OpticalCTImagingScan < ImagingScan
             gelBathCutoff = 40000;
             gelBathSpeckCutoff = 1000;
             
-            catheterCutoff = 8000;
-            catheterSpeckCutoff = 500;
+            catheterRefFrameCutoff = 18000;
+            catheterDeltaFrameCutoff = 4.5;
+            
+            
+            catheterSpeckCutoff = 300;
             
             jarEdgeOutsideBuffer = 10; %pixels
             jarEdgeInsideBuffer = 20;%25; %pixels
-            catheterBuffer = 2;
+            catheterBuffer = 1;
             
             % read, calibrate, and save each frame   
             
@@ -194,23 +197,33 @@ classdef OpticalCTImagingScan < ImagingScan
                 % apply dark frame
                 dataFrame = dataFrame - dataDarkFrame;
                 refFrame = refFrame - refDarkFrame;
-                                
-                % ray rejection
-                isBathMap = (dataFrame > gelBathCutoff);% | (refFrame > gelBathCutoff);
-                isBathMap = bwareaopen(isBathMap, gelBathSpeckCutoff);
-                
-                leftJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'left');
-                rightJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'right');
-                
-                catheterMap = refFrame < catheterCutoff;
-                catheterMap = bwareaopen(catheterMap, catheterSpeckCutoff);
-                catheterMap = imdilate(catheterMap, ones(1+2*catheterBuffer));
-                catheterMap = ~bwareaopen(~catheterMap, catheterSpeckCutoff); % fill in catheter if needed
-                                
-                rayExclusionMap = true & (leftJarWallMap | rightJarWallMap | catheterMap);
                                
                 % convert to \sigma(delta_attenuation .* distance)
                 deltaAttenuationFrame = refFrame ./ dataFrame; % log = ln is matlab
+                                
+                % ray rejection
+                %isBathMap = (dataFrame > gelBathCutoff);% | (refFrame > gelBathCutoff);
+                %isBathMap = bwareaopen(isBathMap, gelBathSpeckCutoff);
+                
+                %leftJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'left');
+                %rightJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'right');
+                
+                xBound = 250:760;
+                
+                catheterMap = ...
+                    (refFrame(:,xBound) < catheterRefFrameCutoff) |...
+                    (deltaAttenuationFrame(:,xBound) < (1/catheterDeltaFrameCutoff)) |...
+                    (deltaAttenuationFrame(:,xBound) > (catheterDeltaFrameCutoff));
+                
+                catheterMap = bwareaopen(catheterMap, catheterSpeckCutoff);
+                catheterMap = imdilate(catheterMap, ones(1+2*catheterBuffer));
+                catheterMap = ~bwareaopen(~catheterMap, catheterSpeckCutoff); % fill in catheter if needed
+                               
+                
+                
+               % rayExclusionMap = true & (leftJarWallMap | rightJarWallMap | catheterMap);
+               rayExclusionMap = false & ones(size(refFrame));
+               rayExclusionMap(:,xBound) = true & catheterMap;
                 
                 % correct for axis of rotation (AOR) error
                 % puts axis of rotation in centre of image
@@ -219,6 +232,11 @@ classdef OpticalCTImagingScan < ImagingScan
                 rayExclusionMap = applyAxisOfRotationCorrection(rayExclusionMap, aorCorrection);
                  
                 % save it in the imaging scan run folder
+                if round(anglesInDeg(i),2) == -234.67
+                    disp('Stop!');
+                end
+                
+                
                 angleFolder = makeAngleFolderName(round(anglesInDeg(i),2));
                 mkdir(savePath, angleFolder);
                 

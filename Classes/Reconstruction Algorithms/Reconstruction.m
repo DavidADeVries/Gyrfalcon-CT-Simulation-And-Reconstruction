@@ -171,6 +171,7 @@ classdef Reconstruction
             % resolution the reconstruction will use
             [projectionData, rayRejectionMaps] = scanGeometry.compileAndInterpolateProjectionData(...
                 simulationOrImagingScanRun, reconstruction);
+            projectionData(isnan(projectionData)) = 0;
             
             % convert projection data to cleaned-up Radon transform data
             projectionData = simulationOrImagingScanRun.getImagingSetup().convertProjectionDataToRadonSumData(projectionData);
@@ -178,6 +179,50 @@ classdef Reconstruction
             
             % clear out original data
             simulationOrImagingScanRun.sliceData = {};
+        end
+        
+        function [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = getCachedReconstructionData(recon, simulationOrImagingScanRun)
+            filename = recon.getCachedProjectionDataFilename();
+            
+            loadPath = makePath(simulationOrImagingScanRun.savePath, Constants.Projection_Data_Cache_Folder, filename);
+            
+            if exist(loadPath, 'file')
+                data = load(loadPath);
+                
+                projectionData = data.('projectionData');
+                rayRejectionMaps = data.('rayRejectionMaps');
+                
+                simulationOrImagingScanRun.sliceData = {};
+            else
+                [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                    recon.organizeDataForReconstruction(simulationOrImagingScanRun);
+                
+                if ~exist(makePath(simulationOrImagingScanRun.savePath, Constants.Projection_Data_Cache_Folder), 'dir')
+                    mkdir(simulationOrImagingScanRun.savePath, Constants.Projection_Data_Cache_Folder);
+                end
+                
+                save(loadPath, 'projectionData', 'rayRejectionMaps');
+            end
+        end
+        
+        function filename = getCachedProjectionDataFilename(recon)
+            xy = recon.processingWholeDetectorDimensions(1);
+            z = recon.processingWholeDetectorDimensions(2);
+            
+            detectorDims = [num2str(xy), 'x' num2str(z)];
+            
+            dimsInM = recon.getSingleDetectorDimensionsInM();
+            dimsInMM = dimsInM * Constants.m_to_mm;
+            
+            pixelDims = [num2str(dimsInMM(1)), 'x', num2str(dimsInMM(2)),'mm'];
+            
+            if recon.useRayRejection
+                rayReject = 'RR';
+            else
+                rayReject = '';
+            end
+            
+            filename = ['Projection Data (', detectorDims, ')(', pixelDims, ')(', rayReject, ')', Constants.Matlab_File_Extension];
         end
         
         function recon = reconFullDataSet(recon, simulationOrImagingScanRun)

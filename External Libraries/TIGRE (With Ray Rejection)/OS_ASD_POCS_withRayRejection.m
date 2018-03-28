@@ -1,4 +1,4 @@
-function [ fres ] = OS_ASD_POCS_withRayRejection (proj,rayRejection,geo,angles,maxiter,varargin)
+function [ fres ] = OS_ASD_POCS_withRayRejection(proj,rayRejectionMaps,geo,angles,maxiter,varargin)
 %ASD_POCS Solves theOS_ASD_POCS_withRayRejection total variation constrained image in 3D
 % tomography.
 %
@@ -59,6 +59,7 @@ function [ fres ] = OS_ASD_POCS_withRayRejection (proj,rayRejection,geo,angles,m
 %--------------------------------------------------------------------------
 
 %% parse inputs
+
 [beta,beta_red,ng,verbose,alpha,alpha_red,rmax,epsilon,blocksize,OrderStrategy,nonneg]=parse_inputs(proj,geo,angles,varargin);
 
 % first order the projection angles
@@ -84,7 +85,15 @@ W=Ax(ones(geoaux.nVoxel','single'),geoaux,angles,'ray-voxel');  %
 W(W<min(geo.dVoxel)/4)=Inf;
 W=1./W;
 
-W = W .* rayRejection;
+numRays = Atb(single(rayRejectionMaps),geo,angles,'FDK');
+invalidVoxels = numRays > 300;
+
+newRayRejection = Ax(single(invalidVoxels),geo,angles);
+newRayRejection = newRayRejection > 0;
+
+rayRejectionMaps = newRayRejection | rayRejectionMaps;
+
+W = W .* (~rayRejectionMaps);
 
 % Back-Projection weigth, V
 if ~isfield(geo,'mode')||~strcmp(geo.mode,'parallel')
@@ -98,8 +107,6 @@ else
     V=ones([geo.nVoxel(1:2).',length(angles)],'single');
 end
 
-% V = V .* rayRejection;
-% V(V==0) = Inf;
 
 clear A x y dx dz;
 
@@ -140,14 +147,16 @@ while ~stop_criteria %POCS
             1./sum(V(:,:,orig_index{jj}),3),...
             Atb(W(:,:,orig_index{jj}) .* (proj(:,:,orig_index{jj}) - Ax(f,geo,alphablocks{jj})), geo, alphablocks{jj})...
             );
-        
+%         
         % Non-negativity constrain
         if nonneg
             f=max(f,0);
         end
     end
     
-%    figure(100+iter);imshow(f(:,:,32),[]);
+%     if mod(iter,50) == 0
+%         figure(100+iter);imshow(f(:,:,60),[]);
+%     end
     
     geo.offDetector=offDetector;
     geo.offOrigin=offOrigin;
@@ -194,7 +203,12 @@ while ~stop_criteria %POCS
     % ==========================================================================
     
     c=dot(dg_vec(:),dp_vec(:))/(norm(dg_vec(:),2)*norm(dp_vec(:),2));
-    if (c<-0.99 && dd<=epsilon) || beta<0.005|| iter>maxiter
+    
+    % EDIT!
+    f(invalidVoxels) = 0;
+    
+    %if (c<-0.99 && dd<=epsilon) || beta<0.005|| iter>maxiter
+    if beta<0.005|| iter>maxiter
         if verbose
             disp(['Stopping criteria met']);
             disp(['   c    = ' num2str(c)]);

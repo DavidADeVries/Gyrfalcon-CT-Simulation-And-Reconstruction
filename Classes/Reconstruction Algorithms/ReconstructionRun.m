@@ -9,6 +9,8 @@ classdef ReconstructionRun < ProcessingRun
         reconPhantomDataSet %reconDataSet but interpolated to size of phantom data set (NaN at voxels if reconDataSet smaller than phantom)
         
         performanceType
+        
+        useOrCreateCachedProjectionData = true
     end
     
     methods
@@ -186,9 +188,7 @@ classdef ReconstructionRun < ProcessingRun
             mkdir(path, newFolder);
         end
         
-        function [] = runReconstruction(run, app)
-            run = run.createFromGUI(app);
-            
+        function [] = runReconstruction(run, app)            
             % set status string with recon running
             
             newString = [' Reconstruction Run Start (', convertTimestampToString(now), ')'];
@@ -207,9 +207,16 @@ classdef ReconstructionRun < ProcessingRun
             newLine = true;            
             app = updateStatusOutput(app, newString, newLine);
             
-            [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
-                run.reconstruction.organizeDataForReconstruction(run.simulationOrImagingScanRun);
+            if run.useOrCreateCachedProjectionData
+                [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                    run.reconstruction.getCachedReconstructionData(run.simulationOrImagingScanRun);
+            else
+                [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                    run.reconstruction.organizeDataForReconstruction(run.simulationOrImagingScanRun);
+            end
+                        
             run.simulationOrImagingScanRun = simulationOrImagingScanRun;
+            
             app.workspace.reconstructionRun.simulationOrImagingScanRun.sliceData = {};
                         
             newString = 'Complete';
