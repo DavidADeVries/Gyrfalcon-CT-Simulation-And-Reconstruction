@@ -130,11 +130,7 @@ classdef ReconstructionRun < ProcessingRun
                         
             % detector interpolation
             
-            app.ReconstructionRunWholeDetectorDimsXYEditField.Value = run.reconstruction.processingWholeDetectorDimensions(1);
-            app.ReconstructionRunWholeDetectorDimsZEditField.Value = run.reconstruction.processingWholeDetectorDimensions(2);
-                        
-            app.ReconstructionRunPixelDimsXYEditField.Value = run.reconstruction.processingSingleDetectorDimensions(1);
-            app.ReconstructionRunPixelDimsZEditField.Value = run.reconstruction.processingSingleDetectorDimensions(2);
+            setDetectorInterpolationGUI(app, run.reconstruction);
             
             % ray rejection
             

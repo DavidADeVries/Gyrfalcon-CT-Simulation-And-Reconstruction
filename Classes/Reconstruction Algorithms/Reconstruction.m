@@ -22,6 +22,7 @@ classdef Reconstruction
         reconDataSetLocation
         reconDataSetLocationUnits = Units.m
         
+        interpolateDetectorData = false
         processingWholeDetectorDimensions = [256 256]
         processingSingleDetectorDimensions = [0.5 0.5]
         
@@ -74,6 +75,8 @@ classdef Reconstruction
             
             recon.reconDataSetVoxelDimensions = [x, y, z];
             
+            recon.interpolateDetectorData = app.ReconstructionRunInterpolateDetectorDataCheckBox.Value;
+            
             recon.reconDataSetInterpolationType = app.ReconstructionRun3DInterpolationTypeDropDown.Value;
             
             xy = app.ReconstructionRunWholeDetectorDimsXYEditField.Value;
@@ -112,6 +115,8 @@ classdef Reconstruction
             recon.reconDataSetDimensions = dims;
             recon.reconDataSetVoxelDimensions = voxelDimsInM;
                     
+            recon.interpolateDetectorData = false;
+            
             if ~isempty(detector)
                 recon.processingWholeDetectorDimensions = detector.wholeDetectorDimensions;
                 recon.processingSingleDetectorDimensions = recon.processingSingleDetectorUnits.convertFromM(detector.getSingleDetectorDimensionsInM());
@@ -165,17 +170,14 @@ classdef Reconstruction
         end
         
         function [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = organizeDataForReconstruction(reconstruction, simulationOrImagingScanRun)
+                
             [scanGeometry] = simulationOrImagingScanRun.findScanGeometry();
             
             % interpolate data from what resolution it was obtained at to
             % resolution the reconstruction will use
-            [projectionData, rayRejectionMaps] = scanGeometry.compileAndInterpolateProjectionData(...
+            [projectionData, rayRejectionMaps] = scanGeometry.compileProjectionData(...
                 simulationOrImagingScanRun, reconstruction);
             projectionData(isnan(projectionData)) = 0;
-            
-            % convert projection data to cleaned-up Radon transform data
-            projectionData = simulationOrImagingScanRun.getImagingSetup().convertProjectionDataToRadonSumData(projectionData);
-            projectionData = correctRadonSumData(projectionData);
             
             % clear out original data
             simulationOrImagingScanRun.sliceData = {};

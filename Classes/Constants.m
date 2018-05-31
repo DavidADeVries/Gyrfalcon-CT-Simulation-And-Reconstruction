@@ -45,6 +45,7 @@ classdef Constants
         AVI_File_Extension = '.avi';
         XML_File_Extension = '.xml';
         BMP_File_Extension = '.bmp';
+        VFF_File_Extension = '.vff';
                 
         Processing_Run_Var_Name = 'run';
         Imaging_Run_Var_Name = 'run';

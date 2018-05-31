@@ -20,7 +20,12 @@ classdef OpticalCTImagingScan < ImagingScan
     % colour of the light source used during the optical imaging
     
     properties
-        vistaScannerHeaderData    
+        vistaScannerHeaderData
+        
+        vistaReconstructionData
+        
+        vistaReconstructionVoxelDimensions
+        vistaReconstructionVoxelDimensionsUnits = Units.mm
         
         usedLightSourceColour
     end
@@ -133,6 +138,12 @@ classdef OpticalCTImagingScan < ImagingScan
             imagingScan.source = source;
             imagingScan.scan = scan;
             
+            % **************************************
+            % Load and cache Vista 3D Reconstruction
+            % **************************************
+            
+            imagingScan = importVistaReconstruction(imagingScan, importPath);            
+            
             % *****************************************
             % Load, process, and save imaging scan data
             % *****************************************
@@ -231,12 +242,7 @@ classdef OpticalCTImagingScan < ImagingScan
                 detectorData = applyAxisOfRotationCorrection(deltaAttenuationFrame, aorCorrection);
                 rayExclusionMap = applyAxisOfRotationCorrection(rayExclusionMap, aorCorrection);
                  
-                % save it in the imaging scan run folder
-                if round(anglesInDeg(i),2) == -234.67
-                    disp('Stop!');
-                end
-                
-                
+                % save it in the imaging scan run folder                
                 angleFolder = makeAngleFolderName(round(anglesInDeg(i),2));
                 mkdir(savePath, angleFolder);
                 
@@ -245,6 +251,24 @@ classdef OpticalCTImagingScan < ImagingScan
                 save(path, Constants.Detector_Data_Var_Name); % save 'detectorData'
                 save(makePath(savePath, angleFolder, rayExclusionFileName), Constants.Ray_Exclusion_Map_Var_Name); % save ray exclusion map
             end         
+        end
+        
+        function imagingScan = importVistaReconstruction(imagingScan, importPath)            
+            files = dir(importPath);
+            
+            for i=1:length(files)
+                filename = files(i).name;
+                len = length(filename);
+                
+                if len >= 4 && strcmp(filename(end-3:end), Constants.VFF_File_Extension) % got the recon
+                    [reconData, voxelDimsInMM] = loadOpticalCtVistaRecon(makePath(importPath, filename));
+                    
+                    imagingScan.vistaReconstructionData = reconData;
+                    imagingScan.vistaReconstructionVoxelDimensions = imagingScan.vistaReconstructionVoxelDimensionsUnits.convertFromM(Units.mm.convertToM(voxelDimsInMM));
+                    
+                    break;
+                end
+            end
         end
     end
 end
@@ -336,9 +360,9 @@ function frames = applyAxisOfRotationCorrection(frames, correction)
     %to shift to the right, positive to shift to the left
     
     if correction < 0
-       frames = frames(:,1:end-(-correction)-1);
+       frames = frames(:,1:end-2*(-correction));
     elseif correction > 0
-       frames = frames(:,correction+1:end);
+       frames = frames(:,1+2*correction:end);
     end
 
 end

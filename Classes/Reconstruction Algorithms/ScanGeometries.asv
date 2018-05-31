@@ -164,14 +164,10 @@ classdef ScanGeometries
                         [detectorData, rayRejectionMap] = loadProjectionAndRayExclusionMapDataFiles(...
                             simulationOrImagingScanRun, 1, angles(i), 1, 1);
                         
-                        % crop down data as needed
                         dataDims = fliplr(size(detectorData)); % fliplr so in [xy,z] format
                         
-                        starts = ( (dataDims - targetDetectorDims) ./ 2) + 1;
-                        ends = starts + targetDetectorDims - 1;
+                        starts
                         
-                        detectorData = detectorData(starts(2):ends(2), starts(1):ends(1));
-                        rayRejectionMap = rayRejectionMap(starts(2):ends(2), starts(1):ends(1));
                         
                         % convert projection data to cleaned-up Radon transform data
                         detectorData = correctProjectionData(detectorData);
