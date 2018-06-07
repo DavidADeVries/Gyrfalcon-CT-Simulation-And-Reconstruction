@@ -143,6 +143,11 @@ classdef ImagingScanRun
                 app.ImageContrastLowEditField.Enable = 'off';
                 app.ImageContrastHighEditField.Enable = 'off';
                 app.SimulationViewerLoopThroughAnglesButton.Enable = 'off';
+                
+                app.I_0Button.Enable = 'off';
+                app.IButton.Enable = 'off';
+                app.I_0IButton.Enable = 'off';
+                app.lnI_0IButton.Enable = 'off';
             else
                 app.SimulationViewerFilePathLabel.Text = run.savePath;
                 
@@ -189,6 +194,11 @@ classdef ImagingScanRun
                 app.ImageContrastLowEditField.Enable = 'on';
                 app.ImageContrastHighEditField.Enable = 'on';
                 app.SimulationViewerLoopThroughAnglesButton.Enable = 'on';
+                
+                app.I_0Button.Enable = 'on';
+                app.IButton.Enable = 'on';
+                app.I_0IButton.Enable = 'on';
+                app.lnI_0IButton.Enable = 'on';
                 
                 showSimulationViewImage(app);
             end            
@@ -320,14 +330,25 @@ classdef ImagingScanRun
                 angleFolder,...
                 positionDetectorDataFilename);
             
-            fileData = load(loadPath);
+            data = load(loadPath);
+    
+            detectorData_I0 = data.(Constants.Detector_Data_I0_Var_Name);
+            detectorData_I = data.(Constants.Detector_Data_I_Var_Name);
             
-            image = fileData.(Constants.Detector_Data_Var_Name);
+            % depending on selection choose what to display
             
-            map = load(makePath(run.savePath, sliceFolder, angleFolder, 'Position (1,1) Ray Exclusion Map.mat'));
-            map = map.rayExclusionMap;
-            
-            %image(map) = 0;
+            switch app.ImagetoDisplayButtonGroup.SelectedObject.Text
+                case 'I_0'
+                    image = detectorData_I0;
+                case 'I'
+                    image = detectorData_I;
+                case 'I_0 / I'
+                    image = detectorData_I0 ./ detectorData_I;
+                case 'ln( I_0 / I )'
+                    image = log(detectorData_I0 ./ detectorData_I);
+                otherwise
+                    error(['Invalid image display type: ', app.ImagetoDisplayButtonGroup.SelectedObject.Text]);
+            end
         end
                   
         function run = createSaveDir(run)

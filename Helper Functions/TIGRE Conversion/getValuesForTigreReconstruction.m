@@ -4,8 +4,6 @@ function [projections, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians] = 
 [tigreGeometry, tigreAnglesInRadians] = convertGyrfalconImagingScanAndReconstructionToTigreGeometry(...
     simulationOrImagingScanRun.getImagingSetup(), recon);
 
-simulationOrImagingScanRun.loadData(simulationOrImagingScanRun.savePath);
-
 % TIGRE needs projections in single precision
 projections = single(projections);
 rayRejectionMaps = single(rayRejectionMaps);

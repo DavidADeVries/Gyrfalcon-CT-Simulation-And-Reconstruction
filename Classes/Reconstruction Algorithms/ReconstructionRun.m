@@ -10,7 +10,7 @@ classdef ReconstructionRun < ProcessingRun
         
         performanceType
         
-        useOrCreateCachedProjectionData = true
+        useOrCreateCachedInterpolationProjectionData = true
     end
     
     methods
@@ -22,7 +22,7 @@ classdef ReconstructionRun < ProcessingRun
             elseif app.ReconstructionRunHighWithGPUButton.Value
                 run.performanceType = ReconstructionRunPerformanceTypes.highWithGPU;
             else
-                error('Invalid performace type!');
+                error('Invalid performance type!');
             end
             
             if run.performanceType == ReconstructionRunPerformanceTypes.highWithMultipleCPUs
@@ -38,6 +38,7 @@ classdef ReconstructionRun < ProcessingRun
             end
             
             run.notes = app.ReconstructionRunNotesTextArea.Value;
+            run.useOrCreateCachedInterpolationProjectionData = app.ReconstructionRunInterpolateDetectorDataCheckBox.Value;
             
             if ~strcmp(class(run.reconstruction), class(Reconstruction))
                 run.reconstruction = run.reconstruction.createFromGUI(app);
@@ -199,11 +200,11 @@ classdef ReconstructionRun < ProcessingRun
             
             % interpolation projection data
             
-            newString = '  Interpolating Projection Data...';
+            newString = '  Loading/Interpolating Projection Data...';
             newLine = true;            
             app = updateStatusOutput(app, newString, newLine);
             
-            if run.useOrCreateCachedProjectionData
+            if run.useOrCreateCachedInterpolationProjectionData
                 [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
                     run.reconstruction.getCachedReconstructionData(run.simulationOrImagingScanRun);
             else

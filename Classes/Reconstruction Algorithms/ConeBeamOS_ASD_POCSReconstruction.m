@@ -6,21 +6,24 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
         fullName = 'OS-ASD-POCS Algorithm (CBCT)'
                 
         % reconstruction settings (for TIGRE)
-        numberOfIterations = 25
-        forwardProjectionAccuracy = 0.5
+        numberOfIterations = 10
+        forwardProjectionAccuracy = 0.25
         
         % specific for OS-SART
-        blockSize = 20
+        initialBlockSize = 26
+        finalBlockSize = 2
+        blockSizeReductionPower = 1/2
+        
         lambda = 1
-        lambdaReduction = 0.95
+        lambdaReduction = 1
         orderStrategy = TigreOrderStrategies.angularDistance
         verbosity = true
         
         numberOfTvIterations = 20
         maxL2ErrorRatio = 0.2
         updateRatio = 0.95
-        alpha = 0.002
-        alphaReduction = 0.95
+        alpha = 0.25
+        alphaReduction = 1
     end
         
     methods(Static)
@@ -38,7 +41,10 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
             recon.numberOfIterations = app.CBCT_OSASDPOCS_NumberOfIterationsEditField.Value;
             recon.forwardProjectionAccuracy = app.CBCT_OSASDPOCS_ForwardProjectionAccuracyEditField.Value;
             
-            recon.blockSize = app.CBCT_OSASDPOCS_BlockSizeEditField.Value;
+            recon.initialBlockSize = app.CBCT_OSASDPOCS_InitialBlockSizeEditField.Value;
+            recon.finalBlockSize = app.CBCT_OSASDPOCS_FinalBlockSizeEditField.Value;
+            recon.blockSizeReductionPower = app.CBCT_OSASDPOCS_BlockSizeReductionPowerEditField.Value;
+            
             recon.lambda = app.CBCT_OSASDPOCS_LambdaEditField.Value;
             recon.lambdaReduction = app.CBCT_OSASDPOCS_LambdaReductionEditField.Value;
             recon.orderStrategy = app.CBCT_OSASDPOCS_OrderStrategyDropDown.Value;
@@ -70,7 +76,10 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
             app.CBCT_OSASDPOCS_NumberOfIterationsEditField.Value = recon.numberOfIterations;
             app.CBCT_OSASDPOCS_ForwardProjectionAccuracyEditField.Value = recon.forwardProjectionAccuracy;
             
-            app.CBCT_OSASDPOCS_BlockSizeEditField.Value = recon.blockSize;
+            app.CBCT_OSASDPOCS_InitialBlockSizeEditField.Value = recon.initialBlockSize;
+            app.CBCT_OSASDPOCS_FinalBlockSizeEditField.Value = recon.finalBlockSize;
+            app.CBCT_OSASDPOCS_BlockSizeReductionPowerEditField.Value = recon.blockSizeReductionPower;
+            
             app.CBCT_OSASDPOCS_LambdaEditField.Value = recon.lambda;
             app.CBCT_OSASDPOCS_LambdaReductionEditField.Value = recon.lambdaReduction;
             app.CBCT_OSASDPOCS_OrderStrategyDropDown.Value = recon.orderStrategy;
@@ -104,9 +113,13 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
                     'maxL2err', im3Dnorm(FDK(projectionData, tigreGeometry, tigreAnglesInRadians),'L2')*recon.maxL2ErrorRatio,...
                     'Ratio', recon.updateRatio);
             else
-                reconDataSet = OS_ASD_POCS(projectionData, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = OSC_TV2(...
+                    app,...
+                    projectionData, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
-                    'BlockSize', recon.blockSize,...
+                    'initialBlockSize', recon.initialBlockSize,...
+                    'finalBlockSize', recon.finalBlockSize,...
+                    'blockSizeReductionPower', recon.blockSizeReductionPower,...
                     'lambda', recon.lambda,...
                     'lambda_red', recon.lambdaReduction,...
                     'Verbose', recon.verbosity,...

@@ -178,6 +178,11 @@ classdef SimulationRun < ProcessingRun
                 app.ImageContrastLowEditField.Enable = 'off';
                 app.ImageContrastHighEditField.Enable = 'off';
                 app.SimulationViewerLoopThroughAnglesButton.Enable = 'off';
+                
+                app.I_0Button.Enable = 'off';
+                app.IButton.Enable = 'off';
+                app.I_0IButton.Enable = 'off';
+                app.lnI_0IButton.Enable = 'off';
             else
                 app.SimulationViewerFilePathLabel.Text = run.savePath;
                 
@@ -224,6 +229,11 @@ classdef SimulationRun < ProcessingRun
                 app.ImageContrastLowEditField.Enable = 'on';
                 app.ImageContrastHighEditField.Enable = 'on';
                 app.SimulationViewerLoopThroughAnglesButton.Enable = 'on';
+                
+                app.I_0Button.Enable = 'on';
+                app.IButton.Enable = 'on';
+                app.I_0IButton.Enable = 'on';
+                app.lnI_0IButton.Enable = 'on';
                 
                 showSimulationViewImage(app);
             end            

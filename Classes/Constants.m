@@ -76,8 +76,9 @@ classdef Constants
         Position_Filename = 'Position';
         All_Positions_Filename = 'All Positions';
         
-        Detector_Data_Filename = 'Detector Data';
-        Detector_Data_Var_Name = 'detectorData';
+        Detector_Data_Filename = 'Detector Data';   
+        Detector_Data_I0_Var_Name = 'detectorData_I0';    
+        Detector_Data_I_Var_Name = 'detectorData_I';         
         
         Recon_Slices_Folder_Name = 'Slices';
         Recon_Slices_File_Name = 'Slice';
