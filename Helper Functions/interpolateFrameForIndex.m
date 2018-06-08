@@ -1,4 +1,4 @@
-function [value, isRejected] = interpolateFrameForIndex(x, y, targetLocationInM, targetPixelDimsInM, frame, rayRejectionMap, detectorPixelDimsInM)
+function [value_I0, value_I, isRejected] = interpolateFrameForIndex(x, y, targetLocationInM, targetPixelDimsInM, frame_I0, frame_I, rayRejectionMap, detectorPixelDimsInM)
 %function [value, isRejected] = interpolateFrameForIndex(x, y, targetLocationInM, targetPixelDimsInM, frame, rayRejectionMap, detectorPixelDimsInM)
 
     xLeft = targetLocationInM(1) + (x-1)*targetPixelDimsInM(1);
@@ -25,9 +25,10 @@ function [value, isRejected] = interpolateFrameForIndex(x, y, targetLocationInM,
 
     [colIndex,rowIndex] = meshgrid(xIndices, yIndices);
     
-    frameIndices = sub2ind(size(frame), rowIndex, colIndex);
+    frameIndices = sub2ind(size(frame_I), rowIndex, colIndex);
     
-    pixelVals = frame(frameIndices);
+    pixelVals_I0 = frame_I0(frameIndices);
+    pixelVals_I = frame_I(frameIndices);
     rayRejectVals = rayRejectionMap(frameIndices);
     
     isRejected = all(all(rayRejectVals));
@@ -38,7 +39,7 @@ function [value, isRejected] = interpolateFrameForIndex(x, y, targetLocationInM,
 
     areasNorm = areas ./ totalArea;
 
-    weightedPixelVals = pixelVals .* areasNorm;
+    value_I0 = sum(sum(pixelVals_I0 .* areasNorm));    
+    value_I = sum(sum(pixelVals_I .* areasNorm));
 
-    value = sum(sum(weightedPixelVals));
 end

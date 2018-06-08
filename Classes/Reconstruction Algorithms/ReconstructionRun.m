@@ -205,10 +205,10 @@ classdef ReconstructionRun < ProcessingRun
             app = updateStatusOutput(app, newString, newLine);
             
             if run.useOrCreateCachedInterpolationProjectionData
-                [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                [detectorData_I0, detectorData_I, rayRejectionMaps, simulationOrImagingScanRun] = ...
                     run.reconstruction.getCachedReconstructionData(run.simulationOrImagingScanRun);
             else
-                [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                [detectorData_I0, detectorData_I, rayRejectionMaps, simulationOrImagingScanRun] = ...
                     run.reconstruction.organizeDataForReconstruction(run.simulationOrImagingScanRun);
             end
                         
@@ -228,7 +228,7 @@ classdef ReconstructionRun < ProcessingRun
             
             run.reconstruction = run.reconstruction.runReconstruction(...
                 run, run.simulationOrImagingScanRun, app,...
-                projectionData, rayRejectionMaps);
+                detectorData_I0, detectorData_I, rayRejectionMaps);
             
             newString = 'Complete';
             newLine = false;            

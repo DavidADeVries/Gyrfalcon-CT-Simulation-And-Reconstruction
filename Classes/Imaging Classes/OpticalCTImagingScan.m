@@ -29,6 +29,24 @@ classdef OpticalCTImagingScan < ImagingScan
         
         usedLightSourceColour
     end
+
+    methods (Static)        
+        function radonSumData = convertProjectionDataToRadonSumData(detectorData_I0, detectorData_I, correctProjectionData, correctRadonSumData)
+            % want to get: sum(\del\mu x)
+            
+            detectorDataRatio = detectorData_I0 ./ detectorData_I;
+            
+            if correctProjectionData
+                detectorDataRatio = correctProjectionData(detectorDataRatio);
+            end
+
+            radonSumData = log(detectorDataRatio); % want \del\mu's to be positive
+            
+            if correctRadonSumData
+                radonSumData = correctRadonSumData(radonSumData);
+            end
+        end        
+    end
     
     methods
         function scan = OpticalCTImagingScan()
@@ -50,13 +68,6 @@ classdef OpticalCTImagingScan < ImagingScan
         
         function imagingScan = createFromGUI(imagingScan, app)
             imagingScan.usedLightSourceColour = app.OptCtSettings_LightSourceColourDropDown.Value;
-        end
-        
-        function radonSumData = convertProjectionDataToRadonSumData(imagingScan, projectionData)
-            % data is stored as: (I_0 / I)
-            % want to get: sum(\del\mu x)
-                      
-            radonSumData = log(projectionData); % want \del\mu's to be positive
         end
         
         function dimsInM = getTargetPixelDimensionsInM(imagingScan)

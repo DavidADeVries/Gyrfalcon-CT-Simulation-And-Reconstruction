@@ -4,7 +4,7 @@ function app = updateStatusOutput(app, newString, newLine)
 currentString = app.StatusOutputTextArea.Value;
 
 if newLine
-    app.StatusOutputTextArea.Value = [currentString; {newString}];
+    stringToWrite = [currentString; {newString}];
 else
     lastString = currentString{end};
     
@@ -12,10 +12,12 @@ else
     
     currentString{end} = lastString;
     
-    app.StatusOutputTextArea.Value = currentString;
+    stringToWrite = currentString;
 end
 
-drawnow;
+app.StatusOutputTextArea.Value = stringToWrite;
+
+waitfor(app.StatusOutputTextArea, 'Value', stringToWrite);
 
 end
 

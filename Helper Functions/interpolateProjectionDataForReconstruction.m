@@ -1,7 +1,7 @@
-function [interpolatedImage, interpolatedRayRejectionMap] = interpolateProjectionDataForReconstruction(projectionImage, rayRejectionMap, useRayRejection, origPixelDimsInM, targetDetectorDims, targetPixelDimsInM)
+function [interpolatedData_I0, interpolatedData_I, interpolatedRayRejectionMap] = interpolateProjectionDataForReconstruction(detectorData_I0, detectorData_I, rayRejectionMap, useRayRejection, origPixelDimsInM, targetDetectorDims, targetPixelDimsInM)
 %[interpolatedImage, interpolatedRayRejectionMap] = interpolateProjectionDataForReconstruction(projectionImage, rayRejectionMap, useRayRejection, origPixelDimsInM, targetDetectorDims, targetPixelDimsInM)
 
-imageDims = size(projectionImage);
+imageDims = size(detectorData_I0);
 origDetectorSize = [imageDims(2), imageDims(1)];
 
 origDimsInM = origDetectorSize .* origPixelDimsInM;
@@ -20,9 +20,9 @@ end
 fn = @(x,y) interpolateFrameForIndex_mex(...
     x, y,...
     targetLocationInM, targetPixelDimsInM,...
-    projectionImage, rayRejectionMap, origPixelDimsInM);
+    detectorData_I0, detectorData_I, rayRejectionMap, origPixelDimsInM);
 
-[interpolatedImage, interpolatedRayRejectionMap] ....
+[interpolatedData_I0, interpolatedData_I, interpolatedRayRejectionMap] ....
     = arrayfun(fn, xVals, yVals);
 
 end

@@ -4,15 +4,13 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
     properties
         displayName = 'OS-ASD-POCS Algorithm [TIGRE]'
         fullName = 'OS-ASD-POCS Algorithm (CBCT)'
-                
+        
         % reconstruction settings (for TIGRE)
-        numberOfIterations = 10
+        numberOfIterations = 25
         forwardProjectionAccuracy = 0.25
         
         % specific for OS-SART
-        initialBlockSize = 26
-        finalBlockSize = 2
-        blockSizeReductionPower = 1/2
+        blockSize = 20
         
         lambda = 1
         lambdaReduction = 1
@@ -25,7 +23,7 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
         alpha = 0.25
         alphaReduction = 1
     end
-        
+    
     methods(Static)
         function handle = getSettingsTabHandle(app)
             handle = app.ConeBeamOSASDPOCSSettingsTab;
@@ -35,15 +33,13 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
     methods
         function string = getNameString(recon)
             string = 'CBCT OS-ASD-POCS';
-        end     
+        end
         
-        function recon = createFromGUIForSubClass(recon, app)            
+        function recon = createFromGUIForSubClass(recon, app)
             recon.numberOfIterations = app.CBCT_OSASDPOCS_NumberOfIterationsEditField.Value;
             recon.forwardProjectionAccuracy = app.CBCT_OSASDPOCS_ForwardProjectionAccuracyEditField.Value;
             
-            recon.initialBlockSize = app.CBCT_OSASDPOCS_InitialBlockSizeEditField.Value;
-            recon.finalBlockSize = app.CBCT_OSASDPOCS_FinalBlockSizeEditField.Value;
-            recon.blockSizeReductionPower = app.CBCT_OSASDPOCS_BlockSizeReductionPowerEditField.Value;
+            recon.blockSize = app.CBCT_OSASDPOCS_InitialBlockSizeEditField.Value;
             
             recon.lambda = app.CBCT_OSASDPOCS_LambdaEditField.Value;
             recon.lambdaReduction = app.CBCT_OSASDPOCS_LambdaReductionEditField.Value;
@@ -70,15 +66,11 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
                 enumeration('TigreOrderStrategies'),...
                 'displayString');
             
-            % set settings  
-            app.CBCT_OSASDPOCS_RayRejectionCheckBox.Value = recon.useRayRejection;
-            
+            % set settings            
             app.CBCT_OSASDPOCS_NumberOfIterationsEditField.Value = recon.numberOfIterations;
             app.CBCT_OSASDPOCS_ForwardProjectionAccuracyEditField.Value = recon.forwardProjectionAccuracy;
             
-            app.CBCT_OSASDPOCS_InitialBlockSizeEditField.Value = recon.initialBlockSize;
-            app.CBCT_OSASDPOCS_FinalBlockSizeEditField.Value = recon.finalBlockSize;
-            app.CBCT_OSASDPOCS_BlockSizeReductionPowerEditField.Value = recon.blockSizeReductionPower;
+            app.CBCT_OSASDPOCS_InitialBlockSizeEditField.Value = recon.blockSize;
             
             app.CBCT_OSASDPOCS_LambdaEditField.Value = recon.lambda;
             app.CBCT_OSASDPOCS_LambdaReductionEditField.Value = recon.lambdaReduction;
@@ -91,16 +83,24 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
             app.CBCT_OSASDPOCS_AlphaEditField.Value = recon.alpha;
             app.CBCT_OSASDPOCS_AlphaReductionEditField.Value = recon.alphaReduction;
         end
-                
-        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, projectionData, rayRejectionMaps)
+        
+        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, detectorData_I0, detectorData_I, rayRejectionMaps)
+            % convert projection data to cleaned-up Radon transform data            
+            correctProjectionData = true;
+            correctRadonSumData = true;
+            
+            radonSumProjections = simulationOrImagingScanRun.getImagingSetup().convertProjectionDataToRadonSumData(...
+                detectorData_I0, detectorData_I,...
+                correctProjectionData, correctRadonSumData);
+            
             % get everything converted for TIGRE
-            [projectionData, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians] = ...
-                getValuesForTigreReconstruction(recon, simulationOrImagingScanRun, projectionData, rayRejectionMaps);
-               
+            [~, radonSumProjections, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians] = ...
+                getValuesForTigreReconstruction(recon, simulationOrImagingScanRun, radonSumProjections, [], rayRejectionMaps);
+            
             % run reconstruction
             if recon.useRayRejection
                 
-                reconDataSet = OS_ASD_POCS_withRayRejection(projectionData, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = OS_ASD_POCS_withRayRejection(radonSumProjections, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
                     'BlockSize', recon.blockSize,...
                     'lambda', recon.lambda,...
@@ -110,16 +110,13 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
                     'TViter', recon.numberOfTvIterations,...
                     'alpha', recon.alpha,...
                     'alpha_red', recon.alphaReduction,...
-                    'maxL2err', im3Dnorm(FDK(projectionData, tigreGeometry, tigreAnglesInRadians),'L2')*recon.maxL2ErrorRatio,...
+                    'maxL2err', im3Dnorm(FDK(radonSumProjections, tigreGeometry, tigreAnglesInRadians),'L2')*recon.maxL2ErrorRatio,...
                     'Ratio', recon.updateRatio);
             else
-                reconDataSet = OSC_TV2(...
-                    app,...
-                    projectionData, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians,...
+                reconDataSet = OS_ASD_POCS(...
+                    radonSumProjections, rayRejectionMaps, tigreGeometry, tigreAnglesInRadians,...
                     recon.numberOfIterations,...
-                    'initialBlockSize', recon.initialBlockSize,...
-                    'finalBlockSize', recon.finalBlockSize,...
-                    'blockSizeReductionPower', recon.blockSizeReductionPower,...
+                    'BlockSize', recon.blockSize,...
                     'lambda', recon.lambda,...
                     'lambda_red', recon.lambdaReduction,...
                     'Verbose', recon.verbosity,...
@@ -127,7 +124,7 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
                     'TViter', recon.numberOfTvIterations,...
                     'alpha', recon.alpha,...
                     'alpha_red', recon.alphaReduction,...
-                    'maxL2err', im3Dnorm(FDK(projectionData, tigreGeometry, tigreAnglesInRadians),'L2')*recon.maxL2ErrorRatio,...
+                    'maxL2err', im3Dnorm(FDK(radonSumProjections, tigreGeometry, tigreAnglesInRadians),'L2')*recon.maxL2ErrorRatio,...
                     'Ratio', recon.updateRatio);
             end
             
@@ -139,7 +136,7 @@ classdef ConeBeamOS_ASD_POCSReconstruction < Reconstruction
         end
         
         function [] = saveOutputSubclass(recon, savePath)
-            % nothing special to do here 
+            % nothing special to do here
         end
     end
     

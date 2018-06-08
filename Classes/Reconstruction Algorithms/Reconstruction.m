@@ -169,15 +169,17 @@ classdef Reconstruction
             strings = {str1 str2 str3 str4 str5};
         end
         
-        function [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = organizeDataForReconstruction(reconstruction, simulationOrImagingScanRun)
+        function [detectorData_I0, detectorData_I, rayRejectionMaps, simulationOrImagingScanRun] = organizeDataForReconstruction(reconstruction, simulationOrImagingScanRun)
                 
             [scanGeometry] = simulationOrImagingScanRun.findScanGeometry();
             
             % interpolate data from what resolution it was obtained at to
             % resolution the reconstruction will use
-            [projectionData, rayRejectionMaps] = scanGeometry.compileProjectionData(...
+            [detectorData_I0, detectorData_I, rayRejectionMaps] = scanGeometry.compileProjectionData(...
                 simulationOrImagingScanRun, reconstruction);
-            projectionData(isnan(projectionData)) = 0;
+
+            detectorData_I0(isnan(detectorData_I0)) = 0;
+            detectorData_I(isnan(detectorData_I)) = 0;
             
             % clear out original data
             simulationOrImagingScanRun.sliceData = {};
