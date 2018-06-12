@@ -1,0 +1,41 @@
+function [] = writeReconstructionToVff()
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
+
+data_invCm = [];
+
+
+% open file
+fid = fopen(path, 'w');
+
+% write header information
+fprintf(fid, 'ncaa;\n');
+fprintf(fid, 'rank=3;\n');
+fprintf(fid, 'type=raster;\n');
+fprintf(fid, 'format=slice;\n');
+fprintf(fid, 'bits=32;\n');
+fprintf(fid, 'bands=1;\n');
+fprintf(fid, 'size=256 256 256;\n');
+fprintf(fid, 'spacing=0.5 0.5 0.5;\n');
+fprintf(fid, 'origin=0 0 0;\n');
+fprintf(fid, 'rawsize=67108864;\n');
+fprintf(fid, 'data_scale=1;\n');
+fprintf(fid, 'data_offset=0;\n');
+fprintf(fid, 'HandleScatter=Factor;\n');
+fprintf(fid, 'ReferenceScatterFactor=1;\n');
+fprintf(fid, 'DataScatterFactor=1;\n');
+fprintf(fid, 'filter = 0');
+fprintf(fid, 'cos param A = 0.54;\n');
+fprintf(fid, 'cos param B = 0.46;\n');
+fprintf(fid, 'title=G:\__Thesis Recon Data\Gel 2-4\Gel 2-4_HR.vff;\n');
+fprintf(fid, 'date=%s;\n', datestr(now));
+fprintf(fid,'\f\n');
+
+% write data
+
+
+% close file
+fclose(fid);
+
+end
+
