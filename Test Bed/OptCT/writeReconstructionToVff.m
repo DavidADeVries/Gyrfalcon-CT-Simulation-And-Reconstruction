@@ -1,6 +1,5 @@
 function [] = writeReconstructionToVff()
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%[] = writeReconstructionToVff()
 
 data_invCm = [];
 
@@ -35,6 +34,12 @@ fprintf(fid, 'date=%s;\n', datestr(now));
 fprintf(fid,'\f\n');
 
 % write data
+writeData = single(data_invCm); % ensure data is in single format
+writeData = reshape(writeData, [numel(writeData),1]); %single vector (no 3D)
+writeData = swapbytes(writeData); %little/big endian switch
+writeData = typecast(writeData, 'uint8'); % split 32 bit single, into 4x8bit uint8s for writing to file
+
+fwrite(fid, writeData);
 
 
 % close file
