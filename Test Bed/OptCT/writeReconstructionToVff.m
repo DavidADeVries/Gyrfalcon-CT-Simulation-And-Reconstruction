@@ -1,11 +1,17 @@
-function [] = writeReconstructionToVff()
+function [] = writeReconstructionToVff(reconRun, path, varargin)
 %[] = writeReconstructionToVff()
 
-data_invCm = [];
+if nargin == 2
+    sliceNum = 1;
+else
+    sliceNum = varargin{1};
+end
+
+data_invCm = reconRun.reconstruction.getReconDataSetSliceInInvM(sliceNum) .* (1 ./ Constants.m_to_cm); %convert from 1/m to 1/cmn (for vff)
 
 dims = size(data_invCm);
 
-voxelDims_mm = [];
+voxelDims_mm = reconRun.reconstruction.getSliceVoxelDimensionsInM() .* Constants.m_to_mm;
 
 % open file
 fid = fopen(path, 'w');

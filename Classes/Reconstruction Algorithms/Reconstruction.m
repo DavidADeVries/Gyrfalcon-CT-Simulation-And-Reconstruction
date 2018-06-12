@@ -94,6 +94,14 @@ classdef Reconstruction
             recon = recon.createFromGUIForSubClass(app);
         end
         
+        function dataSet_invM = getReconDataSetSliceInInvM(recon, sliceNum)
+            dataSet_invM = recon.reconDataSetSlices{sliceNum};
+        end
+        
+        function voxelDims_m = getSliceVoxelDimensionsInM(recon)
+            voxelDims_m = recon.reconSliceVoxelDimensionUnits.convertToM(recon.reconSliceVoxelDimensions);
+        end
+        
         function recon = setReconDataSetDefaults(recon, phantom, detector)
             % set defaults for the reconDataSet based on the phantom and
             % detector dimensions
