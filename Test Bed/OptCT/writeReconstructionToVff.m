@@ -1,13 +1,12 @@
-function [] = writeReconstructionToVff(reconRun, path, varargin)
-%[] = writeReconstructionToVff()
+function [] = writeReconstructionToVff(reconRun, data_invM, path)
+%[] = writeReconstructionToVff(reconRun, path)
 
-if nargin == 2
-    sliceNum = 1;
-else
-    sliceNum = varargin{1};
-end
+data_invCm = data_invM .* (1 ./ Constants.m_to_cm); %convert from 1/m to 1/cmn (for vff)
 
-data_invCm = reconRun.reconstruction.getReconDataSetSliceInInvM(sliceNum) .* (1 ./ Constants.m_to_cm); %convert from 1/m to 1/cmn (for vff)
+% rotate 180 degree about z
+% use two flips to avoid any interpolation
+data_invCm = flip(data_invCm, 1);
+% data_invCm = flip(data_invCm, 3); % top slice becomes bottom slice
 
 dims = size(data_invCm);
 

@@ -38,7 +38,7 @@ if useRayRejection
     
     for i=1:size(catheterMaps,3)
         catheterMaps(:,:,i) = bwareaopen(catheterMaps(:,:,i), 5000);
-        cathMapDilateSmall(:,:,i) = imdilate(catheterMaps(:,:,i),ones(7));
+        cathMapDilateSmall(:,:,i) = imdilate(catheterMaps(:,:,i),ones(5));
         %cathMapDilateLarge(:,:,i) = imdilate(catheterMaps(:,:,i),ones(10));
     end
     
@@ -66,8 +66,8 @@ if useRayRejection
     cathMapsForwardProj = Ax(single(cathLoc),geo,angles);
     cathMapsForwardProj = cathMapsForwardProj ~= 0;
     
-    catheterMaps = (cathMapsForwardProj) | (cathMapDilateSmall);
-%     catheterMaps =  cathMapDilateSmall & ones(size(cathMapDilateSmall));
+    %catheterMaps = (cathMapsForwardProj) | (cathMapDilateSmall);
+    catheterMaps =  cathMapDilateSmall & ones(size(cathMapDilateSmall));
     
     % for i=1:size(catheterMaps,3)
     %     catheterMaps(:,:,i) = bwmorph(catheterMaps(:,:,i),'close',5);
@@ -215,7 +215,7 @@ while ~stop_criteria %OSC-TV
         f = minimizeTV2(f, tvConstant, nIterTV);    %   This is the MATLAB CODE, the functions are sill in the library, but CUDA is used nowadays
     end
     
-%    figure(200+iter);imshow(f(:,:,216/2),[0,12/1000]);
+   figure(200+iter);imshow(f(:,:,216/2),[0,10/1000]);
     
     % update status output
     string = [' (e=', num2str(sumOfErrors/numel(projRef)), ', dp=', num2str(dp), ')'];

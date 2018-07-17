@@ -68,7 +68,7 @@ classdef Constants
         Phantom_Data_Set_Display_Name = 'Phantom Data Set';
         Workspace_Display_Name = 'Workspace';
         
-        Reconstruction_Folder_Name = 'Recon';
+        Reconstruction_Folder_Name = 'Thesis Recon';
         Reconstruction_Run_File_Name = 'Reconstruction Run';
         
         Slice_Folder = 'Slice';

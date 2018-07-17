@@ -1,7 +1,7 @@
 function  f = minimizeTV2(f, tvConstant, nIterTV)
     reset(gpuDevice);
     f_gpu = gpuArray(f);
-
+    
     for i=1:nIterTV
 %         if mod(i,2) == 0
             f_grad = tvGradient(f_gpu);

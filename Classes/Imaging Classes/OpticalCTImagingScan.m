@@ -247,46 +247,46 @@ classdef OpticalCTImagingScan < ImagingScan
         function rayRejectionMap = getRayRejectionMap(imagingScan, refFrame, dataFrame, deltaAttenuationFrame, useRayRejection)
             rayRejectionMap = false & ones(size(refFrame));
             
-            if useRayRejection                                
-                %some constants
-                gelBathCutoff = 40000;
-                gelBathSpeckCutoff = 1000;
-                
-                catheterRefFrameCutoff = 18000;
-                catheterDeltaFrameCutoff = 4.5;
-                
-                
-                catheterSpeckCutoff = 300;
-                
-                jarEdgeOutsideBuffer = 10; %pixels
-                jarEdgeInsideBuffer = 20;%25; %pixels
-                catheterBuffer = 1;
-                
-                for i=1:numFrames
-                    % ray rejection
-                    %isBathMap = (dataFrame > gelBathCutoff);% | (refFrame > gelBathCutoff);
-                    %isBathMap = bwareaopen(isBathMap, gelBathSpeckCutoff);
-                    
-                    %leftJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'left');
-                    %rightJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'right');
-                    
-                    xBound = 250:760;
-                    
-                    catheterMap = ...
-                        (refFrame(:,xBound) < catheterRefFrameCutoff) |...
-                        (deltaAttenuationFrame(:,xBound) < (1/catheterDeltaFrameCutoff)) |...
-                        (deltaAttenuationFrame(:,xBound) > (catheterDeltaFrameCutoff));
-                    
-                    catheterMap = bwareaopen(catheterMap, catheterSpeckCutoff);
-                    catheterMap = imdilate(catheterMap, ones(1+2*catheterBuffer));
-                    catheterMap = ~bwareaopen(~catheterMap, catheterSpeckCutoff); % fill in catheter if needed
-                    
-                    
-                    
-                    % rayExclusionMap = true & (leftJarWallMap | rightJarWallMap | catheterMap);
-                    rayRejectionMap(:,xBound,i) = true & catheterMap;
-                end
-            end
+%             if useRayRejection                                
+%                 %some constants
+%                 gelBathCutoff = 40000;
+%                 gelBathSpeckCutoff = 1000;
+%                 
+%                 catheterRefFrameCutoff = 18000;
+%                 catheterDeltaFrameCutoff = 4.5;
+%                 
+%                 
+%                 catheterSpeckCutoff = 300;
+%                 
+%                 jarEdgeOutsideBuffer = 10; %pixels
+%                 jarEdgeInsideBuffer = 20;%25; %pixels
+%                 catheterBuffer = 1;
+%                 
+%                 for i=1:numFrames
+%                     % ray rejection
+%                     %isBathMap = (dataFrame > gelBathCutoff);% | (refFrame > gelBathCutoff);
+%                     %isBathMap = bwareaopen(isBathMap, gelBathSpeckCutoff);
+%                     
+%                     %leftJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'left');
+%                     %rightJarWallMap = getJarWallMap(isBathMap, jarEdgeOutsideBuffer, jarEdgeInsideBuffer, 'right');
+%                     
+%                     xBound = 250:760;
+%                     
+%                     catheterMap = ...
+%                         (refFrame(:,xBound) < catheterRefFrameCutoff) |...
+%                         (deltaAttenuationFrame(:,xBound) < (1/catheterDeltaFrameCutoff)) |...
+%                         (deltaAttenuationFrame(:,xBound) > (catheterDeltaFrameCutoff));
+%                     
+%                     catheterMap = bwareaopen(catheterMap, catheterSpeckCutoff);
+%                     catheterMap = imdilate(catheterMap, ones(1+2*catheterBuffer));
+%                     catheterMap = ~bwareaopen(~catheterMap, catheterSpeckCutoff); % fill in catheter if needed
+%                     
+%                     
+%                     
+%                     % rayExclusionMap = true & (leftJarWallMap | rightJarWallMap | catheterMap);
+%                     rayRejectionMap(:,xBound,i) = true & catheterMap;
+%                 end
+%             end
         end
     end
 end
