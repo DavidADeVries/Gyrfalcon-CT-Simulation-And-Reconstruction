@@ -46,15 +46,17 @@ classdef ConeBeamFDKReconstruction < Reconstruction
             app.CBCT_FDK_ParkerCheckBox.Value = recon.parker;
         end
                 
-        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, projectionData, rayRejectionMaps)
-            % get everything converted for TIGRE
-            [projectionData, ~, tigreGeometry, tigreAnglesInRadians] = ...
-                getValuesForTigreReconstruction(recon, simulationOrImagingScanRun, projectionData, rayRejectionMaps);
+        function recon = runReconstruction(recon, reconRun, simulationOrImagingScanRun, app, projectionData_I0, projectionData_I, rayRejectionMaps)
+            projectionData = log(projectionData_I ./ projectionData_I0);
             
-            % run reconstruction            
-                reconDataSet = FDK(projectionData, tigreGeometry, tigreAnglesInRadians,...
-                    'parker', recon.parker,...
-                    'filter', recon.filter.tigreString);
+            % get everything converted for TIGRE
+            [projectionData, ~,~, tigreGeometry, tigreAnglesInRadians] = ...
+                getValuesForTigreReconstruction(recon, simulationOrImagingScanRun, projectionData, projectionData, rayRejectionMaps);
+            
+            % run reconstruction
+            reconDataSet = FDK(projectionData, tigreGeometry, tigreAnglesInRadians,...
+                'parker', recon.parker,...
+                'filter', recon.filter.tigreString);
             
             % convert data set to Gyrfalcon units
             reconDataSet = convertReconDataSetFromTigreToGyrfalcon(reconDataSet);

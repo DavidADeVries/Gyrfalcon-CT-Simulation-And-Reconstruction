@@ -46,7 +46,7 @@ switch run.reconAlgorithm
         subsetsList = run.numSubsetsValues;
         cList = run.cValues;
         
-        counter = run.reconNumberStart;
+        counter = 1;
         
         for k=1:length(numIterList)
             numIters = numIterList{k};
@@ -57,23 +57,25 @@ switch run.reconAlgorithm
                 for i=1:length(cList)
                     c = cList{i};
                     
-                    disp([run.gelName, ' (OSC-TV): ', num2str(counter)]);
+                    reconNum = run.reconNumberStart + counter - 1;
+                    
+                    disp([run.gelName, ' (OSC-TV): ', num2str(reconNum)]);
                     
                     % set params
-                    results{1,1} = run.gelName;
-                    results{1,2} = run.reconAlgorithm;
-                    results{1,3} = boolToString(run.usedFloodFields);
-                    results{1,4} = boolToString(run.usedCatheterReject);
-                    results{1,5} = numIters;
-                    results{1,6} = subsets;
-                    results{1,7} = c;
+                    results{counter,1} = run.gelName;
+                    results{counter,2} = run.reconAlgorithm;
+                    results{counter,3} = boolToString(run.usedFloodFields);
+                    results{counter,4} = boolToString(run.usedCatheterReject);
+                    results{counter,5} = numIters;
+                    results{counter,6} = subsets;
+                    results{counter,7} = c;
                     
                     % load volumes and run times
-                    [volume, timeInS] = loadGyrfalconVolume(run.readPath, counter, run.usedFloodFields);
-                    results{1,8} = timeInS;
+                    [volume, timeInS] = loadGyrfalconVolume(run.readPath, reconNum, run.usedFloodFields);
+                    results{counter,8} = timeInS;
                     
                     % compute metrics
-                    results(1,9:end) = getMetricsForRoi(...
+                    results(counter,9:end) = getMetricsForRoi(...
                         volume,...
                         botMask, midMask, topMask, cathMask,...
                         botSlices, midSlices, topSlices,...

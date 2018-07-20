@@ -1,6 +1,6 @@
 % output params
-writePath = 'F:\Analysis Test Values\Results New.xls';
-sheetName = 'Parameter Optimization';
+writePath = 'E:\Thesis Results\External Beam Trials.xls';
+sheetName = 'Temp';%'Stand. OSC-TV Param. Opt.';
 
 % general params
 catheterMaskRadius = 5;
@@ -8,7 +8,7 @@ catheterMaskRadius = 5;
 % Set-up base for the analysis
 base = AnalysisRun;
 
-base.catheterCoordsFile = 'F:\Analysis Test Values\Catheter Coords.mat';
+base.catheterCoordsFile = 'F:\Thesis Recon Data\Gel 4-2\Catheter Coords.mat';
 
 base.usedCatheterReject = false;
 
@@ -16,41 +16,52 @@ base.usedCatheterReject = false;
 control = base;
 control.gelName = 'Gel 4-1';
 control.reconAlgorithm = 'FDK';       
-control.readPath = 'F:\Analysis Test Values\Gel 4-1_HR.vff';
+control.readPath = 'F:\Thesis Recon Data\Gel 4-1\Gel 4-1_HR.vff';
 
 % FDK Comparison
 fdkComp = base;
 fdkComp.gelName = 'Gel 4-2';
 fdkComp.reconAlgorithm = 'FDK';       
-fdkComp.readPath = 'F:\Analysis Test Values\Gel 4-2_HR.vff';
+fdkComp.readPath = 'F:\Thesis Recon Data\Gel 4-2\Gel 4-2_HR.vff';
+
+% FDK FF Comparison
+fdkFFComp = base;
+fdkFFComp.gelName = 'Gel 4-2';
+fdkFFComp.reconAlgorithm = 'FDK';       
+fdkFFComp.readPath = 'F:\Thesis Recon Data\Gel 4-2 (FF-R)\Gel 4-2 (FF-R)_HR.vff';
+fdkFFComp.usedFloodFields = true; 
+
+% OSC-TV Base
+osctvBase = base;
+osctvBase.gelName = 'Gel 4-2';
+osctvBase.reconAlgorithm = 'OSC-TV'; 
+osctvBase.reconNumberStart = 1;  
+osctvBase.numIterationsValues = {'10', '15'};
+osctvBase.numSubsetsValues = { '[26 2]', '[51 3]', '[103 6]', '[205 13]', '[205 41]'};
+osctvBase.cValues = {'0.001', '0.005', '0.01', '0.05', '0.1'};
 
 % OSC-TV No Flood Field
-osctvNoFF = base;
-osctvNoFF.gelName = 'Gel 4-2';
-osctvNoFF.reconAlgorithm = 'OSC-TV';       
-osctvNoFF.readPath = 'F:\Analysis Test Values\';
-osctvNoFF.usedFloodFields = false;
-osctvNoFF.reconNumberStart = 48;    
-osctvNoFF.numIterationsValues = {'1'};
-osctvNoFF.numSubsetsValues = {'[2,3]'};
-osctvNoFF.cValues = {'1'};
+osctvNoFF = osctvBase;
+osctvNoFF.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\';
+osctvNoFF.usedFloodFields = false;  
 
 % OSC-TV No Flood Field
-osctvFF = base;
-osctvFF.gelName = 'Gel 4-2';
-osctvFF.reconAlgorithm = 'OSC-TV';       
-osctvFF.readPath = 'F:\Analysis Test Values\';
+osctvFF = osctvBase;     
+osctvFF.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\';
 osctvFF.usedFloodFields = true;
-osctvFF.reconNumberStart = 48;    
-osctvFF.numIterationsValues = {'1'};
-osctvFF.numSubsetsValues = {'[2,3]'};
-osctvFF.cValues = {'1'};
+
   
-%
+% *********
 % ** RUN **
-%
+% *********
+
+% crunchParameterOptimizationMetrics(...
+%     {control, fdkComp, fdkFFComp,...
+%     osctvNoFF, osctvFF},...
+%     catheterMaskRadius,...
+%     writePath, sheetName);
 
 crunchParameterOptimizationMetrics(...
-    {control, fdkComp, osctvNoFF, osctvFF},...
+    {fdkFFComp},...
     catheterMaskRadius,...
     writePath, sheetName);
