@@ -73,6 +73,12 @@ classdef ProcessingRun
             seconds = floor(numSeconds);
         end
         
+        function seconds = getRunTimeInSeconds(run)
+            [hours, minutes, seconds] = run.getRunTime();
+            
+            seconds = seconds + 60*minutes + 60*60*hours;
+        end
+        
         function string = getRunTimeString(run)
             [hours, minutes, seconds] = run.getRunTime();
             
