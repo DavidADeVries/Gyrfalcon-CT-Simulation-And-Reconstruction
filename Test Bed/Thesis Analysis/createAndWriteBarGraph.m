@@ -14,6 +14,7 @@ x = 1;
 xTicks = zeros(length(barData),1);
 
 subgroupLabelX = 0;
+subgroupLabelData = [];
 
 for i=1:length(barData)
     labelData = barData{i};
@@ -31,7 +32,7 @@ for i=1:length(barData)
         
     if subgroupLabelWriteIndex == i
         subgroupLabelX = x;
-        
+        subgroupLabelData = labelData;
     end
     
     for j=1:len
@@ -89,14 +90,25 @@ for j=1:len
             text(...
                 x, -bump, subgroupNames{j},...
                 'Rotation', -45);
+        case 'above-stepped'
+            text(...
+                x, max(subgroupLabelData(j),0)+bump, subgroupNames{j},...
+                'Rotation', 45);
+            
     end
     
     x = x+1;
 end
 
+drawnow;
+
 % save to .png
 
 saveas(fig, writePath);
+
+savefig(fig, strrep(writePath, '.png', '.fig'), 'compact');
+
+delete(fig);
 
 end
 

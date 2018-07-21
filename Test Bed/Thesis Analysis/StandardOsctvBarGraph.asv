@@ -13,12 +13,12 @@ groupLabels = {...
     '\begin{tabular}{c}OSC-TV\\S=[205..41]\end{tabular}'};
 
 groupRows = {...
-    4:4,...
-    31:35,...
-    36:40,...
-    41:45,...
-    46:50,...
-    51:55};
+    3:3,...
+    30:34,...
+    35:39,...
+    40:44,...
+    45:49,...
+    50:54};
 
 subgroupLabels = {...
     'c=0.001',...
@@ -40,18 +40,18 @@ customColours = {...
 
 figDimsInCm = [10, 15];
 
-subgroupLabelWriteIndex = 2;
-subgroupLabelOrientation = 'above-stepped';
-
 % **************************************
 % Mean
 % **************************************
 
 graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Mean Comparison (15 Iterations).png';
 
-column = 22;
+column = 10;
 
 yAxisLabel = 'Change in $\bar{\mu}_{ROI}$ from control';
+
+subgroupLabelWriteIndex = 2;
+subgroupLabelOrientation = 'above';
 
 title = 'Comparison of $\bar{\mu}_{ROI}$ for tested OSC-TV parameters';
 
@@ -68,9 +68,12 @@ barGraphDataCollectionAndCreation(...
 
 graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Variance Comparison (15 Iterations).png';
 
-column = 25;
+column = 13;
 
 yAxisLabel = 'Change in $\sigma_{ROI}$ from control';
+
+subgroupLabelWriteIndex = 2;
+subgroupLabelOrientation = 'above-stepped';
 
 title = 'Comparison of $\sigma_{ROI}$ for tested OSC-TV parameters';
 
@@ -87,50 +90,14 @@ barGraphDataCollectionAndCreation(...
 
 graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Gradient Comparison (15 Iterations).png';
 
-column = 28;
+column = 16;
 
-yAxisLabel = 'Change in $\nabla_{ROI}$ from control';
+yAxisLabel = 'Change in $\sigma_{ROI}$ from control';
 
-title = 'Comparison of $\nabla_{ROI}$ for tested OSC-TV parameters';
+subgroupLabelWriteIndex = 2;
+subgroupLabelOrientation = 'above-stepped';
 
-barGraphDataCollectionAndCreation(...
-    readPath, sheet, groupRows, column,...
-    graphWritePath, groupLabels, subgroupLabels,...
-    subgroupLabelWriteIndex, subgroupLabelOrientation,...
-    figDimsInCm, subgroupColours, customColours,...
-    yAxisLabel, title); 
-
-
-% **************************************
-% D1
-% **************************************
-
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\d1 Comparison (15 Iterations).png';
-
-column = 34;
-
-yAxisLabel = 'Change in $d_{1}$ from control';
-
-title = 'Comparison of $d_{1}$ for tested OSC-TV parameters';
-
-barGraphDataCollectionAndCreation(...
-    readPath, sheet, groupRows, column,...
-    graphWritePath, groupLabels, subgroupLabels,...
-    subgroupLabelWriteIndex, subgroupLabelOrientation,...
-    figDimsInCm, subgroupColours, customColours,...
-    yAxisLabel, title); 
-
-% **************************************
-% D1
-% **************************************
-
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\d2 Comparison (15 Iterations).png';
-
-column = 40;
-
-yAxisLabel = 'Change in $d_{2}$ from control';
-
-title = 'Comparison of $d_{2}$ for tested OSC-TV parameters';
+title = 'Comparison of $\sigma_{ROI}$ for tested OSC-TV parameters';
 
 barGraphDataCollectionAndCreation(...
     readPath, sheet, groupRows, column,...
