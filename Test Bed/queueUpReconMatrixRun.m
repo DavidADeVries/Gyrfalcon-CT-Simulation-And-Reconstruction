@@ -2,7 +2,8 @@ function [] = queueUpReconMatrixRun(app)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-numIterList = {10, 15};
+%numIterList = {10, 15};
+numIterList = {15};
 
 subsetsList = {...
     [26 2],...
