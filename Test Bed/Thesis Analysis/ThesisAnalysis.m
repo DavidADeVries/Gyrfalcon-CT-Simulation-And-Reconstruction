@@ -1,6 +1,6 @@
 % output params
 writePath = 'E:\Thesis Results\External Beam Trials.xls';
-sheetName = 'Temp';%'Stand. OSC-TV Param. Opt.';
+sheetName = 'Stand. OSC-TV Param. Opt.';
 
 % general params
 catheterMaskRadius = 5;
@@ -11,6 +11,8 @@ base = AnalysisRun;
 base.catheterCoordsFile = 'F:\Thesis Recon Data\Gel 4-2\Catheter Coords.mat';
 
 base.usedCatheterReject = false;
+
+base.controlPath = 'F:\Thesis Recon Data\Gel 4-1\Gel 4-1_HR.vff';
 
 % Control Analysis
 control = base;
@@ -55,13 +57,8 @@ osctvFF.usedFloodFields = true;
 % ** RUN **
 % *********
 
-% crunchParameterOptimizationMetrics(...
-%     {control, fdkComp, fdkFFComp,...
-%     osctvNoFF, osctvFF},...
-%     catheterMaskRadius,...
-%     writePath, sheetName);
-
 crunchParameterOptimizationMetrics(...
-    {fdkFFComp},...
+    {control, fdkComp, fdkFFComp,...
+    osctvNoFF, osctvFF},...
     catheterMaskRadius,...
     writePath, sheetName);

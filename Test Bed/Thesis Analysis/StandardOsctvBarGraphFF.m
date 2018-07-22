@@ -14,11 +14,11 @@ groupLabels = {...
 
 groupRows = {...
     4:4,...
-    31:35,...
-    36:40,...
-    41:45,...
-    46:50,...
-    51:55};
+    81:85,...
+    86:90,...
+    91:95,...
+    96:100,...
+    101:105};
 
 subgroupLabels = {...
     'c=0.001',...
@@ -46,7 +46,7 @@ subgroupLabelWriteIndex = 2;
 % Mean
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Mean Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\Mean Comparison (15 Iterations).png';
 
 column = 28;
 
@@ -84,7 +84,7 @@ barGraphDataCollectionAndCreation(...
 % Stdev
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Stdev Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\Stdev Comparison (15 Iterations).png';
 
 column = 31;
 
@@ -122,7 +122,7 @@ barGraphDataCollectionAndCreation(...
 % Gradient Mean
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Gradient Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\Gradient Comparison (15 Iterations).png';
 
 column = 34;
 
@@ -160,7 +160,7 @@ barGraphDataCollectionAndCreation(...
 % Delta Mean
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Delta Mean Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\Delta Mean Comparison (15 Iterations).png';
 
 column = 40;
 
@@ -198,7 +198,7 @@ barGraphDataCollectionAndCreation(...
 % Delta Stdev
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Delta Stdev Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\Delta Stdev Comparison (15 Iterations).png';
 
 column = 43;
 
@@ -237,7 +237,7 @@ barGraphDataCollectionAndCreation(...
 % D1
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\d1 Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\d1 Comparison (15 Iterations).png';
 
 column = 46;
 
@@ -275,7 +275,7 @@ barGraphDataCollectionAndCreation(...
 % D2
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\d2 Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV FF Bar Graphs\d2 Comparison (15 Iterations).png';
 
 column = 52;
 

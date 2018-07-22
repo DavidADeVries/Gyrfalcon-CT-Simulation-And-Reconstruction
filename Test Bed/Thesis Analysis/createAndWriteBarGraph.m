@@ -1,4 +1,4 @@
-function [] = createAndWriteBarGraph(writePath, figureDimsInCm, barData, groupNames, subgroupNames, subgroupLabelWriteIndex, subgroupLabelOrientation, subgroupColours, customColours, yLabel, axesTitle)
+function [] = createAndWriteBarGraph(writePath, figureDimsInCm, barData, groupNames, subgroupNames, subgroupLabelWriteIndex, subgroupLabelOrientation, subgroupLabelAngle, subgroupColours, customColours, yLabel, axesTitle, unitConversionFn, lineAtBar, linePosAndNeg)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -17,7 +17,7 @@ subgroupLabelX = 0;
 subgroupLabelData = [];
 
 for i=1:length(barData)
-    labelData = barData{i};
+    labelData = unitConversionFn(barData{i});
     customColour = customColours{i};
     
     if isempty(customColour)
@@ -52,6 +52,17 @@ end
 
 xlim(axis, [0, x]);
 
+if ~isempty(lineAtBar)
+    data = barData{lineAtBar(1)};
+    val = unitConversionFn(data(lineAtBar(2)));
+    
+    line([0,x],[val,val],'LineStyle','--','Color','k','LineWidth',0.1)
+    
+    if linePosAndNeg
+        line([0,x],-[val,val],'LineStyle','--','Color','k','LineWidth',0.1);
+    end
+end
+
 axis.XTick = xTicks;
 axis.XTickLabel = groupNames;
 axis.TickLabelInterpreter = 'latex';
@@ -81,20 +92,17 @@ bump = abs(y(2) - y(1)) ./ 50;
 
 for j=1:len
     
-    switch subgroupLabelOrientation
+    switch subgroupLabelOrientation{j}
         case 'above'
             text(...
-                x, bump, subgroupNames{j},...
-                'Rotation', 45);
+                x, max(subgroupLabelData(j),0)+bump, subgroupNames{j},...
+                'Rotation', subgroupLabelAngle{j},...
+                'FontSize', 9);
         case 'below'
             text(...
-                x, -bump, subgroupNames{j},...
-                'Rotation', -45);
-        case 'above-stepped'
-            text(...
-                x, max(subgroupLabelData(j),0)+bump, subgroupNames{j},...
-                'Rotation', 45);
-            
+                x, min(subgroupLabelData(j),0)-bump, subgroupNames{j},...
+                'Rotation', -subgroupLabelAngle{j},...
+                'FontSize', 9);            
     end
     
     x = x+1;

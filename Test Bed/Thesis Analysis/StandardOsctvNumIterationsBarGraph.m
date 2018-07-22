@@ -2,30 +2,24 @@
 % Set Base Params
 % **************************************
 readPath = 'E:\Thesis Results\External Beam Trials.xls';
-sheet = 'Stand. OSC-TV Param. Opt. ANLYS';
+sheet = 'Stand. OSC-TV # Iters ANLYS';
 
 groupLabels = {...
     'FDK',...
-    '\begin{tabular}{c}OSC-TV\\S=[26..2]\end{tabular}',...
-    '\begin{tabular}{c}OSC-TV\\S=[51..3]\end{tabular}',...
-    '\begin{tabular}{c}OSC-TV\\S=[103..6]\end{tabular}',...
-    '\begin{tabular}{c}OSC-TV\\S=[205..13]\end{tabular}',...
-    '\begin{tabular}{c}OSC-TV\\S=[205..41]\end{tabular}'};
+    '\begin{tabular}{c}OSC-TV\\Direct\end{tabular}',...
+    '\begin{tabular}{c}OSC-TV\\Indirect\end{tabular}'};
 
 groupRows = {...
     4:4,...
-    31:35,...
-    36:40,...
-    41:45,...
-    46:50,...
-    51:55};
+    6:10,...
+    11:15};    
 
 subgroupLabels = {...
-    'c=0.001',...
-    'c=0.005',...
-    'c=0.01',...
-    'c=0.05',...
-    'c=0.1'};
+    'n=10',...
+    'n=15',...
+    'n=20',...
+    'n=25',...
+    'n=30'};
 
 subgroupColours = [...
     0.8 0.8 0.8;...
@@ -46,7 +40,7 @@ subgroupLabelWriteIndex = 2;
 % Mean
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Mean Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\Mean Comparison (15 Iterations).png';
 
 column = 28;
 
@@ -84,7 +78,7 @@ barGraphDataCollectionAndCreation(...
 % Stdev
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Stdev Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\Stdev Comparison (15 Iterations).png';
 
 column = 31;
 
@@ -122,7 +116,7 @@ barGraphDataCollectionAndCreation(...
 % Gradient Mean
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Gradient Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\Gradient Comparison (15 Iterations).png';
 
 column = 34;
 
@@ -160,7 +154,7 @@ barGraphDataCollectionAndCreation(...
 % Delta Mean
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Delta Mean Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\Delta Mean Comparison (15 Iterations).png';
 
 column = 40;
 
@@ -198,7 +192,7 @@ barGraphDataCollectionAndCreation(...
 % Delta Stdev
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\Delta Stdev Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\Delta Stdev Comparison (15 Iterations).png';
 
 column = 43;
 
@@ -237,7 +231,7 @@ barGraphDataCollectionAndCreation(...
 % D1
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\d1 Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\d1 Comparison (15 Iterations).png';
 
 column = 46;
 
@@ -275,7 +269,7 @@ barGraphDataCollectionAndCreation(...
 % D2
 % **************************************
 
-graphWritePath = 'E:\Thesis Results\Standard OSC-TV Bar Graphs\d2 Comparison (15 Iterations).png';
+graphWritePath = 'E:\Thesis Results\Standard OSC-TV Num Iterations Bar Graphs\d2 Comparison (15 Iterations).png';
 
 column = 52;
 

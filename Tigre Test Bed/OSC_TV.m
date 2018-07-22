@@ -31,47 +31,31 @@ rotDetector = geo.rotDetector;
 changeRange = [1 0];
 
 if useRayRejection
-    catheterMaps = findCatheterMaps(projRef, projData);
-    
-    cathMapDilateSmall = zeros(size(catheterMaps));
-    cathMapDilateLarge = zeros(size(catheterMaps));
-    
-    for i=1:size(catheterMaps,3)
-        catheterMaps(:,:,i) = bwareaopen(catheterMaps(:,:,i), 5000);
-        cathMapDilateSmall(:,:,i) = imdilate(catheterMaps(:,:,i),ones(7));
-        %cathMapDilateLarge(:,:,i) = imdilate(catheterMaps(:,:,i),ones(10));
-    end
-    
-    cathLoc = Atb(single(~cathMapDilateSmall), geo, angles) == 0;%410/1.5;
-    
-%     cathLocPad = false(size(cathLoc)+2);
-%     cathLocPad(2:end-1,2:end-1,2:end-1) = ~cathLoc; % invert for filling
+%     catheterMaps = findCatheterMaps(projRef, projData);
 %     
-%     for i=2:size(cathLocPad,3)-1
-%         cathLocPad(:,:,i) = imfill(cathLocPad(:,:,i),[1,1],8);
+%     cathMapDilateSmall = zeros(size(catheterMaps));
+%     
+%     for i=1:size(catheterMaps,3)
+%         catheterMaps(:,:,i) = bwareaopen(catheterMaps(:,:,i), 5000);
+%         cathMapDilateSmall(:,:,i) = imdilate(catheterMaps(:,:,i),ones(7));
 %     end
 %     
-%     cathLoc = ~cathLocPad(2:end-1,2:end-1,2:end-1);
+%     cathLoc = Atb(single(~cathMapDilateSmall), geo, angles) < 5;
+%     
+%     
+%     for i=1:size(cathLoc,3)
+%         cathLoc(:,:,i) = bwareaopen(cathLoc(:,:,i), 3, 8);
+%     end
+%     
+%     cathMapsForwardProj = Ax(single(cathLoc),geo,angles);
+%     cathMapsForwardProj = cathMapsForwardProj ~= 0;
+%     
+%     catheterMaps = (cathMapsForwardProj) | (cathMapDilateSmall);
+
+    loadData = load('E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\Catheter Maps.mat');
     
-    for i=1:size(cathLoc,3)
-        cathLoc(:,:,i) = bwareaopen(cathLoc(:,:,i), 3, 8);
-        cathLoc(:,:,i) = imdilate(cathLoc(:,:,i),ones(2));
-    end
-    
-    % cathLoc = Atb(single(catheterMaps), geo, angles);
-    %
-    %
-    % cathLoc = cathLoc > 410 / 4; % preset catheter;
-    %
-    cathMapsForwardProj = Ax(single(cathLoc),geo,angles);
-    cathMapsForwardProj = cathMapsForwardProj ~= 0;
-    
-    catheterMaps = (cathMapsForwardProj) | (cathMapDilateSmall);
-%     catheterMaps =  cathMapDilateSmall & ones(size(cathMapDilateSmall));
-    
-    % for i=1:size(catheterMaps,3)
-    %     catheterMaps(:,:,i) = bwmorph(catheterMaps(:,:,i),'close',5);
-    % end
+    catheterMaps = loadData.catheterMaps;
+    cathLoc = loadData.cathLoc;
 end
 
 % calc compensator

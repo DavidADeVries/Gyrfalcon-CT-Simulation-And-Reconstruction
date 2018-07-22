@@ -1,25 +1,32 @@
-function  results = getMetricsForRoi(volume, botMask, midMask, topMask, cathMask, botSlices, midSlices, topSlices, d1ProfileCoords, d2ProfileCoords)
+function  results = getMetricsForRoi(volume, controlVolume, botMask, midMask, topMask, cathMask, botSlices, midSlices, topSlices, d1ProfileCoords, d2ProfileCoords)
 %[mean, variance] = getMetricsForRoi(volume, roiMask)
 
 grad = imgradient3(volume);
+diff = abs(volume - controlVolume);
 
 [meanValBot, varValBot] = getRoiMetrics(volume, botMask);
 [gradMeanBot, gradVarBot] = getRoiMetrics(grad, botMask);
+[diffMeanBot, diffVarBot] = getRoiMetrics(diff, botMask);
 
 [meanValMid, varValMid] = getRoiMetrics(volume, midMask);
 [gradMeanMid, gradVarMid] = getRoiMetrics(grad, midMask);
+[diffMeanMid, diffVarMid] = getRoiMetrics(diff, midMask);
 
 [meanValTop, varValTop] = getRoiMetrics(volume, topMask);
 [gradMeanTop, gradVarTop] = getRoiMetrics(grad, topMask);
+[diffMeanTop, diffVarTop] = getRoiMetrics(diff, topMask);
 
 [meanValBotSub, varValBotSub] = getRoiMetrics(volume, botMask & ~cathMask);
 [gradMeanBotSub, gradVarBotSub] = getRoiMetrics(grad, botMask & ~cathMask);
+[diffMeanBotSub, diffVarBotSub] = getRoiMetrics(diff, botMask & ~cathMask);
 
 [meanValMidSub, varValMidSub] = getRoiMetrics(volume, midMask & ~cathMask);
 [gradMeanMidSub, gradVarMidSub] = getRoiMetrics(grad, midMask & ~cathMask);
+[diffMeanMidSub, diffVarMidSub] = getRoiMetrics(diff, midMask & ~cathMask);
 
 [meanValTopSub, varValTopSub] = getRoiMetrics(volume, topMask & ~cathMask);
 [gradMeanTopSub, gradVarTopSub] = getRoiMetrics(grad, topMask & ~cathMask);
+[diffMeanTopSub, diffVarTopSub] = getRoiMetrics(diff, topMask & ~cathMask);
 
 [d1MeanBot, d1VarBot] = getProfileMetrics(volume, botSlices, d1ProfileCoords);
 [d2MeanBot, d2VarBot] = getProfileMetrics(volume, botSlices, d2ProfileCoords);
@@ -35,10 +42,14 @@ results = {...
     varValBot, varValMid, varValTop,...
     gradMeanBot, gradMeanMid, gradMeanTop,...
     gradVarBot, gradVarMid, gradVarTop,...
+    diffMeanBot, diffMeanMid, diffMeanTop,...
+    diffVarBot, diffVarMid, diffVarTop,...
     meanValBotSub, meanValMidSub, meanValTopSub,...
     varValBotSub, varValMidSub, varValTopSub,...
     gradMeanBotSub, gradMeanMidSub, gradMeanTopSub,...
     gradVarBotSub, gradVarMidSub, gradVarTopSub,...
+    diffMeanBotSub, diffMeanMidSub, diffMeanTopSub,...
+    diffVarBotSub, diffVarMidSub, diffVarTopSub,...
     d1MeanBot, d1MeanMid, d1MeanTop,...
     d1VarBot, d1VarMid, d1VarTop,...
     d2MeanBot, d2MeanMid, d2MeanTop,...
@@ -64,7 +75,7 @@ for i=1:length(slices)
 end
 
 meanVal = mean(vals);
-varVal = var(vals);
+varVal = std(vals);
 
 end
 
@@ -73,7 +84,7 @@ function [meanVal, varVal] = getRoiMetrics(volume, mask)
 vals = volume(mask);
 
 meanVal = mean(vals);
-varVal = var(vals);
+varVal = std(vals);
 
 end
 

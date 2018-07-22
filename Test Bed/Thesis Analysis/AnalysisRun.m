@@ -32,7 +32,10 @@ classdef AnalysisRun
         d1ProfileCoords
         d2ProfileCoords
         
+        controlVolume
+        
         readPath = ''
+        controlPath = ''
     end
     
     methods
