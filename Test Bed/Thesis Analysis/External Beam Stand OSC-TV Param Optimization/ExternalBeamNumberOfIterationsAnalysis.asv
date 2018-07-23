@@ -1,6 +1,6 @@
 % output params
 writePath = 'E:\Thesis Results\External Beam Trials.xls';
-sheetName = 'RR OSC-TV # Iters';
+sheetName = 'Stand. OSC-TV # Iters';
 
 % general params
 catheterMaskRadius = 5;
@@ -37,20 +37,21 @@ fdkFFComp.usedFloodFields = true;
 osctvBase = base;
 osctvBase.gelName = 'Gel 4-2';
 osctvBase.reconAlgorithm = 'OSC-TV';
+osctvBase.numIterationsValues = {'10', '15', '20', '25', '30','35','40'};
+osctvBase.numSubsetsValues = {'[205 41]','[205 13]'};
 
 % OSC-TV (STANDARD)
 osctv205_41 =  osctvBase;
-osctv205_41.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)';
-osctv205_41.usedFloodFields = false;
+osctvNoFF.usedFloodFields = false;
 osctv205_41.cValues = {'0.01'};
 
-osctv205_41.reconNumberStart = 151; 
+osctv205_41.reconNumberStart = 51; 
 
-osctv205_41.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
+osctv205_41.numIterationsValues = {'10', '15', '20', '25', '30'};
 osctv205_41.numSubsetsValues = {'[205 41]'};
 
 osctv205_13 = osctv205_41;
-osctv205_13.reconNumberStart = 158; 
+osctv205_13.reconNumberStart = 165; 
 
 osctv205_13.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
 osctv205_13.numSubsetsValues = {'[205 13]'};
@@ -58,20 +59,35 @@ osctv205_13.numSubsetsValues = {'[205 13]'};
 % OSC-TV (FF)
 
 osctvFF205_41 =  osctvBase;
-osctvFF205_41.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)';
-osctvFF205_41.usedFloodFields = true;
+osctvFF205_41.usedFloodFields = false;
 osctvFF205_41.cValues = {'0.005'};  
 
-osctvFF205_41.reconNumberStart = 151; 
+osctv205_41.reconNumberStart = 151; 
 
-osctvFF205_41.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
-osctvFF205_41.numSubsetsValues = {'[205 41]'};
+osctv205_41.numIterationsValues = {'10', '15', '20', '25', '30'};
+osctv205_41.numSubsetsValues = {'[205 41]'};
 
-osctvFF205_13 = osctvFF205_41;
-osctvFF205_13.reconNumberStart = 158; 
+osctv205_13 = osctv205_41;
+osctv205_13.reconNumberStart = 165; 
 
-osctvFF205_13.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
-osctvFF205_13.numSubsetsValues = {'[205 13]'};
+osctv205_13.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
+osctv205_13.numSubsetsValues = {'[205 13]'};
+
+
+
+
+
+
+% OSC-TV No Flood Field
+osctvNoFF = osctvBase;
+osctvNoFF.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\';
+osctvNoFF.cValues = {'0.01'};
+
+% OSC-TV No Flood Field
+osctvFF = osctvBase;     
+osctvFF.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\';
+osctvFF.cValues = {'0.005'};
+osctvFF.usedFloodFields = true;
 
   
 % *********

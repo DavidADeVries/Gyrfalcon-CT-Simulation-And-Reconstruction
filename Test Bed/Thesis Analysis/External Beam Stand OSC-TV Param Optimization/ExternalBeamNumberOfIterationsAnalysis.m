@@ -36,22 +36,42 @@ fdkFFComp.usedFloodFields = true;
 % OSC-TV Base
 osctvBase = base;
 osctvBase.gelName = 'Gel 4-2';
-osctvBase.reconAlgorithm = 'OSC-TV'; 
-osctvBase.reconNumberStart = 51;  
-osctvBase.numIterationsValues = {'10', '15', '20', '25', '30'};
-osctvBase.numSubsetsValues = {'[205 41]'};
+osctvBase.reconAlgorithm = 'OSC-TV';
 
-% OSC-TV No Flood Field
-osctvNoFF = osctvBase;
-osctvNoFF.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\';
-osctvNoFF.cValues = {'0.01'};
-osctvNoFF.usedFloodFields = false;  
+% OSC-TV (STANDARD)
+osctv205_41 =  osctvBase;
+osctv205_41.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)';
+osctv205_41.usedFloodFields = false;
+osctv205_41.cValues = {'0.01'};
 
-% OSC-TV No Flood Field
-osctvFF = osctvBase;     
-osctvFF.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\';
-osctvFF.cValues = {'0.005'};
-osctvFF.usedFloodFields = true;
+osctv205_41.reconNumberStart = 51; 
+
+osctv205_41.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
+osctv205_41.numSubsetsValues = {'[205 41]'};
+
+osctv205_13 = osctv205_41;
+osctv205_13.reconNumberStart = 165; 
+
+osctv205_13.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
+osctv205_13.numSubsetsValues = {'[205 13]'};
+
+% OSC-TV (FF)
+
+osctvFF205_41 =  osctvBase;
+osctvFF205_41.readPath = 'E:\Data Files\Git Repos\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)';
+osctvFF205_41.usedFloodFields = true;
+osctvFF205_41.cValues = {'0.005'};  
+
+osctvFF205_41.reconNumberStart = 51; 
+
+osctvFF205_41.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
+osctvFF205_41.numSubsetsValues = {'[205 41]'};
+
+osctvFF205_13 = osctvFF205_41;
+osctvFF205_13.reconNumberStart = 165; 
+
+osctvFF205_13.numIterationsValues = {'10', '15', '20', '25', '30', '35', '40'};
+osctvFF205_13.numSubsetsValues = {'[205 13]'};
 
   
 % *********
@@ -60,6 +80,7 @@ osctvFF.usedFloodFields = true;
 
 crunchParameterOptimizationMetrics(...
     {control, fdkComp, fdkFFComp,...
-    osctvNoFF, osctvFF},...
+    osctv205_13, osctv205_41,...
+    osctvFF205_13, osctvFF205_41},...
     catheterMaskRadius,...
     writePath, sheetName);
