@@ -89,17 +89,7 @@ switch run.reconAlgorithm
 end
 end
 
-function volume = loadVolume(path)
-data = load(path);
 
-volume = data.reconData;
-end
-
-function run = loadReconRun(path)
-data = load(path);
-
-run = data.run;
-end
 
 function volume = loadVffVolume(readPath, usedFloodFields)
 if usedFloodFields
@@ -118,7 +108,4 @@ if bool
 else
     string = 'N';
 end
-end
-
-
 end

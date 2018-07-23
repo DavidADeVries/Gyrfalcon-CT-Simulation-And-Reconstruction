@@ -18,3 +18,20 @@ else
     volume = volumePost - volumePre;
     time = runPre.getRunTimeInSeconds() + runPost.getRunTimeInSeconds();
 end
+
+end
+
+
+
+
+function volume = loadVolume(path)
+data = load(path);
+
+volume = data.reconData;
+end
+
+function run = loadReconRun(path)
+data = load(path);
+
+run = data.run;
+end
