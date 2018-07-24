@@ -6,19 +6,19 @@ classdef ConeBeamOSC_TVReconstruction < Reconstruction
         fullName = 'OSC-TV Algorithm (CBCT)'
                 
         % reconstruction settings (for TIGRE)
-        numberOfIterations = 10
+        numberOfIterations = 40
         forwardProjectionAccuracy = 0.25
         
         % specific for OSC-TV
-        initialBlockSize = 26
-        finalBlockSize = 2
+        initialBlockSize = 205
+        finalBlockSize = 41
         blockSizeReductionPower = 1/2
         
         orderStrategy = TigreOrderStrategies.angularDistance
         
         numberOfTvIterations = 20
         
-        c = 0.25
+        c = 0.005
     end
         
     methods(Static)

@@ -107,7 +107,7 @@ classdef Reconstruction
             % detector dimensions
             
             if isempty(phantom)
-                dims = [256 256 256]; % default
+                dims = [256 256 216]; % default
                 voxelDimsInM = [0.5 0.5 0.5]; % default (0.5mm isotropic)
             else
                 phantom = phantom.loadFields('');
@@ -126,7 +126,7 @@ classdef Reconstruction
             recon.interpolateDetectorData = false;
             
             if ~isempty(detector)
-                recon.processingWholeDetectorDimensions = detector.wholeDetectorDimensions;
+                recon.processingWholeDetectorDimensions = [700,700];%detector.wholeDetectorDimensions;
                 recon.processingSingleDetectorDimensions = recon.processingSingleDetectorUnits.convertFromM(detector.getSingleDetectorDimensionsInM());
             else
                 recon.processingWholeDetectorDimensions = [256 256];
