@@ -55,7 +55,7 @@ axis.Units = 'centimeters';
 
 pos = axis.Position;
 pos(3) = figureDimsInCm(2) - pos(1) - 0.4;
-pos(4) = pos(4);
+pos(4) = pos(4) + 0.1;
 axis.Position = pos;
 
 % save without legend
@@ -69,11 +69,9 @@ savefig(fig, strrep(writePath, '.png', ' (1).fig'), 'compact');
 leg = legend(axis, legendLabels);
 leg.Box ='off';
 
-leg.Units = 'centimeters';
 pos = leg.Position;
 pos(1) = pos(1)+0.3;
-pos(2) = pos(2)+0.3;
-leg.Position = pos;
+p
 
 % save with legend
 

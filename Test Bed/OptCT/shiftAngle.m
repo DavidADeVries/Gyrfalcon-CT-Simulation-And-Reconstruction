@@ -3,7 +3,7 @@ function [] = shiftAngle()
 from = 'F:\Thesis Raw Data\Gel 7-3\data\Gel 7-3_DATA_';
 to = 'F:\Thesis Recon Data\Gel 7-3\data\Gel 7-3_DATA_';
 
-shift = 6;
+shift = 7;
 
 for i=1:410
     j = i + shift; 
