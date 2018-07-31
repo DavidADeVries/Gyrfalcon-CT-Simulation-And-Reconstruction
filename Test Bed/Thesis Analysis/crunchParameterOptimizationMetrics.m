@@ -83,7 +83,8 @@ for i=1:numRuns
     % Catheter Masks
     cathMaskVff = createCatheterMask(...
         run.catheterCoordsFile, [256 256 256], catheterMaskRadius);
-        
+    
+    
     run.d1ProfileCoords = d1ProfileCoords;
 	run.d2ProfileCoords = d2ProfileCoords;
     

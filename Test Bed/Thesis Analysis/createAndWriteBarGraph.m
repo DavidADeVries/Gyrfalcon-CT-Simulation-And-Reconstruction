@@ -6,6 +6,8 @@ fig = figure();
 axis = axes('parent', fig);
 hold(axis, 'on');
 
+title(axis, axesTitle, 'Interpreter', 'latex', 'FontWeight', 'normal');
+
 fig.Units = 'centimeters';
 fig.Position = [1 1 figureDimsInCm(2) figureDimsInCm(1)];
 
@@ -80,7 +82,6 @@ pos(3) = figureDimsInCm(2)-1.6;
 
 axis.Position = pos;
 
-title(axis, axesTitle, 'Interpreter', 'latex', 'FontWeight', 'normal');
 
 % set subgroup labels
 

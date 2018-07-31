@@ -4,7 +4,6 @@ function [] = writeSliceImagesFromFigure(writePath, slice, unitConversion, thres
 
 if isempty(threshold)
     threshold = [min(min(slice)) max(max(slice))];
-    colourbarTicks = linspace(threshold(1), threshold(2), 5);
 end
 
 fig = figure();
@@ -41,6 +40,7 @@ axis.YLim = [1 length(slice)];
 picCounter = 1;
 
 % save figure with only slice (no colour bar, no lines)
+drawnow;
 saveas(fig, strrep(writePath, '.', [' (1-' num2str(picCounter), ').']));
 picCounter = picCounter + 1;
 
@@ -61,11 +61,19 @@ picCounter = 1;
 
 fig.Position = [1 1 imageHeightInCm+4 imageHeightInCm+0.2*2];
 
-cBar = colorbar(...
-    axis,...
-    'Ticks', colourbarTicks.*unitConversion,...
-    'FontName', 'times',...
-    'FontSize', 10);
+if isempty(colourbarTicks)
+    cBar = colorbar(...
+        axis,...
+        'FontName', 'times',...
+        'FontSize', 10);
+else
+    cBar = colorbar(...
+        axis,...
+        'Ticks', colourbarTicks.*unitConversion,...
+        'TickLabels', strtrim(cellstr(num2str(colourbarTicks'.*unitConversion))),...
+        'FontName', 'times',...
+        'FontSize', 10);    
+end
 
 axis.Position = [0 0.2 imageHeightInCm imageHeightInCm];
 
