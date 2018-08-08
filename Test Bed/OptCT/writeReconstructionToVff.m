@@ -1,16 +1,25 @@
-function [] = writeReconstructionToVff(reconRun, data_invM, path)
+function [] = writeReconstructionToVff(data_invM, path, additionalFlips)
 %[] = writeReconstructionToVff(reconRun, path)
 
 data_invCm = data_invM .* (1 ./ Constants.m_to_cm); %convert from 1/m to 1/cmn (for vff)
 
 % rotate 180 degree about z
 % use two flips to avoid any interpolation
-data_invCm = flip(data_invCm, 1);
-% data_invCm = flip(data_invCm, 3); % top slice becomes bottom slice
+if ~additionalFlips(1)
+    data_invCm = flip(data_invCm, 1);
+end
+
+if ~additionalFlips(2)
+    data_invCm = flip(data_invCm, 2);
+end
+
+if ~additionalFlips(3)
+    data_invCm = flip(data_invCm, 3); % top slice becomes bottom slice
+end
 
 dims = size(data_invCm);
 
-voxelDims_mm = reconRun.reconstruction.getSliceVoxelDimensionsInM() .* Constants.m_to_mm;
+voxelDims_mm = [0.5 0.5 0.5];
 
 % open file
 fid = fopen(path, 'w');
@@ -23,7 +32,7 @@ fprintf(fid, 'format=slice;\n');
 fprintf(fid, 'bits=32;\n');
 fprintf(fid, 'bands=1;\n');
 fprintf(fid, 'size=%d %d %d;\n', dims);
-fprintf(fid, 'spacing=%d %d %d;\n', voxelDims_mm);
+fprintf(fid, 'spacing=0.5 0.5 0.5;\n');
 fprintf(fid, 'origin=0 0 0;\n');
 fprintf(fid, 'rawsize=%d;\n', 4*prod(dims)); %size of data is 4 bytes per value * number of values in 3D data set
 fprintf(fid, 'data_scale=1;\n');
