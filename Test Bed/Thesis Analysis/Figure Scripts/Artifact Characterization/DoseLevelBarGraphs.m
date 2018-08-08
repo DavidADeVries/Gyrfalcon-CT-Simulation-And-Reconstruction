@@ -5,10 +5,10 @@ readPath = 'E:\Thesis Results\External Beam Trials.xls';
 sheet = 'Stand. OSC-TV All Trials';
 
 groupLabels = {...
-    '\begin{tabular}{c}500MU\end{tabular}',...
-    '\begin{tabular}{c}1500MU\end{tabular}',...
-    '\begin{tabular}{c}2000MU\end{tabular}',...
-    '\begin{tabular}{c}2500MU\end{tabular}'};
+    '\begin{tabular}{c}4 Gy\end{tabular}',...
+    '\begin{tabular}{c}12 Gy\end{tabular}',...
+    '\begin{tabular}{c}16 Gy\end{tabular}',...
+    '\begin{tabular}{c}20 Gy\end{tabular}'};
 
 groupRows = {...
     3:4,...
@@ -30,7 +30,7 @@ customColours = {...
     [],...
     []};
 
-figDimsInCm = [7.4, 7.4];
+figDimsInCm = [5, 7.4];
 
 subgroupLabelWriteIndex = 1;
 
@@ -44,7 +44,7 @@ column = 28;
 
 yAxisLabel = '$\bar{\Delta\mu}_{ROI}$ $[cm^-1]$';
 
-title = '$\bar{\Delta\mu}_{ROI}$ for $\Delta\mu$ levels';
+title = '$\bar{\Delta\mu}_{ROI}$';
 
 f = @(x) x ./ 100;
 
@@ -77,7 +77,7 @@ column = 31;
 
 yAxisLabel = '$\sigma_{ROI}$ $[cm^-1]$';
 
-title = '$\sigma_{ROI}$ for $\Delta\mu$ levels';
+title = '$\sigma_{ROI}$';
 
 f = @(x) x ./ 100;
 
@@ -112,9 +112,9 @@ graphWritePath = 'E:\Thesis Figures\Results\Artifact Characterization\Dose Level
 
 column = 34;
 
-yAxisLabel = '$\bar{\nabla_{ROI}}$ $[cm^{-1} / mm]$';
+yAxisLabel = '$\bar{\nabla}_{ROI}$ $[cm^{-1} / mm]$';
 
-title = '$\bar{\nabla_{ROI}}$ for $\Delta\mu$ levels';
+title = '$\bar{\nabla}_{ROI}$';
 
 f = @(x) x ./ 100;
 
@@ -157,9 +157,9 @@ graphWritePath = 'E:\Thesis Figures\Results\Artifact Characterization\Dose Level
 
 column = 40;
 
-yAxisLabel = '$\bar{\Delta_{ROI}}$ $[cm^{-1}]$';
+yAxisLabel = '$\bar{\Delta}_{ROI}$ $[cm^{-1}]$';
 
-title = '$\bar{\Delta_{ROI}}$ for $\Delta\mu$ levels';
+title = '$\bar{\Delta}_{ROI}$';
 
 f = @(x) x ./ 100;
 

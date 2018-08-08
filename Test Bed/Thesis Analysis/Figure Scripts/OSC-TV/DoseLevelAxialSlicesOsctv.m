@@ -4,7 +4,7 @@ gel500MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging S
 
 gel1500MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-4)\', 51, usedFloodFields);
 
-gel2000MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\', 54, usedFloodFields);
+gel2000MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\', 57, usedFloodFields);
 
 gel2500MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-4)\', 1, usedFloodFields);
 
