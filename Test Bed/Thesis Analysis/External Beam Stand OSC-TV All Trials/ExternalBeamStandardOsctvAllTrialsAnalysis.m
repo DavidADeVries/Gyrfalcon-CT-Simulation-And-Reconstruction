@@ -58,7 +58,7 @@ gel500MU_Osctv_FF.reconNumberStart = 1;
 
 gel500MU_Osctv_RR = osctvBase;
 gel500MU_Osctv_RR.gelName = gelName;
-gel500MU_Osctv_RR.usedCatheterReject = false;
+gel500MU_Osctv_RR.usedCatheterReject = true;
 gel500MU_Osctv_RR.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2)\';
 gel500MU_Osctv_RR.controlPath = controlPath;
 gel500MU_Osctv_RR.catheterCoordsFile = catheterCoordsFile;
@@ -66,7 +66,7 @@ gel500MU_Osctv_RR.reconNumberStart = 2;
 
 gel500MU_Osctv_FF_RR = osctvBaseFF;
 gel500MU_Osctv_FF_RR.gelName = gelName;
-gel500MU_Osctv_FF_RR.usedCatheterReject = false;
+gel500MU_Osctv_FF_RR.usedCatheterReject = true;
 gel500MU_Osctv_FF_RR.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2 FF-R)\';
 gel500MU_Osctv_FF_RR.controlPath = controlPath;
 gel500MU_Osctv_FF_RR.catheterCoordsFile = catheterCoordsFile;
