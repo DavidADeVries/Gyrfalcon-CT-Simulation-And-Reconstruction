@@ -18,7 +18,7 @@ unitConversion = 1/100; % m-1 to cm-1
 
 root = 'E:\Thesis Figures\Results\OSC-TV\Full Optimization\';
 %% run
-for recon = 26:50
+for recon = 1:20
     reconData = loadGyrfalconVolume(path, recon, usedFloodField);
     
 

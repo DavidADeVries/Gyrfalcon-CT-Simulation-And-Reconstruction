@@ -1,7 +1,7 @@
 % Load up OSC-TV_FF
 usedFloodFields = true;
 
-gel1Cath_osctv_FF = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\', 57, usedFloodFields);
+gel1Cath_osctv_FF = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\', 25, usedFloodFields);
 gel1CathOffset_osctv_FF = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-2 FF-R)\', 1, usedFloodFields);
 gel3Cath_osctv_FF = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-3 FF-R)\', 1, usedFloodFields);
 gel5Cath_osctv_FF = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-4 FF-R)\', 1, usedFloodFields);
@@ -9,7 +9,7 @@ gel5Cath_osctv_FF = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imagin
 % Load up OSC-TV_RR
 usedFloodFields = false;
 
-gel1Cath_osctv_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\', 157, usedFloodFields);
+gel1Cath_osctv_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\', 50, usedFloodFields);
 gel1CathOffset_osctv_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-2)\', 2, usedFloodFields);
 gel3Cath_osctv_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-3)\', 2, usedFloodFields);
 gel5Cath_osctv_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-4)\', 2, usedFloodFields);
@@ -17,7 +17,7 @@ gel5Cath_osctv_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imagin
 % Load up OSC-TV_FF_RR
 usedFloodFields = true;
 
-gel1Cath_osctv_FF_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\', 157, usedFloodFields);
+gel1Cath_osctv_FF_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\', 50, usedFloodFields);
 gel1CathOffset_osctv_FF_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-2 FF-R)\', 2, usedFloodFields);
 gel3Cath_osctv_FF_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-3 FF-R)\', 2, usedFloodFields);
 gel5Cath_osctv_FF_RR = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-4 FF-R)\', 2, usedFloodFields);

@@ -1,6 +1,6 @@
 % output params
 writePath = 'E:\Thesis Results\External Beam Trials (Redo).xls';
-sheetName = 'Stand. OSC-TV Param. Opt.';
+sheetName = 'OSC-TV_RR # Iters';
 
 % general params
 catheterMaskRadius = 5;
@@ -36,22 +36,19 @@ fdkFFComp.usedFloodFields = true;
 % OSC-TV Base
 osctvBase = base;
 osctvBase.gelName = 'Gel 4-2';
-osctvBase.reconAlgorithm = 'OSC-TV'; 
-osctvBase.reconNumberStart = 1;  
-osctvBase.numIterationsValues = {'10'};
-osctvBase.numSubsetsValues = {'[3 51]', '[6 103]', '[13 205]', '[41 205]'};
-osctvBase.cValues = {'0.001', '0.005', '0.01', '0.05', '0.1'};
+osctvBase.reconAlgorithm = 'OSC-TV';
 
-% OSC-TV No Flood Field
-osctvNoFF = osctvBase;
-osctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\';
-osctvNoFF.usedFloodFields = false;  
+% OSC-TV (STANDARD)
+osctv205_41 =  osctvBase;
+osctv205_41.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)';
+osctv205_41.usedFloodFields = false;
+osctv205_41.usedCatheterReject = true;
 
-% OSC-TV No Flood Field
-osctvFF = osctvBase;     
-osctvFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\';
-osctvFF.usedFloodFields = true;
+osctv205_41.reconNumberStart = 46; 
 
+osctv205_41.numIterationsValues = {'5', '10', '15', '20', '25'};
+osctv205_41.numSubsetsValues = {'[41 205]'};
+osctv205_41.cValues = {'0.05'};
   
 % *********
 % ** RUN **
@@ -59,6 +56,6 @@ osctvFF.usedFloodFields = true;
 
 crunchParameterOptimizationMetrics(...
     {control, fdkComp, fdkFFComp,...
-    osctvNoFF},..., osctvFF},...
+    osctv205_41},...
     catheterMaskRadius,...
     writePath, sheetName);

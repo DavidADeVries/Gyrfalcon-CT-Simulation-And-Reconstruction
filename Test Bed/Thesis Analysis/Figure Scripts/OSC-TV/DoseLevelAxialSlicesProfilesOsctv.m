@@ -2,7 +2,7 @@ usedFloodFields = false;
 
 %gel500MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2)\', 1, usedFloodFields);
 
-gel1500MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-4)\', 51, usedFloodFields);
+gel1500MU_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-4)\', 1, usedFloodFields);
 
 gel1500MU_control = loadOpticalCtVistaRecon('E:\Thesis Recon Data\Gel 2-3\Gel 2-3_HR.vff');
 gel1500MU_fdk = loadOpticalCtVistaRecon('E:\Thesis Recon Data\Gel 2-4\Gel 2-4_HR.vff');

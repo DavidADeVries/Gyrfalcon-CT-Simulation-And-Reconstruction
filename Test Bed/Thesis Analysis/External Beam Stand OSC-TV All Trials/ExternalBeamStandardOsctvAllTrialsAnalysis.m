@@ -1,6 +1,6 @@
 % output params
-writePath = 'E:\Thesis Results\External Beam Trials.xls';
-sheetName = 'OSC-TV All Trials';
+writePath = 'E:\Thesis Results\External Beam Trials (Redo).xls';
+sheetName = 'OSC-TV_ All Trials';
 
 % general params
 catheterMaskRadius = 5;
@@ -14,15 +14,15 @@ fdkBase.reconAlgorithm = 'FDK';
 osctvBase = AnalysisRun;
 osctvBase.usedCatheterReject = false;
 osctvBase.reconAlgorithm = 'OSC-TV';
-osctvBase.numIterationsValues = {'40'};
-osctvBase.numSubsetsValues = {'[205 41]'};
+osctvBase.numIterationsValues = {'15'};
+osctvBase.numSubsetsValues = {'[41 205]'};
 
 osctvBase.usedFloodFields = false;
-osctvBase.cValues = {'0.01'};
+osctvBase.cValues = {'0.05'};
 
 osctvBaseFF = osctvBase;
 osctvBaseFF.usedFloodFields = true;
-osctvBaseFF.cValues = {'0.005'};
+osctvBaseFF.cValues = {'0.01'};
 
 
 % ** Gel 2-1/2-2 (500MU) **
@@ -42,27 +42,27 @@ gel2_2Fdk.readPath = 'E:\Thesis Recon Data\Gel 2-2\Gel 2-2_HR.vff';
 gel2_2Fdk.controlPath = controlPath;
 gel2_2Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel500MU_Osctv = osctvBase;
-gel500MU_Osctv.gelName = gelName;
-gel500MU_Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2)\';
-gel500MU_Osctv.controlPath = controlPath;
-gel500MU_Osctv.catheterCoordsFile = catheterCoordsFile;
-gel500MU_Osctv.reconNumberStart = 1;
+gel2_2_Osctv = osctvBase;
+gel2_2_Osctv.gelName = gelName;
+gel2_2_Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2)\';
+gel2_2_Osctv.controlPath = controlPath;
+gel2_2_Osctv.catheterCoordsFile = catheterCoordsFile;
+gel2_2_Osctv.reconNumberStart = 1;
 
-gel500MU_Osctv_FF = osctvBaseFF;
-gel500MU_Osctv_FF.gelName = gelName;
-gel500MU_Osctv_FF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2 FF-R)\';
-gel500MU_Osctv_FF.controlPath = controlPath;
-gel500MU_Osctv_FF.catheterCoordsFile = catheterCoordsFile;
-gel500MU_Osctv_FF.reconNumberStart = 1;
+gel2_2_Osctv_FF = osctvBaseFF;
+gel2_2_Osctv_FF.gelName = gelName;
+gel2_2_Osctv_FF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2 FF-R)\';
+gel2_2_Osctv_FF.controlPath = controlPath;
+gel2_2_Osctv_FF.catheterCoordsFile = catheterCoordsFile;
+gel2_2_Osctv_FF.reconNumberStart = 1;
 
-gel500MU_Osctv_RR = osctvBase;
-gel500MU_Osctv_RR.gelName = gelName;
-gel500MU_Osctv_RR.usedCatheterReject = true;
-gel500MU_Osctv_RR.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2)\';
-gel500MU_Osctv_RR.controlPath = controlPath;
-gel500MU_Osctv_RR.catheterCoordsFile = catheterCoordsFile;
-gel500MU_Osctv_RR.reconNumberStart = 2;
+gel2_2_Osctv_RR = osctvBase;
+gel2_2_Osctv_RR.gelName = gelName;
+gel2_2_Osctv_RR.usedCatheterReject = true;
+gel2_2_Osctv_RR.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-2)\';
+gel2_2_Osctv_RR.controlPath = controlPath;
+gel2_2_Osctv_RR.catheterCoordsFile = catheterCoordsFile;
+gel2_2_Osctv_RR.reconNumberStart = 2;
 
 gel500MU_Osctv_FF_RR = osctvBaseFF;
 gel500MU_Osctv_FF_RR.gelName = gelName;
@@ -90,19 +90,19 @@ gel2_4Fdk.readPath = 'E:\Thesis Recon Data\Gel 2-4\Gel 2-4_HR.vff';
 gel2_4Fdk.controlPath = controlPath;
 gel2_4Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel2_4OsctvNoFF = osctvBase;
-gel2_4OsctvNoFF.gelName = gelName;
-gel2_4OsctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-4)\';
-gel2_4OsctvNoFF.controlPath = controlPath;
-gel2_4OsctvNoFF.catheterCoordsFile = catheterCoordsFile;
-gel2_4OsctvNoFF.reconNumberStart = 51;
+gel2_4Osctv = osctvBase;
+gel2_4Osctv.gelName = gelName;
+gel2_4Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-4)\';
+gel2_4Osctv.controlPath = controlPath;
+gel2_4Osctv.catheterCoordsFile = catheterCoordsFile;
+gel2_4Osctv.reconNumberStart = 1;
 
 gel2_4OsctvFF = osctvBaseFF;
 gel2_4OsctvFF.gelName = gelName;
 gel2_4OsctvFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 2-4 FF-R)\';
 gel2_4OsctvFF.controlPath = controlPath;
 gel2_4OsctvFF.catheterCoordsFile = catheterCoordsFile;
-gel2_4OsctvFF.reconNumberStart = 51;
+gel2_4OsctvFF.reconNumberStart = 1;
 
 
 % ** Gel 4-1/4-2 (2000MU) **
@@ -122,19 +122,19 @@ gel4_2Fdk.readPath = 'E:\Thesis Recon Data\Gel 4-2\Gel 4-2_HR.vff';
 gel4_2Fdk.controlPath = controlPath;
 gel4_2Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel4_2OsctvNoFF = osctvBase;
-gel4_2OsctvNoFF.gelName = gelName;
-gel4_2OsctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\';
-gel4_2OsctvNoFF.controlPath = controlPath;
-gel4_2OsctvNoFF.catheterCoordsFile = catheterCoordsFile;
-gel4_2OsctvNoFF.reconNumberStart = 57;
+gel4_2Osctv = osctvBase;
+gel4_2Osctv.gelName = gelName;
+gel4_2Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\';
+gel4_2Osctv.controlPath = controlPath;
+gel4_2Osctv.catheterCoordsFile = catheterCoordsFile;
+gel4_2Osctv.reconNumberStart = 23;
 
 gel4_2OsctvFF = osctvBaseFF;
 gel4_2OsctvFF.gelName = gelName;
 gel4_2OsctvFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2 FF-R)\';
 gel4_2OsctvFF.controlPath = controlPath;
 gel4_2OsctvFF.catheterCoordsFile = catheterCoordsFile;
-gel4_2OsctvFF.reconNumberStart = 57;
+gel4_2OsctvFF.reconNumberStart = 23;
 
 
 % ** Gel 4-3/4-4 (2500MU) **
@@ -154,12 +154,12 @@ gel4_4Fdk.readPath = 'E:\Thesis Recon Data\Gel 4-4\Gel 4-4_HR.vff';
 gel4_4Fdk.controlPath = controlPath;
 gel4_4Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel4_4OsctvNoFF = osctvBase;
-gel4_4OsctvNoFF.gelName = gelName;
-gel4_4OsctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-4)\';
-gel4_4OsctvNoFF.controlPath = controlPath;
-gel4_4OsctvNoFF.catheterCoordsFile = catheterCoordsFile;
-gel4_4OsctvNoFF.reconNumberStart = 1;
+gel4_4Osctv = osctvBase;
+gel4_4Osctv.gelName = gelName;
+gel4_4Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-4)\';
+gel4_4Osctv.controlPath = controlPath;
+gel4_4Osctv.catheterCoordsFile = catheterCoordsFile;
+gel4_4Osctv.reconNumberStart = 1;
 
 gel4_4OsctvFF = osctvBaseFF;
 gel4_4OsctvFF.gelName = gelName;
@@ -186,12 +186,12 @@ gel5_2Fdk.readPath = 'E:\Thesis Recon Data\Gel 5-2\Gel 5-2_HR.vff';
 gel5_2Fdk.controlPath = controlPath;
 gel5_2Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel5_2OsctvNoFF = osctvBase;
-gel5_2OsctvNoFF.gelName = gelName;
-gel5_2OsctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-2)\';
-gel5_2OsctvNoFF.controlPath = controlPath;
-gel5_2OsctvNoFF.catheterCoordsFile = catheterCoordsFile;
-gel5_2OsctvNoFF.reconNumberStart = 1;
+gel5_2Osctv = osctvBase;
+gel5_2Osctv.gelName = gelName;
+gel5_2Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-2)\';
+gel5_2Osctv.controlPath = controlPath;
+gel5_2Osctv.catheterCoordsFile = catheterCoordsFile;
+gel5_2Osctv.reconNumberStart = 1;
 
 gel5_2OsctvFF = osctvBaseFF;
 gel5_2OsctvFF.gelName = gelName;
@@ -218,12 +218,12 @@ gel5_3Fdk.readPath = 'E:\Thesis Recon Data\Gel 5-3\Gel 5-3_HR.vff';
 gel5_3Fdk.controlPath = controlPath;
 gel5_3Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel5_3OsctvNoFF = osctvBase;
-gel5_3OsctvNoFF.gelName = gelName;
-gel5_3OsctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-3)\';
-gel5_3OsctvNoFF.controlPath = controlPath;
-gel5_3OsctvNoFF.catheterCoordsFile = catheterCoordsFile;
-gel5_3OsctvNoFF.reconNumberStart = 1;
+gel5_3Osctv = osctvBase;
+gel5_3Osctv.gelName = gelName;
+gel5_3Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-3)\';
+gel5_3Osctv.controlPath = controlPath;
+gel5_3Osctv.catheterCoordsFile = catheterCoordsFile;
+gel5_3Osctv.reconNumberStart = 1;
 
 gel5_3OsctvFF = osctvBaseFF;
 gel5_3OsctvFF.gelName = gelName;
@@ -250,12 +250,12 @@ gel5_4Fdk.readPath = 'E:\Thesis Recon Data\Gel 5-4\Gel 5-4_HR.vff';
 gel5_4Fdk.controlPath = controlPath;
 gel5_4Fdk.catheterCoordsFile = catheterCoordsFile;
 
-gel5_4OsctvNoFF = osctvBase;
-gel5_4OsctvNoFF.gelName = gelName;
-gel5_4OsctvNoFF.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-4)\';
-gel5_4OsctvNoFF.controlPath = controlPath;
-gel5_4OsctvNoFF.catheterCoordsFile = catheterCoordsFile;
-gel5_4OsctvNoFF.reconNumberStart = 1;
+gel5_4Osctv = osctvBase;
+gel5_4Osctv.gelName = gelName;
+gel5_4Osctv.readPath = 'E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-4)\';
+gel5_4Osctv.controlPath = controlPath;
+gel5_4Osctv.catheterCoordsFile = catheterCoordsFile;
+gel5_4Osctv.reconNumberStart = 1;
 
 gel5_4OsctvFF = osctvBaseFF;
 gel5_4OsctvFF.gelName = gelName;
@@ -271,13 +271,13 @@ gel5_4OsctvFF.reconNumberStart = 1;
 
 crunchParameterOptimizationMetrics(...
     {...
-    gel2_2Control, gel2_2Fdk, gel500MU_Osctv, gel500MU_Osctv_FF,...
-    gel2_4Control, gel2_4Fdk, gel2_4OsctvNoFF, gel2_4OsctvFF,...    
-    gel4_2Control, gel4_2Fdk, gel4_2OsctvNoFF, gel4_2OsctvFF,...  
-    gel4_4Control, gel4_4Fdk, gel4_4OsctvNoFF, gel4_4OsctvFF,...
-    gel5_2Control, gel5_2Fdk, gel5_2OsctvNoFF, gel5_2OsctvFF,...
-    gel5_3Control, gel5_3Fdk, gel5_3OsctvNoFF, gel5_3OsctvFF,...
-    gel5_4Control, gel5_4Fdk, gel5_4OsctvNoFF, gel5_4OsctvFF,...
+    gel2_2Control, gel2_2Fdk, gel2_2_Osctv,... gel500MU_Osctv_FF,...
+    gel2_4Control, gel2_4Fdk, gel2_4Osctv,... gel2_4OsctvFF,...    
+    gel4_2Control, gel4_2Fdk, gel4_2Osctv,... gel4_2OsctvFF,...  
+    gel4_4Control, gel4_4Fdk, gel4_4Osctv,... gel4_4OsctvFF,...
+    gel5_2Control, gel5_2Fdk, gel5_2Osctv,... gel5_2OsctvFF,...
+    gel5_3Control, gel5_3Fdk, gel5_3Osctv,... gel5_3OsctvFF,...
+    gel5_4Control, gel5_4Fdk, gel5_4Osctv,... gel5_4OsctvFF,...
     },...
     catheterMaskRadius,...
     writePath, sheetName);

@@ -1,6 +1,6 @@
 usedFloodFields = false;
 
-gel1Cath_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\', 57, usedFloodFields);
+gel1Cath_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 4-2)\', 23, usedFloodFields);
 
 gel1CathOffset_osctv = loadGyrfalconReconForFigures('E:\Local Gyrfalcon Data\Imaging Scan Runs\Optical CT Imaging Scan Run (Gel 5-2)\', 1, usedFloodFields);
 

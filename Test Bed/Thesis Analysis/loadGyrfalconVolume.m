@@ -1,7 +1,7 @@
 function [volume, time] = loadGyrfalconVolume(path, reconNumber, usedFloodField)
 
-volumePath = [path, '/Thesis Recon ', num2str(reconNumber), ' (CBCT OSC-TV)/Slices/Slice 1.mat'];
-runPath = [path, '/Thesis Recon ', num2str(reconNumber), ' (CBCT OSC-TV)/Thesis Recon ', num2str(reconNumber), ' (CBCT OSC-TV).mat'];
+volumePath = [path, '/Thesis Recon [2] ', num2str(reconNumber), ' (CBCT OSC-TV)/Slices/Slice 1.mat'];
+runPath = [path, '/Thesis Recon [2] ', num2str(reconNumber), ' (CBCT OSC-TV)/Thesis Recon [2] ', num2str(reconNumber), ' (CBCT OSC-TV).mat'];
 
 if ~usedFloodField
     volume = loadVolume(volumePath);
