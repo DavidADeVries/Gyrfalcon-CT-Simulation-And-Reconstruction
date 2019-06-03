@@ -4,6 +4,13 @@ classdef FirstGenPAIRReconstruction < Reconstruction
     properties
         displayName = 'PAIR'
         fullName = 'PAIR (1st Gen)'
+        
+        usePrecomputedAlphaMatrix
+        alphaMatrixSavePath
+        alphaMatrixSaveFileName
+        
+        useNonPartialWeighting
+        nonPartialWeightingCutoff
     end
     
     methods(Static)
@@ -27,10 +34,14 @@ classdef FirstGenPAIRReconstruction < Reconstruction
         end
               
         function recon = createFromGUIForSubClass(recon, app)
-            % nothing yet
+            recon.useNonPartialWeighting = app.Gen1PAIR_UseNonPartialVoxelWeightingCheckBox.Value;
+            recon.nonPartialWeightingCutoff = app.Gen1PAIR_NonPartialVoxelWeightingCutoffEditField.Value;
         end
         
+        function recon = runReconstruction(recon, simulationOrImagingRun, app)
+            recon = firstGenPAIRAlgorithm(recon, simulationOrImagingRun);
+        end
+                
     end
     
 end
-

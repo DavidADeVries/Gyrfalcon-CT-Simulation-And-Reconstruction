@@ -6,13 +6,29 @@ classdef Reconstruction
         
         reconDataSet % the 3D reconstructed data set (which can be compared to the original phantom)
         
-        reconSliceDimensions = [0 0]% number of voxels in x,y,z for each slice
-        reconSliceVoxelDimensionsInM = [0 0]% dimension of each voxel in data set
-        reconSliceLocationInM
+        reconSliceDimensions = [0 0 0]% number of voxels in x,y,z for each slice
+        
+        reconSliceVoxelDimensions = [0 0 0]% dimension of each voxel in data set
+        reconSliceVoxelDimensionUnits = Units.mm
+        
+        reconSliceLocation
+        reconSliceLocationUnits = Units.m
         
         reconDataSetDimensions = [0 0 0] % number of voxels in x,y,z for dataset
-        reconDataSetVoxelDimensionsInM = [0 0 0] % dimension of each voxel
-        reconDataSetLocationInM
+        
+        reconDataSetVoxelDimensions = [0 0 0] % dimension of each voxel
+        reconDataSetVoxelDimensionUnits = Units.mm
+        
+        reconDataSetLocation
+        reconDataSetLocationUnits = Units.m
+        
+        interpolateDetectorData = false
+        processingWholeDetectorDimensions = [256 256]
+        processingSingleDetectorDimensions = [0.5 0.5]
+        
+        processingSingleDetectorUnits = Units.mm
+        
+        useRayRejection = false
         
         reconDataSetInterpolationType = InterpolationTypes3D.spline
     end
@@ -26,24 +42,26 @@ classdef Reconstruction
             recon.reconDataSetSlices = oldRecon.reconDataSetSlices;
             recon.reconDataSet = oldRecon.reconDataSet;
             recon.reconSliceDimensions = oldRecon.reconSliceDimensions;
-            recon.reconSliceVoxelDimensionsInM = oldRecon.reconSliceVoxelDimensionsInM;
-            recon.reconSliceLocationInM = oldRecon.reconSliceLocationInM;
+            recon.reconSliceVoxelDimensions = oldRecon.reconSliceVoxelDimensions;
+            recon.reconSliceLocation = oldRecon.reconSliceLocation;
             recon.reconDataSetDimensions = oldRecon.reconDataSetDimensions;
-            recon.reconDataSetVoxelDimensionsInM = oldRecon.reconDataSetVoxelDimensionsInM;
-            recon.reconDataSetLocationInM = oldRecon.reconDataSetLocationInM;
+            recon.reconDataSetVoxelDimensions = oldRecon.reconDataSetVoxelDimensions;
+            recon.reconDataSetLocation = oldRecon.reconDataSetLocation;
             recon.reconDataSetInterpolationType = oldRecon.reconDataSetInterpolationType;
         end
         
         function recon = createFromGUI(recon, app)
             x = app.ReconstructionRunSliceDimsXEditField.Value;
             y = app.ReconstructionRunSliceDimsYEditField.Value;
+            z = app.ReconstructionRunSliceDimsZEditField.Value;
             
-            recon.reconSliceDimensions = [x, y];
+            recon.reconSliceDimensions = [x, y, z];
             
             x = app.ReconstructionRunSlicePixelDimsXEditField.Value;
             y = app.ReconstructionRunSlicePixelDimsYEditField.Value;
+            z = app.ReconstructionRunSlicePixelDimsZEditField.Value;
             
-            recon.reconSliceVoxelDimensionsInM = [x, y];
+            recon.reconSliceVoxelDimensions= [x, y, z];
             
             x = app.ReconstructionRunDataSetDimsXEditField.Value;
             y = app.ReconstructionRunDataSetDimsYEditField.Value;
@@ -55,27 +73,65 @@ classdef Reconstruction
             y = app.ReconstructionRunDataSetVoxelDimsYEditField.Value;
             z = app.ReconstructionRunDataSetVoxelDimsZEditField.Value;
             
-            recon.reconDataSetVoxelDimensionsInM = [x, y, z];
+            recon.reconDataSetVoxelDimensions = [x, y, z];
+            
+            recon.interpolateDetectorData = app.ReconstructionRunInterpolateDetectorDataCheckBox.Value;
             
             recon.reconDataSetInterpolationType = app.ReconstructionRun3DInterpolationTypeDropDown.Value;
+            
+            xy = app.ReconstructionRunWholeDetectorDimsXYEditField.Value;
+            z = app.ReconstructionRunWholeDetectorDimsZEditField.Value;
+            
+            recon.processingWholeDetectorDimensions = [xy, z];
+            
+            xy = app.ReconstructionRunPixelDimsXYEditField.Value;
+            z = app.ReconstructionRunPixelDimsZEditField.Value;
+            
+            recon.processingSingleDetectorDimensions = [xy, z];
+            
+            recon.useRayRejection = app.ReconstructionRunUseRayExclusionCheckBox.Value;
             
             recon = recon.createFromGUIForSubClass(app);
         end
         
-        function recon = setReconDataSetDefaults(recon, phantom)
-            % set defaults for the reconDataSet based on the phantom
-            % dimensions
+        function dataSet_invM = getReconDataSetSliceInInvM(recon, sliceNum)
+            dataSet_invM = recon.reconDataSetSlices{sliceNum};
+        end
+        
+        function voxelDims_m = getSliceVoxelDimensionsInM(recon)
+            voxelDims_m = recon.reconSliceVoxelDimensionUnits.convertToM(recon.reconSliceVoxelDimensions);
+        end
+        
+        function recon = setReconDataSetDefaults(recon, phantom, detector)
+            % set defaults for the reconDataSet based on the phantom and
+            % detector dimensions
             
-            phantomDataSet = phantom.dataSet;
+            if isempty(phantom)
+                dims = [256 256 216]; % default
+                voxelDimsInM = [0.5 0.5 0.5]; % default (0.5mm isotropic)
+            else
+                phantom = phantom.loadFields('');
+                phantomDataSet = phantom.dataSet;
+                
+                dims = phantomDataSet.getSize();
+                voxelDimsInM = phantom.getVoxelDimensionsInM();
+            end
             
-            dims = phantomDataSet.getSize();
-            voxelDimsInM = phantom.getVoxelDimensionsInM();
-            
-            recon.reconSliceDimensions = dims(1:2);
-            recon.reconSliceVoxelDimensionsInM = voxelDimsInM(1:2);
-            
+            recon.reconSliceDimensions = dims(1:3);
+            recon.reconSliceVoxelDimensions = voxelDimsInM(1:3);
+                        
             recon.reconDataSetDimensions = dims;
-            recon.reconDataSetVoxelDimensionsInM = voxelDimsInM;
+            recon.reconDataSetVoxelDimensions = voxelDimsInM;
+                    
+            recon.interpolateDetectorData = false;
+            
+            if ~isempty(detector)
+                recon.processingWholeDetectorDimensions = [700,700];%detector.wholeDetectorDimensions;
+                recon.processingSingleDetectorDimensions = recon.processingSingleDetectorUnits.convertFromM(detector.getSingleDetectorDimensionsInM());
+            else
+                recon.processingWholeDetectorDimensions = [256 256];
+                recon.processingSingleDetectorDimensions = [0.5 0.5];
+            end
         end
         
         function savePath = getSavePath(recon, simulationRunSavePath)
@@ -89,6 +145,14 @@ classdef Reconstruction
             savePath = makePath(simulationRunSavePath, defaultName);
         end
         
+        function dimsInM = getReconDataSetVoxelDimensionsInM(recon)
+            dimsInM = recon.reconDataSetVoxelDimensionUnits.convertToM(recon.reconDataSetVoxelDimensions);
+        end
+        
+        function dimsInM = getReconSliceVoxelDimensionsInM(recon)
+            dimsInM = recon.reconSliceVoxelDimensionUnits.convertToM(recon.reconSliceVoxelDimensions);
+        end
+        
         function strings = getReconstructionSettingsString(recon)
             str1 = 'Reconstruction Settings:';
             
@@ -96,7 +160,7 @@ classdef Reconstruction
             
             str2 = ['Slice Dimensions: ' sliceDimString];
             
-            voxelDimsInMM = Units.mm.convertFromM(recon.reconSliceVoxelDimensionsInM);
+            voxelDimsInMM = Units.mm.convertFromM(recon.getReconSliceVoxelDimensionsInM());
             sliceVoxelDimString = makeDimensionString(voxelDimsInMM);
             
             str3 = ['Slice Voxel Dimensions (mm): ', sliceVoxelDimString];
@@ -105,7 +169,7 @@ classdef Reconstruction
             
             str4 = ['Data Set Dimensions: ' dataSetDimString];
             
-            voxelDimsInMM = Units.mm.convertFromM(recon.reconDataSetVoxelDimensionsInM);
+            voxelDimsInMM = Units.mm.convertFromM(recon.getReconDataSetVoxelDimensionsInM());
             dataSetVoxelDimString = makeDimensionString(voxelDimsInMM);
             
             str5 = ['Data Set Voxel Dimensions (mm): ', dataSetVoxelDimString];
@@ -113,16 +177,77 @@ classdef Reconstruction
             strings = {str1 str2 str3 str4 str5};
         end
         
-        function recon = reconFullDataSet(recon, simulation)
-            phantom = simulation.phantom;
+        function [detectorData_I0, detectorData_I, rayRejectionMaps, simulationOrImagingScanRun] = organizeDataForReconstruction(reconstruction, simulationOrImagingScanRun)
+                
+            [scanGeometry] = simulationOrImagingScanRun.findScanGeometry();
             
-            reconLocationInM = calculateNewPhantomLocationForReconstruction(...
-                phantom.getLocationInM(), phantom.getVoxelDimensionsInM(), phantom.dataSet.getSize(),...
-                recon.reconDataSetVoxelDimensionsInM, recon.reconDataSetDimensions);
+            % interpolate data from what resolution it was obtained at to
+            % resolution the reconstruction will use
+            [detectorData_I0, detectorData_I, rayRejectionMaps] = scanGeometry.compileProjectionData(...
+                simulationOrImagingScanRun, reconstruction);
+
+            detectorData_I0(isnan(detectorData_I0)) = 0;
+            detectorData_I(isnan(detectorData_I)) = 0;
             
-            recon.reconDataSetLocationInM = reconLocationInM;
+            % clear out original data
+            simulationOrImagingScanRun.sliceData = {};
+        end
+        
+        function [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = getCachedReconstructionData(recon, simulationOrImagingScanRun)
+            filename = recon.getCachedProjectionDataFilename();
             
-            sliceLocationsInM = simulation.scan.getSlicesInM();
+            loadPath = makePath(simulationOrImagingScanRun.savePath, Constants.Projection_Data_Cache_Folder, filename);
+            
+            if exist(loadPath, 'file')
+                data = load(loadPath);
+                
+                projectionData = data.('projectionData');
+                rayRejectionMaps = data.('rayRejectionMaps');
+                
+                simulationOrImagingScanRun.sliceData = {};
+            else
+                [projectionData, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                    recon.organizeDataForReconstruction(simulationOrImagingScanRun);
+                
+                if ~exist(makePath(simulationOrImagingScanRun.savePath, Constants.Projection_Data_Cache_Folder), 'dir')
+                    mkdir(simulationOrImagingScanRun.savePath, Constants.Projection_Data_Cache_Folder);
+                end
+                
+                save(loadPath, 'projectionData', 'rayRejectionMaps');
+            end
+        end
+        
+        function filename = getCachedProjectionDataFilename(recon)
+            xy = recon.processingWholeDetectorDimensions(1);
+            z = recon.processingWholeDetectorDimensions(2);
+            
+            detectorDims = [num2str(xy), 'x' num2str(z)];
+            
+            dimsInM = recon.getSingleDetectorDimensionsInM();
+            dimsInMM = dimsInM * Constants.m_to_mm;
+            
+            pixelDims = [num2str(dimsInMM(1)), 'x', num2str(dimsInMM(2)),'mm'];
+            
+            if recon.useRayRejection
+                rayReject = 'RR';
+            else
+                rayReject = '';
+            end
+            
+            filename = ['Projection Data (', detectorDims, ')(', pixelDims, ')(', rayReject, ')', Constants.Matlab_File_Extension];
+        end
+        
+        function recon = reconFullDataSet(recon, simulationOrImagingScanRun)
+            recon.reconDataSet = recon.reconDataSetSlices{1};
+%             phantom = simulationOrImagingScanRun.phantom;
+%             
+%             reconLocationInM = calculateNewPhantomLocationForReconstruction(...
+%                 phantom.getLocationInM(), phantom.getVoxelDimensionsInM(), phantom.dataSet.getSize(),...
+%                 recon.reconDataSetVoxelDimensionsInM, recon.reconDataSetDimensions);
+%             
+%             recon.reconDataSetLocationInM = reconLocationInM;
+%             
+%             sliceLocationsInM = simulationOrImagingScanRun.scan.getSlicesInM();
             
 %             recon.reconDataSet = reconstructDataSetFromReconstructedSlices(...
 %                 recon.reconDataSetSlices, sliceLocationsInM,...
@@ -157,20 +282,40 @@ classdef Reconstruction
             
             window = [allSliceMin allSliceMax]; %for max contrast
             
-            % save slices to PNG
+            % save slices to .png and .mat
             for i=1:numSlices
+                baseFilename = [Constants.Recon_Slices_File_Name, ' ', num2str(i)];
+                
                 slice = slices{i};
+                
+                dims = size(slice);
+                middleZ = ceil(dims(3)./2);
+                slice = slice(:,:,middleZ);
                 
                 adjSlice = applyContrastToMaximizeGrayscale(slice, window, 1);
                 
-                filename = [Constants.Recon_Slices_File_Name, ' ', num2str(i), Constants.PNG_File_Extension];
+                % write slice to png
+                filename = [baseFilename, Constants.PNG_File_Extension];
                 
                 imwrite(adjSlice, makePath(savePath, sliceFolder, filename));
+                
+                % write to matlab file
+                filename = [baseFilename, Constants.Matlab_File_Extension];
+                
+                reconData = slices{i};
+                save(makePath(savePath, sliceFolder, filename), Constants.Recon_Slice_Data_Var_Name);
             end
         end
+        
+        function dimsInM = getSingleDetectorDimensionsInM(recon)
+            dimsInM = recon.processingSingleDetectorUnits.convertToM(recon.processingSingleDetectorDimensions);
+        end
+            
     end
     
 end
+
+% HELPER FUNCTIONS
 
 function string = makeDimensionString(dims)
     string = '';

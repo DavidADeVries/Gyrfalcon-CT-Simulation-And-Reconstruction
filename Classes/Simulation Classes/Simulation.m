@@ -80,6 +80,19 @@ classdef Simulation < GyrfalconObject
             object = Simulation;
         end
         
+        function numRays = getTotalNumberOfRays(simulation)
+            numSlices = length(simulation.scan.slices);
+            numAngles = length(simulation.scan.scanAngles);
+            numPerAngleTranslationXY = simulation.scan.perAngleTranslationResolution(1);
+            numPerAngleTranslationZ = simulation.scan.perAngleTranslationResolution(2);
+            numDetectorsXY = simulation.detector.wholeDetectorDimensions(1);
+            numDetectorsZ = simulation.detector.wholeDetectorDimensions(2);
+            
+            dims = [numSlices, numAngles, numPerAngleTranslationXY, numPerAngleTranslationZ, numDetectorsXY, numDetectorsZ];
+            
+            numRays = prod(dims(dims~=0));
+        end
+        
         function simulation = setDefaultValues(simulation)
             phantom = Phantom;
             phantom = phantom.setDefaultValues();
@@ -482,33 +495,7 @@ classdef Simulation < GyrfalconObject
             app.StatusOutputLamp.Color = [0 1 0]; % green
         end
         
-        function string = getScanGeometryString(simulation, scanGeometry, errorMsg)
-            if isempty(scanGeometry)
-                string = errorMsg;
-            else
-                numSlices = num2str(length(simulation.scan.slices));
-                numAngles = num2str(length(simulation.scan.scanAngles));
-                
-                angleString = [numAngles, ' Scan Angles [°] (', ')'];
-                slicesString = [numSlices, ' Slices [mm] (', ')'];
-                
-                detectorDims = simulation.detector.wholeDetectorDimensions;
-                
-                detectorSizeString = ['Detector Size: ', num2str(detectorDims(1)), 'x', num2str(detectorDims(2))];
-                
-                perAngleDims = simulation.scan.perAngleTranslationResolution;
-                
-                perAngleString = ['Per Angle Translation Steps: ', num2str(perAngleDims(1)), 'x', num2str(perAngleDims(2))];
-                
-                string = {...
-                    scanGeometry.displayString,...
-                    scanGeometry.shortDescriptionString,...
-                    angleString,...
-                    slicesString,...
-                    detectorSizeString,...
-                    perAngleString};
-            end
-        end
+        
         
         function sliceData = runScanSimulationForSlice(simulation, axesHandle, slicePosition, displaySlices, displayAngles, displayPerAnglePosition, displayDetectorRaster, displayDetectorValues, displayDetectorRayTrace, detectorImageHandle, app, sliceSavePath)
             angles = simulation.scan.getScanAnglesInDegrees();
@@ -887,57 +874,109 @@ classdef Simulation < GyrfalconObject
         end
         
         function simulationRun = runScanSimulationHighPerformanceOnGPU(simulation, simulationRun, app)
-            simulationRun = simulationRun.startRun();
+            % SET-UP
+            newString = ['Simulation Run Start (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            app.StatusOutputLamp.Color = [1 1 0]; % yellow
+                         
+            anglesInDeg = simulation.scan.getScanAnglesInDegrees();
+            slicesInM = 0; % single slice at z=0 only
+            
+            % ADDITIONAL SET-UP
+            gpu = gpuDevice();
+            
+            if isempty(gpu)
+                error('No GPU available for processing!');
+            end 
+            
+            % START THE TIMER!
+            simulationRun = simulationRun.startRun(); 
+            
+            % CREATE FOLDERS FOR SAVING
+            % parallelizing folder creation doesn't speed-up
+            
+            createFoldersForData(...
+                simulationRun.savePath,...
+                anglesInDeg,...
+                length(slicesInM), length(anglesInDeg));
+            
+            % CONVERT GYRFALCON GEOMETRY TO TIGRE GEOMETRY
+            [tigreGeometry, tigrePhantom, tigreAngles, tigrePoissionNoise, tigreGaussianNoise] =...
+                convertGyrfalconSimulationToTigreGeometry(simulation);
+                                    
+            % COMPUTE PROJECTIONS WITH TIGRE
+            radonProjections = Ax(tigrePhantom, tigreGeometry, tigreAngles, 'ray-voxel');
+            
+            % ADD NOISE IF NEEDED
+            if simulation.scatteringNoiseLevel ~= 0 && simulation.detectorNoiseLevel ~= 0
+                radonProjections = addCTnoise(radonProjections, 'Poisson', tigrePoissionNoise, 'Gaussian', tigreGaussianNoise);
+            end            
+            
+            radonProjections = double(radonProjections);
+            
+            % CONVERT RADON PROJECTIONS TO TRUE INTENSITY
+            
+            startingIntensity = simulation.scan.beamCharacterization.rawIntensity();
+            
+            projections = startingIntensity .* exp(-radonProjections);
+            
+            % SAVE FILES
+            
+            for angleIndex=1:length(anglesInDeg)
+                sliceIndex = 1; % only 1 slice
+                xyPositionIndex = 1; % only 1 position 
+                zPositionIndex = 1; % only 1 position 
+                
+                indices = [sliceIndex angleIndex, zPositionIndex, xyPositionIndex];
+                isScanPositionMosiac = false; %can't be, one 1 position
+            
+                saveDetectorImage(projections(:,:,angleIndex), simulationRun.savePath, indices, anglesInDeg, isScanPositionMosiac)
+            end
+            
+            % END THE TIMER!
             simulationRun = simulationRun.endRun();
+                        
+            % TEAR-DOWN  
+            gpuDevice([]); % clear out GPU                       
+            
+            % Show finish on Output Status
+            newString = ['Simulation Run Complete (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            app.StatusOutputLamp.Color = [0 1 0]; % green
         end
         
+        function bool = isSourceOppositeOfDetector(simulation)
+            originToDetector = norm(simulation.detector.getLocationInM());
+            originToSource = norm(simulation.source.getLocationInM());
+            
+            detectorToSource = norm(simulation.detector.getLocationInM()-simulation.source.getLocationInM());
+            
+            if abs(detectorToSource - (originToDetector + originToSource)) < Constants.Round_Off_Error_Bound
+                bool = true; % line between source and detector must intersect with the origin
+            else
+                bool = false;
+            end
+        end
+        
+        function radonSumData = convertProjectionDataToRadonSumData(simulation, projectionData)
+            % data is stored as: I
+            % want to get: sum(\mu x)
+            
+            I_0 = simulation.scan.beamCharacterization.rawIntensity();
+            
+            radonSumData = -log(projectionData./I_0);
+        end
     end
     
 end
 
 % HELPER FUNCTIONS %
-
-function indices = getIndices(index, indexingLevels, useFlags)
-    dims = ~useFlags + useFlags.*indexingLevels; % dim of 1 at unused levels
-    
-    % use fliplr so that detector values will be sequential
-    [indices(6), indices(5), indices(4), indices(3), indices(2), indices(1)] = ind2sub(fliplr(dims), index);
-end
-
-function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceIndices, parallelFlags, indexLevels, angles)
-    parallelForDetector = parallelFlags(5) & parallelFlags(6);
-    
-    numBeamTraces = length(detectorData);
-    numPixelsInDetector = indexLevels(5) * indexLevels(6);
-    
-    if parallelForDetector
-        numDetectorImages = numBeamTraces / numPixelsInDetector;
-        
-        for i=1:numDetectorImages
-            detectorImage = detectorData((i-1)*numPixelsInDetector+1:(i)*numPixelsInDetector, 1);
-            
-            detectorImage = reshape(detectorImage, indexLevels(6), indexLevels(5));
-            
-            detectorImage = detectorImage';
-            
-            saveDetectorImage(detectorImage, savePath, parallelBeamTraceIndices((i-1)*numPixelsInDetector+1,:), angles);
-        end
-    else
-        error('No specified action for saving Non-Parallelized Detector Calculation');
-    end
-end
-
-function [] = saveDetectorImage(detectorData, savePath, indices, angles)
-    sliceFolder = makeSliceFolderName(indices(1));
-    angleFolder = makeAngleFolderName(angles(indices(2)));
-    positionFolder = makePositionFolderName(indices(3), indices(4));
-    
-    fileName = [Constants.Detector_Data_Filename, Constants.Matlab_File_Extension];
-    
-    writePath = makePath(savePath, sliceFolder, angleFolder, positionFolder, fileName);
-    
-    save(writePath, Constants.Detector_Data_Var_Name);
-end
 
 
 function [] = createFoldersForData(writePath, angles, numSlices, numAngles)

@@ -1,5 +1,5 @@
 function filename = makePositionName(xyIndex, zIndex, isScanPositionMosiac)
-% filename = makePositionName(xyIndex, zIndex)
+% filename = makePositionName(xyIndex, zIndex, isScanPositionMosiac)
 
 if isScanPositionMosiac
     filename = Constants.All_Positions_Filename;

@@ -32,6 +32,27 @@ classdef Units
             handle.Items = items;
             handle.ItemsData = itemsData;
         end
+        
+        function [] = setPlanarUnitsDropDown(handle)
+            [rawItemData,~] = enumeration('Units');
+                        
+            counter = 1;
+            
+            items = {};
+            itemsData = {};
+            
+            for i=1:length(rawItemData)
+                if ~rawItemData(i).isAngular
+                    items{counter} = rawItemData(i).displayString;
+                    itemsData{counter} = rawItemData(i);
+                    
+                    counter = counter + 1;
+                end
+            end
+                        
+            handle.Items = items;
+            handle.ItemsData = itemsData;
+        end
     end
     
     methods

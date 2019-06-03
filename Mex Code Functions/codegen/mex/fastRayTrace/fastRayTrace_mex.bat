@@ -7,7 +7,7 @@ set OUTDIR=.\
 set LIB_NAME=fastRayTrace_mex
 set MEX_NAME=fastRayTrace_mex
 set MEX_EXT=.mexw64
-call "C:\PROGRA~1\MATLAB\R2017a\sys\lcc64\lcc64\mex\lcc64opts.bat"
+call setEnv.bat
 echo # Make settings for fastRayTrace > fastRayTrace_mex.mki
 echo COMPILER=%COMPILER%>> fastRayTrace_mex.mki
 echo COMPFLAGS=%COMPFLAGS%>> fastRayTrace_mex.mki
@@ -21,6 +21,6 @@ echo MATLAB_ARCH=%MATLAB_ARCH%>> fastRayTrace_mex.mki
 echo BORLAND=%BORLAND%>> fastRayTrace_mex.mki
 echo OMPFLAGS= >> fastRayTrace_mex.mki
 echo OMPLINKFLAGS= >> fastRayTrace_mex.mki
-echo EMC_COMPILER=lcc64>> fastRayTrace_mex.mki
+echo EMC_COMPILER=mingw64>> fastRayTrace_mex.mki
 echo EMC_CONFIG=optim>> fastRayTrace_mex.mki
 "C:\Program Files\MATLAB\R2017a\bin\win64\gmake" -B -f fastRayTrace_mex.mk

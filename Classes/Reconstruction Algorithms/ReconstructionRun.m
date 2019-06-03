@@ -4,11 +4,13 @@ classdef ReconstructionRun < ProcessingRun
     properties
         reconstruction
         
-        simulationRun
+        simulationOrImagingScanRun
         
         reconPhantomDataSet %reconDataSet but interpolated to size of phantom data set (NaN at voxels if reconDataSet smaller than phantom)
         
         performanceType
+        
+        useOrCreateCachedInterpolationProjectionData = true
     end
     
     methods
@@ -20,7 +22,7 @@ classdef ReconstructionRun < ProcessingRun
             elseif app.ReconstructionRunHighWithGPUButton.Value
                 run.performanceType = ReconstructionRunPerformanceTypes.highWithGPU;
             else
-                error('Invalid performace type!');
+                error('Invalid performance type!');
             end
             
             if run.performanceType == ReconstructionRunPerformanceTypes.highWithMultipleCPUs
@@ -36,18 +38,21 @@ classdef ReconstructionRun < ProcessingRun
             end
             
             run.notes = app.ReconstructionRunNotesTextArea.Value;
+            run.useOrCreateCachedInterpolationProjectionData = app.ReconstructionRunInterpolateDetectorDataCheckBox.Value;
             
-            if ~isa(run.reconstruction, class(Reconstruction))
+            if ~strcmp(class(run.reconstruction), class(Reconstruction))
                 run.reconstruction = run.reconstruction.createFromGUI(app);
             end
         end
         
         function app = setGUI(run, app)
-            [scanGeometry, errorMsg] = run.getScanGeometry();
-                
+                        
             % simulationRun 
-            if isempty(run.simulationRun)
-                app.SimulationRunInfoLoadPathLabel.Text = 'Simulation Run Not Loaded';
+            if isempty(run.simulationOrImagingScanRun)
+                scanGeometry = [];
+                erroMsg = '';
+
+                app.SimulationRunInfoLoadPathLabel.Text = 'Simulation/Imaging Run Not Loaded';
                 
                 app.SimulationRunInfoStartDateTimeEditField.Value = '';
                 app.SimulationRunInfoRunTimeEditField.Value = '';
@@ -59,21 +64,12 @@ classdef ReconstructionRun < ProcessingRun
                 app.SimulationRunInfoNotesTextArea.Value = {''};
                 
                 app.SimulationRunInfoLoadSimulationButton.Enable = 'off';
-            else                
-                app.SimulationRunInfoLoadPathLabel.Text = run.simulationRun.getPath();
-                
-                app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.simulationRun.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
-                app.SimulationRunInfoRunTimeEditField.Value = run.simulationRun.getRunTimeString();
-                app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.simulationRun.versionUsed];
-                app.SimulationRunInfoRunPerformanceEditField.Value = run.simulationRun.getPerformanceString(); 
-                
-                app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = run.simulationRun.simulation.getScanGeometryString(scanGeometry, errorMsg);
-                app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.simulationRun.computerInfo.getSummaryString();
-                app.SimulationRunInfoNotesTextArea.Value = run.simulationRun.notes;
-                
-                %app.SimulationRunInfoLoadSimulationButton.Enable = 'on'; %TODO
+            else
+                [scanGeometry, errorMsg] = run.simulationOrImagingScanRun.findScanGeometry();
+
+                run.simulationOrImagingScanRun.setGUIForReconstructionRun(app);
             end
-            
+                            
             % reconstructionRun
             savePath = run.getPath();
             
@@ -110,19 +106,21 @@ classdef ReconstructionRun < ProcessingRun
             % recon settings
             app.ReconstructionRunSliceDimsXEditField.Value = run.reconstruction.reconSliceDimensions(1);
             app.ReconstructionRunSliceDimsYEditField.Value = run.reconstruction.reconSliceDimensions(2);
+            app.ReconstructionRunSliceDimsZEditField.Value = run.reconstruction.reconSliceDimensions(3);
             
             % convert to mm
-            pixelDimsInMM = Units.mm.convertFromM(run.reconstruction.reconSliceVoxelDimensionsInM);
+            pixelDimsInMM = run.reconstruction.reconSliceVoxelDimensions;
             
             app.ReconstructionRunSlicePixelDimsXEditField.Value = pixelDimsInMM(1);
             app.ReconstructionRunSlicePixelDimsYEditField.Value = pixelDimsInMM(2);
+            app.ReconstructionRunSlicePixelDimsZEditField.Value = pixelDimsInMM(3);
             
             app.ReconstructionRunDataSetDimsXEditField.Value = run.reconstruction.reconDataSetDimensions(1);
             app.ReconstructionRunDataSetDimsYEditField.Value = run.reconstruction.reconDataSetDimensions(2);
             app.ReconstructionRunDataSetDimsZEditField.Value = run.reconstruction.reconDataSetDimensions(3);
             
             % convert to mm
-            voxelDimsInMM = Units.mm.convertFromM(run.reconstruction.reconDataSetVoxelDimensionsInM);
+            voxelDimsInMM = run.reconstruction.reconDataSetVoxelDimensions;
             
             app.ReconstructionRunDataSetVoxelDimsXEditField.Value = voxelDimsInMM(1);
             app.ReconstructionRunDataSetVoxelDimsYEditField.Value = voxelDimsInMM(2);
@@ -131,7 +129,14 @@ classdef ReconstructionRun < ProcessingRun
             % interpolation type drop-down
             app.ReconstructionRun3DInterpolationTypeDropDown.Value = run.reconstruction.reconDataSetInterpolationType;
                         
+            % detector interpolation
             
+            setDetectorInterpolationGUI(app, run.reconstruction);
+            
+            % ray rejection
+            
+            app.ReconstructionRunUseRayExclusionCheckBox.Value = run.reconstruction.useRayRejection;
+                        
             % number of CPUs
             app.ReconstructionRunNumCPUsEditField.Value = run.computerInfo.numCoresUsed;
             app.ReconstructionRunNumCPUsEditField.Limits = [1 run.computerInfo.cpuNumCores];
@@ -146,17 +151,22 @@ classdef ReconstructionRun < ProcessingRun
         end
         
         function [scanGeometry, errorMsg] = getScanGeometry(run)
-            if isempty(run.simulationRun) || isempty(run.simulationRun.simulation)
+            if isempty(run.simulationOrImagingScanRun)
                 scanGeometry = [];
-                errorMsg = 'No Simulation Selected';
+                errorMsg = 'No Simulation/Imaging Scan Selected';
             else
-                [scanGeometry, errorMsg] = run.simulationRun.simulation.findScanGeometry();
+                [scanGeometry, errorMsg] = run.simulationOrImagingScanRun.findScanGeometry();
             end
         end
         
         function run = setDefaultValues(run)
             run.reconstruction = Reconstruction();
-            run.simulationRun = [];
+            
+            phantom = [];
+            detector = [];
+            run.reconstruction = run.reconstruction.setReconDataSetDefaults(phantom, detector);
+            
+            run.simulationOrImagingScanRun = [];
             
             run.performanceType = ReconstructionRunPerformanceTypes.high;
             
@@ -166,42 +176,87 @@ classdef ReconstructionRun < ProcessingRun
         function currentFolder = getCurrentSaveFolder(run)
             currentFolder = getLastItemFromPath(run.savePath);
         end
-        
-        function [] = runReconstruction(run, app)
-            run = run.createFromGUI(app);
+                 
+        function [] = createReconDirectory(run)
+            newFolder = run.getCurrentSaveFolder();
             
+            path = removeLastItemFromPath(run.savePath);
+            
+            mkdir(path, newFolder);
+        end
+        
+        function [] = runReconstruction(run, app)            
             % set status string with recon running
             
-            newString = ['Reconstruction Run Start (', convertTimestampToString(now), ')'];
+            newString = [' Reconstruction Run Start (', convertTimestampToString(now), ')'];
             newLine = true;
             
             app = updateStatusOutput(app, newString, newLine);
+            
+            app.StatusOutputLamp.Color = [1 1 0]; % yellow
             
             % run the recon
             run = run.startProcessingRun(); % set start time
-            run.reconstruction = ...
-                run.reconstruction.runReconstruction(run.simulationRun, app);
-            run = run.endProcessingRun(); % set end time
             
-            % set status string complete
+            % interpolation projection data
             
-            newString = ['Reconstruction Run Complete (', convertTimestampToString(now), ')'];
-            newLine = true;
-            
+            newString = '  Loading/Interpolating Projection Data...';
+            newLine = true;            
             app = updateStatusOutput(app, newString, newLine);
+            
+            if run.useOrCreateCachedInterpolationProjectionData
+                [detectorData_I0, detectorData_I, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                    run.reconstruction.getCachedReconstructionData(run.simulationOrImagingScanRun);
+            else
+                [detectorData_I0, detectorData_I, rayRejectionMaps, simulationOrImagingScanRun] = ...
+                    run.reconstruction.organizeDataForReconstruction(run.simulationOrImagingScanRun);
+            end
+                        
+            run.simulationOrImagingScanRun = simulationOrImagingScanRun;
+            
+            app.workspace.reconstructionRun.simulationOrImagingScanRun.sliceData = {};
+                        
+            newString = 'Complete';
+            newLine = false;            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            % run recon
+                        
+            newString = '  Running Reconstruction...';
+            newLine = true;            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            run.reconstruction = run.reconstruction.runReconstruction(...
+                run, run.simulationOrImagingScanRun, app,...
+                detectorData_I0, detectorData_I, rayRejectionMaps);
+            
+            newString = 'Complete';
+            newLine = false;            
+            app = updateStatusOutput(app, newString, newLine);
+            
+            run = run.endProcessingRun(); % set end time
             
             
             % perform the recon of the 3D data-set from recon'ed
             % slices
             
-            run.reconstruction = run.reconstruction.reconFullDataSet(run.simulationRun.simulation);
+            run.reconstruction = run.reconstruction.reconFullDataSet(run.simulationOrImagingScanRun);
             
             % compare to the original phantom
             
-            run = run.calculateReconPhantomDataSet();
+           % run = run.calculateReconPhantomDataSet();
             
             % save files
-            run.saveReconstructionValues();                
+            run.saveReconstructionValues();
+            
+            % set status string complete
+            
+            newString = [' Reconstruction Run Complete (', convertTimestampToString(now), ')'];
+            newLine = true;
+            
+            app = updateStatusOutput(app, newString, newLine); 
+            
+            app.StatusOutputLamp.Color = [0 1 0]; % green
         end
         
         function run = calculateReconPhantomDataSet(run)
@@ -220,14 +275,18 @@ classdef ReconstructionRun < ProcessingRun
         
         function [] = saveReconstructionValues(run)
             % clear out simulationRun projection data
-            run.simulationRun.sliceData = {};
+            run.simulationOrImagingScanRun.sliceData = {};
             
             % have reconstruction save any extra outputs
             run.reconstruction.saveOuput(run.savePath);
             
             % save this, the reconstruction run
-            save(makePath(run.savePath, run.saveFileName), Constants.Processing_Run_Var_Name);
-            
+            run.saveReconstructionRunFile();
+        end
+        
+        function [] = saveReconstructionRunFile(run)            
+            filename = [getLastItemFromPath(run.savePath), Constants.Matlab_File_Extension];
+            save(makePath(run.savePath, filename), Constants.Processing_Run_Var_Name);
         end
         
     end

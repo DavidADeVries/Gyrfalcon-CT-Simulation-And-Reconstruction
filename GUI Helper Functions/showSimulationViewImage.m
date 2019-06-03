@@ -4,15 +4,16 @@ function [] = showSimulationViewImage(app)
 [invert, contrastBounds] = getSimulationViewerImageDisplaySettings(app);
 
 run = app.workspace.simulationRunForViewing;
-simulation = run.simulation;
 
-isPositionMosiac = simulation.isScanMultiplePositionMosiac();
+imagingSetup = run.getImagingSetup();
 
-detectorDims = simulation.detector.wholeDetectorDimensions;
-detectorDimsInM = simulation.detector.getSingleDetectorDimensionsInM();
+isPositionMosiac = imagingSetup.isScanMultiplePositionMosiac();
 
-stepDims = simulation.scan.perAngleTranslationDimensions;
-stepDimsInM = simulation.scan.getPerAngleTranslationResolutionInM();
+detectorDims = imagingSetup.detector.wholeDetectorDimensions;
+detectorDimsInM = imagingSetup.detector.getSingleDetectorDimensionsInM();
+
+stepDims = imagingSetup.scan.perAngleTranslationDimensions;
+stepDimsInM = imagingSetup.scan.getPerAngleTranslationResolutionInM();
 
 image = loadImageForScanSimulationViewer(run, app);
 

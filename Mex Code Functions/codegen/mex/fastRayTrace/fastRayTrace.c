@@ -19,12 +19,12 @@
 /* Variable Definitions */
 static emlrtRSInfo emlrtRSI = { 89,    /* lineNo */
   "fastRayTrace",                      /* fcnName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pathName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pathName */
 };
 
 static emlrtRSInfo b_emlrtRSI = { 95,  /* lineNo */
   "fastRayTrace",                      /* fcnName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pathName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pathName */
 };
 
 static emlrtRSInfo c_emlrtRSI = { 13,  /* lineNo */
@@ -40,7 +40,7 @@ static emlrtRSInfo d_emlrtRSI = { 19,  /* lineNo */
 static emlrtDCInfo emlrtDCI = { 102,   /* lineNo */
   35,                                  /* colNo */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
   1                                    /* checkKind */
 };
 
@@ -50,14 +50,14 @@ static emlrtBCInfo emlrtBCI = { -1,    /* iFirst */
   35,                                  /* colNo */
   "phantomData",                       /* aName */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtDCInfo b_emlrtDCI = { 102, /* lineNo */
   47,                                  /* colNo */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
   1                                    /* checkKind */
 };
 
@@ -67,14 +67,14 @@ static emlrtBCInfo b_emlrtBCI = { -1,  /* iFirst */
   47,                                  /* colNo */
   "phantomData",                       /* aName */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
   0                                    /* checkKind */
 };
 
 static emlrtDCInfo c_emlrtDCI = { 102, /* lineNo */
   59,                                  /* colNo */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
   1                                    /* checkKind */
 };
 
@@ -84,7 +84,7 @@ static emlrtBCInfo c_emlrtBCI = { -1,  /* iFirst */
   59,                                  /* colNo */
   "phantomData",                       /* aName */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m",/* pName */
   0                                    /* checkKind */
 };
 
@@ -92,14 +92,14 @@ static emlrtECInfo emlrtECI = { -1,    /* nDims */
   134,                                 /* lineNo */
   5,                                   /* colNo */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pName */
 };
 
 static emlrtECInfo b_emlrtECI = { -1,  /* nDims */
   135,                                 /* lineNo */
   5,                                   /* colNo */
   "fastRayTrace",                      /* fName */
-  "C:\\Users\\MPRadmin\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pName */
+  "E:\\Data Files\\Git Repos\\Gyrfalcon-CT-Simulation-And-Reconstruction\\Mex Code Functions\\fastRayTrace.m"/* pName */
 };
 
 static emlrtRTEInfo b_emlrtRTEI = { 39,/* lineNo */
@@ -309,7 +309,7 @@ real_T fastRayTrace(const emlrtStack *sp, const real_T pointSourceCoords[3],
     }
 
     /* needs to be, since we always floor to find the lattice for delta == 0 */
-    while (tMin < tMax) {
+    while (tMax - tMin > 1.0E-9) {
       st.site = &emlrtRSI;
 
       /*  ** HELPER FUNCTIONS ** */

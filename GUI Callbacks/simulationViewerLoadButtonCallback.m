@@ -13,10 +13,10 @@ if ~all(fileName == 0) % have a selection
     loadedData = load(openPath);
     
     if isfield(loadedData, Constants.Processing_Run_Var_Name)
-        simulationRun = loadedData.(Constants.Processing_Run_Var_Name);
+        run = loadedData.(Constants.Processing_Run_Var_Name);
         
-        if isa(simulationRun, class(SimulationRun)) % we're good!
-            app.workspace.simulationRunForViewing = simulationRun;
+        if isa(run, class(SimulationRun)) || isa(run, class(ImagingScanRun)) % we're good!
+            app.workspace.simulationRunForViewing = run;
             
             app = app.workspace.simulationRunForViewing.setGUIForScanSimulationViewer(app);
             

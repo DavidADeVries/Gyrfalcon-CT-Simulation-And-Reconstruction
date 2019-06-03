@@ -85,7 +85,7 @@ else % run through the voxels
     
     latticeToIndex(isDelta0) = 1; %needs to be, since we always floor to find the lattice for delta == 0
     
-    while currentT < endingT
+    while endingT - currentT > Constants.Round_Off_Error_Bound
         currentLattices = getLattices(currentPoint, invVoxelDims, isVoxelDim0, isDeltaNeg, isDelta0);
         
         nextLattices = currentLattices + nextLatticeAdder;
@@ -100,7 +100,7 @@ else % run through the voxels
         indices = currentLattices + latticeToIndex;
         
         attenuation = phantomData(indices(2), indices(1), indices(3));
-        
+                
         currentT = nextT;
         currentPoint = nextPoint;
         radonSum = radonSum + length .* attenuation;        
@@ -125,7 +125,7 @@ function lattices = getLattices(point, invVoxelDims, isVoxelDim0, isDeltaNeg, is
     % no round to get lattice/index values
     isDeltaNeg(1) = ~isDeltaNeg(1);
     selectFloor = isDeltaNeg | isDelta0; % ceiling if delta is positive ONLY
-    
+        
     floorVals = floor(unroundedVals(selectFloor));
     ceilVals = ceil(unroundedVals(~selectFloor));
      

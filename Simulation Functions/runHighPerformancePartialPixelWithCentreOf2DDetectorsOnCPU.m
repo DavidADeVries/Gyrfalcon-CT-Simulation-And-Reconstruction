@@ -185,18 +185,6 @@ function [] = writeDetectorDataToDisk(detectorData, savePath, parallelBeamTraceI
     end
 end
 
-function [] = saveDetectorImage(detectorData, savePath, indices, angles, isScanPositionMosiac)
-    sliceFolder = makeSliceFolderName(indices(1));
-    angleFolder = makeAngleFolderName(angles(indices(2)));
-    positionName = makePositionName(indices(4), indices(3), isScanPositionMosiac);
-    
-    fileName = makePositionFileName(positionName);
-    
-    writePath = makePath(savePath, sliceFolder, angleFolder, fileName);
-    
-    save(writePath, Constants.Detector_Data_Var_Name);
-end
-
 function [] = runOptimizedRayTraceCalculation(i, indexingLevels, optimizeFlags, numTracesInOptimizedCalc, scatteringNoiseLevel, detectorNoiseLevel, phantomDims, voxelDimsInM, phantomLocationInM, detectorDims, detectorPixelDims, partialPixelRes, averagingBlockSize, rawIntensity, calibratedPhantomDataSet, source, detector, scan, savePath, slices, angles, isScanPositionMosiac, useMexCode)
 nonOptimizedCalcIndices = getIndices(i, indexingLevels, ~optimizeFlags);
 

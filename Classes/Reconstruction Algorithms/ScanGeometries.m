@@ -58,19 +58,28 @@ classdef ScanGeometries
                         };
                 case ScanGeometries.secondGenCT
                     choices = {...
-                        SecondGenFilteredBackprojectionReconstruction,...
+                        SecondGenFilteredBackprojectionReconstruction...
                         };
                 case ScanGeometries.thirdGenCT
                     choices = {...
-                        ThirdGenFilteredBackprojectionReconstruction,...
+                        ThirdGenFilteredBackprojectionReconstruction...
                         };                    
                 case ScanGeometries.fourthGenCT                    
                     choices = {...
-                        FourthGenFilteredBackprojectionReconstruction,...
+                        FourthGenFilteredBackprojectionReconstruction...
                         };                    
                 case ScanGeometries.coneBeamCT                    
                     choices = {...
                         ConeBeamFDKReconstruction,...
+                        ConeBeamPAIRReconstruction,...
+                        ConeBeamOSC_TVReconstruction,...
+                        ConeBeamSIRTReconstruction,...
+                        ConeBeamSARTReconstruction,...
+                        ConeBeamSART_TVReconstruction,...
+                        ConeBeamOS_SARTReconstruction,...
+                        ConeBeamOS_ASD_POCSReconstruction,...
+                        ConeBeamMLEMReconstruction,...
+                        ConeBeamCGLSReconstruction...
                         };
             end
             
@@ -96,6 +105,88 @@ classdef ScanGeometries
                 case ScanGeometries.coneBeamCT
                     choice = ConeBeamFDKReconstruction;
             end
+        end
+        
+        function [detectorData_I0, detectorData_I, rayRejectionMaps] = compileAndInterpolateProjectionData(geometry, simulationOrImagingScanRun, reconstruction)
+            switch geometry
+                case ScanGeometries.coneBeamCT
+                    angles = simulationOrImagingScanRun.getImagingSetup().scan.getScanAnglesInDegrees();
+                    numAngles = length(angles);
+                    
+                    targetDetectorDims = reconstruction.processingWholeDetectorDimensions;
+                    
+                    detectorData_I0 = zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
+                    detectorData_I = zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
+                    rayRejectionMaps = false & zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
+                                        
+                    origSingleDetectorDimensionsInM = simulationOrImagingScanRun.getImagingSetup().detector.getSingleDetectorDimensionsInM();
+                    
+                    targetSingleDetectorDimensionsInM = reconstruction.getSingleDetectorDimensionsInM();
+                    
+                    useRayRejection = reconstruction.useRayRejection;
+                                        
+                   p = parpool();
+                    
+                   parfor i=1:numAngles
+                        [frameData_I0, frameData_I, frameDataRatio] = loadProjectionDataFiles(...
+                            simulationOrImagingScanRun, 1, angles(i), 1, 1);
+                        
+                        rayRejectionMap = simulationOrImagingScanRun.getImagingSetup().getRayRejectionMap(...
+                            frameData_I0, frameData_I, frameDataRatio, useRayRejection);
+                                                
+                        
+                        [detectorData_I0(:,:,i), detectorData_I(:,:,i), rayRejectionMaps(:,:,i)] = interpolateProjectionDataForReconstruction(...
+                            frameData_I0,...
+                            frameData_I,...
+                            rayRejectionMap,...
+                            useRayRejection,...
+                            origSingleDetectorDimensionsInM,...
+                            targetDetectorDims, targetSingleDetectorDimensionsInM);
+                    end
+                    
+                   delete(p);
+                otherwise
+                    error('Invalid Scan Geometry');
+            end
+                
+        end
+        
+        function [detectorData_I0, detectorData_I, rayRejectionMaps] = compileProjectionData(geometry, simulationOrImagingScanRun, reconstruction)
+            switch geometry
+                case ScanGeometries.coneBeamCT
+                    angles = simulationOrImagingScanRun.getImagingSetup().scan.getScanAnglesInDegrees();
+                    numAngles = length(angles);
+                    
+                    targetDetectorDims = reconstruction.processingWholeDetectorDimensions;
+                    
+                    useRayRejection = reconstruction.useRayRejection;
+                    
+                    detectorData_I0 = zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
+                    detectorData_I = zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
+                    rayRejectionMaps = zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);%false & zeros(targetDetectorDims(2), targetDetectorDims(1), numAngles);
+                                                 
+                    for i=1:numAngles
+                        [frameData_I0, frameData_I, detectorDataRatio] = loadProjectionDataFiles(...
+                            simulationOrImagingScanRun, 1, angles(i), 1, 1);
+                        
+                        rayRejectionMap = simulationOrImagingScanRun.getImagingSetup().getRayRejectionMap(...
+                            frameData_I0, frameData_I, detectorDataRatio, useRayRejection);
+                        
+                        % crop down data as needed
+                        dataDims = fliplr(size(frameData_I0)); % fliplr so in [xy,z] format
+                        
+                        starts = ( (dataDims - targetDetectorDims) ./ 2) + 1;
+                        ends = starts + targetDetectorDims - 1;
+                        
+                        detectorData_I0(:,:,i) = frameData_I0(starts(2):ends(2), starts(1):ends(1));
+                        detectorData_I(:,:,i) = frameData_I(starts(2):ends(2), starts(1):ends(1));
+                        
+                        rayRejectionMaps(:,:,i) = rayRejectionMap(starts(2):ends(2), starts(1):ends(1));
+                    end
+                otherwise
+                    error('Invalid Scan Geometry');
+            end
+                
         end
     end
     

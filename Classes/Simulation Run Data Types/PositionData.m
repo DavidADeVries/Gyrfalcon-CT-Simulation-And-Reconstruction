@@ -19,6 +19,8 @@ classdef PositionData
     
     properties
         detectorData
+        rayRejectionMap
+        
         attenuationCoords
         attenuationDistances
         detectorCornerCoords
@@ -27,9 +29,10 @@ classdef PositionData
     end
     
     methods
-        function data = PositionData(detectorData, attenuationCoords, attenuationDistances, detectorCornerCoords, sourceStartBoxCoords, sourceEndBoxCoords)
+        function data = PositionData(detectorData, rayRejectionMap, attenuationCoords, attenuationDistances, detectorCornerCoords, sourceStartBoxCoords, sourceEndBoxCoords)
             if nargin ~= 0
                 data.detectorData = detectorData;
+                data.rayRejectionMap = rayRejectionMap;
                 data.attenuationCoords = attenuationCoords;
                 data.attenuationDistances = attenuationDistances;
                 data.detectorCornerCoords = detectorCornerCoords;
@@ -40,6 +43,7 @@ classdef PositionData
         
         function data = clearBeforeSave(data)
             data.detectorData = [];
+            data.rayRejectionMap = [];
             data.attenuationCoords = [];
             data.attenuationDistances = [];
             data.detectorCornerCoords = [];
@@ -68,9 +72,14 @@ classdef PositionData
         end
         
         function positionData = loadData(positionData, loadPath)            
-            loadedData = load(loadPath);
+            % detector data
+            loadedData = load(makeDetectorDataFileName(loadPath));
 
             positionData.detectorData = loadedData.(Constants.Detector_Data_Var_Name);
+            
+            % ray rejection map
+            loadedData = load(makeRayExclusionMapFileName(loadPath));
+            positionData.rayRejectionMap = loadedData.(Constants.Ray_Exclusion_Map_Var_Name);
         end
     end
     

@@ -58,6 +58,39 @@ classdef SimulationRun < ProcessingRun
             
             run.sliceData = sliceData;
             
+        end 
+        
+        function [scanGeometry, errorMsg] = findScanGeometry(run)
+            [scanGeometry, errorMsg] = boolLogicForFindScanGeometry(run.simulation);
+        end
+        
+        function phantom = getPhantom(run)
+            phantom = run.simulation.phantom;
+        end
+        
+        function numRays = getTotalNumberOfRays(run)
+            numRays = run.simulation.getTotalNumberOfRays();
+        end
+        
+        function app = setGUIForReconstructionRun(run, app)
+            [scanGeometry, errorMsg] = run.findScanGeometry();
+            
+            app.SimulationRunInfoLoadPathLabel.Text = run.getPath();
+            
+            app.SimulationRunInfoStartDateTimeEditField.Value = datestr(run.startTimestamp, 'mmm dd, yyyy HH:MM:SS');
+            app.SimulationRunInfoRunTimeEditField.Value = run.getRunTimeString();
+            app.SimulationRunInfoGyrfalconVersionEditField.Value = ['v', run.versionUsed];
+            app.SimulationRunInfoRunPerformanceEditField.Value = run.getPerformanceString();
+            
+            app.SimulationRunInfoInterpretedScanGeometryTextArea.Value = getScanGeometryString(run.simulation, scanGeometry, errorMsg);
+            app.SimulationRunInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
+            app.SimulationRunInfoNotesTextArea.Value = run.notes;
+            
+            %app.SimulationRunInfoLoadSimulationButton.Enable = 'on'; %TODO
+        end
+        
+        function setup = getImagingSetup(run)
+            setup = run.simulation;
         end
         
         function run = setDefaultValues(run)
@@ -97,7 +130,9 @@ classdef SimulationRun < ProcessingRun
                 run.computerInfo.numCoresUsed = 1;
             end
             
-            if run.performanceType == SimulationRunPerformanceTypes.low
+            if ...
+                    run.performanceType == SimulationRunPerformanceTypes.low ||...
+                    run.performanceType == SimulationRunPerformanceTypes.highWithGPU
                 run.useMexCode = false; 
             else
                 run.useMexCode = app.SimulationRunUseMEXCodeCheckBox.Value;
@@ -120,7 +155,7 @@ classdef SimulationRun < ProcessingRun
         
         function app = setGUIForScanSimulationViewer(run, app)
             if isempty(run.getPath())
-                app.SimulationViewerFilePathLabel.Text = 'No Simulation Run Selected';
+                app.SimulationViewerFilePathLabel.Text = 'No Run Selected';
                 
                 app.SimulationViewerSliceListBox.Enable = 'off';
                 app.SimulationViewerScanAngleListBox.Enable = 'off';
@@ -143,6 +178,11 @@ classdef SimulationRun < ProcessingRun
                 app.ImageContrastLowEditField.Enable = 'off';
                 app.ImageContrastHighEditField.Enable = 'off';
                 app.SimulationViewerLoopThroughAnglesButton.Enable = 'off';
+                
+                app.I_0Button.Enable = 'off';
+                app.IButton.Enable = 'off';
+                app.I_0IButton.Enable = 'off';
+                app.lnI_0IButton.Enable = 'off';
             else
                 app.SimulationViewerFilePathLabel.Text = run.savePath;
                 
@@ -176,7 +216,7 @@ classdef SimulationRun < ProcessingRun
                 app.SimulationViewerInfoComputerArchitectureSummaryTextArea.Value = run.computerInfo.getSummaryString();
                 app.SimulationViewerInfoNotesTextArea.Value = run.notes;
                 
-                image = app.workspace.simulationRunForViewing.loadImageForScanSimulationViewer(app);
+                image = loadImageForScanSimulationViewer(app.workspace.simulationRunForViewing, app);
                 
                 minVal = allMin(image);
                 maxVal = allMax(image);
@@ -189,6 +229,11 @@ classdef SimulationRun < ProcessingRun
                 app.ImageContrastLowEditField.Enable = 'on';
                 app.ImageContrastHighEditField.Enable = 'on';
                 app.SimulationViewerLoopThroughAnglesButton.Enable = 'on';
+                
+                app.I_0Button.Enable = 'on';
+                app.IButton.Enable = 'on';
+                app.I_0IButton.Enable = 'on';
+                app.lnI_0IButton.Enable = 'on';
                 
                 showSimulationViewImage(app);
             end            
@@ -281,21 +326,7 @@ classdef SimulationRun < ProcessingRun
             
         end
         
-        function image = loadImageForScanSimulationViewer(run, app)
-            % get selected folders/files
-            sliceFolder = app.SimulationViewerSliceListBox.Value;
-            angleFolder = app.SimulationViewerScanAngleListBox.Value;
-            positionDetectorDataFilename = app.SimulationViewerPerAngleTranslationPositionListBox.Value; %ItemData used to the filename
-            
-            loadPath = makePath(run.savePath,...
-                sliceFolder,...
-                angleFolder,...
-                positionDetectorDataFilename);
-            
-            fileData = load(loadPath);
-            
-            image = fileData.(Constants.Detector_Data_Var_Name);
-        end
+        
         
         function simulationRun = startRun(simulationRun)
             simulationRun = simulationRun.startProcessingRun();

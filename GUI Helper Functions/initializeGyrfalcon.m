@@ -29,6 +29,12 @@ FirstGenFilterTypes.setDropDown(app.Gen1FBP_FilterTypeDropDown);
 
 InterpolationTypes.setDropDown(app.Gen1FBP_InterpolationTypeDropDown);
 
+% set dropdown menus in import imaging scan tab
+
+ImagingScanTypes.setDropDown(app.ImagingScanTypeDropDown);
+
+OpticalWavelengthColoursForVistaScanner.setDropDown(app.OptCtSettings_LightSourceColourDropDown);
+
 % *******************************
 % *** INITIALIZE DATA HANDLES ***
 % *******************************

@@ -163,6 +163,32 @@ classdef Phantom < GyrfalconObject
             locationInM = units.convertToM(location);
         end
         
+        function centreLocationInM = getCentreLocationInM(phant)
+            % get corner location in m
+            units = phant.locationUnits;
+            location = phant.location;
+            
+            cornerLocationInM = units.convertToM(location);
+            
+            % get size of phantom in m to let us find the centre
+            units = phant.voxelDimensionUnits;
+            dimensions = phant.voxelDimensions;
+            
+            voxelDimsInM = units.convertToM(dimensions);
+            phantomDims = phant.dataSet.getSize();
+            
+            phantomDimsInM = phantomDims .* voxelDimsInM;
+            
+            % to get to centre divide by 2
+            shift = phantomDimsInM ./ 2;
+            
+            % x-coord needs to be added, y,z-coords needed to be subtracted
+            shift = shift .* [1 -1 -1];
+            
+            % final calc
+            centreLocationInM = cornerLocationInM + shift;
+        end
+        
         function data = getData(phantom)
             if isempty(phantom.dataSet)
                 data = [];

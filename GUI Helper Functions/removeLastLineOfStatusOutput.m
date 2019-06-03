@@ -7,6 +7,7 @@ text(end) = []; % bump last entry
 
 app.StatusOutputTextArea.Value = text;
 
+waitfor(app.StatusOutputTextArea, 'Value', text);
 
 end
 
