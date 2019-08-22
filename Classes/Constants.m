@@ -46,6 +46,8 @@ classdef Constants
         XML_File_Extension = '.xml';
         BMP_File_Extension = '.bmp';
         VFF_File_Extension = '.vff';
+        CSV_File_Extension = '.csv';
+        RAW_File_Extension = '.raw';
                 
         Processing_Run_Var_Name = 'run';
         Imaging_Run_Var_Name = 'run';
