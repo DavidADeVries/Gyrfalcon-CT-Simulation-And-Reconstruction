@@ -89,7 +89,7 @@ classdef Vista16ScannerData
              % load up CSV
              path = makePath(seriesPath, data.getDataFrameFolderName());
              
-             fileName = [data.getCsvLabel(), '.csv'];
+             fileName = [data.getCsvLabel(), Constants.CSV_File_Extension];
              
              optCtCsvData = loadOptCtCsv(makePath(seriesPath, fileName));
              
