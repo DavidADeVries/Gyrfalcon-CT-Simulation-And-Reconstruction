@@ -87,7 +87,7 @@ classdef OpticalCTImagingScan < ImagingScan
             % ***********************
             % Load Vista scanner data
             % ***********************
-            vistaScannerData = Vista15ScannerData();
+            vistaScannerData = Vista16ScannerData();
             vistaScannerData = vistaScannerData.loadData(importPath);
             
             imagingScan.vistaScannerHeaderData = vistaScannerData;
@@ -168,13 +168,10 @@ classdef OpticalCTImagingScan < ImagingScan
             
             aorCorrection = vistaScannerData.axisOfRotationOffsetInPx;
             
-            dataPrefix = getFilePrefix(dataPath);
-            refPrefix = getFilePrefix(refPath);
-            
             darkLabel = vistaScannerData.getDarkFrameLabel();
             
-            dataDarkFrame = readOptCtFrameBmp(makePath(dataPath, [dataPrefix, darkLabel, Constants.BMP_File_Extension]), frameDims);
-            refDarkFrame = readOptCtFrameBmp(makePath(refPath, [refPrefix, darkLabel, Constants.BMP_File_Extension]), frameDims);
+            dataDarkFrame = readOptCtFramePng(makePath(dataPath, [darkLabel, Constants.PNG_File_Extension]), frameDims);
+            refDarkFrame = readOptCtFramePng(makePath(refPath, [darkLabel, Constants.PNG_File_Extension]), frameDims);
             
             anglesInDeg = scan.getScanAnglesInDegrees();
             
@@ -196,11 +193,11 @@ classdef OpticalCTImagingScan < ImagingScan
             for i=1:numFrames
                 % import the data and ref frames
                 
-                dataFilename = [dataPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
-                refFilename = [refPrefix, padNumberWithLeadingZeros(i,numFrameDigits), Constants.BMP_File_Extension];
+                dataFilename = [padNumberWithLeadingZeros((i-1),numFrameDigits), Constants.PNG_File_Extension];
+                refFilename = [padNumberWithLeadingZeros((i-1),numFrameDigits), Constants.PNG_File_Extension];
                 
-                dataFrame = readOptCtFrameBmp(makePath(dataPath, dataFilename), frameDims);
-                refFrame = readOptCtFrameBmp(makePath(refPath, refFilename), frameDims);
+                dataFrame = readOptCtFramePng(makePath(dataPath, dataFilename), frameDims);
+                refFrame = readOptCtFramePng(makePath(refPath, refFilename), frameDims);
                                 
                 % apply dark frame
                 dataFrame = dataFrame - dataDarkFrame;
@@ -292,18 +289,19 @@ classdef OpticalCTImagingScan < ImagingScan
 end
 
 % HELPER FUNCTIONS
-function image = readOptCtFrameBmp(path, frameDims)
-    fid = fopen(path);
+function image = readOptCtFramePng(path, frameDims)
+%     fid = fopen(path);
+%     
+%     data = fread(fid, inf, 'uint16');
+%     
+%     fclose(fid);
+%     
+%     data = data(28:end); %strip header
     
-    data = fread(fid, inf, 'uint16');
+%     image = imrotate(reshape(data, frameDims), 90);
+    image = imread(path);
     
-    fclose(fid);
-    
-    data = data(28:end); %strip header
-    
-    image = imrotate(reshape(data, frameDims), 90);
-    
-    image = double(image); %convert to double so we can do math!
+    image = im2double(image); %convert to double so we can do math!
 end
 
 function map = getJarWallMap(isBathMap, outsideBuffer, insideBuffer, sideString)
