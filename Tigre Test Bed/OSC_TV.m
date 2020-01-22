@@ -89,7 +89,8 @@ while ~stop_criteria %OSC-TV
         end
     end
     
-    [alphablocks,orig_index] = order_subsets(angles,blocksize,OrderStrategy, changeRange);
+    %[alphablocks,orig_index] = order_subsets(angles,blocksize,OrderStrategy, changeRange);
+    [alphablocks,orig_index] = order_subsets(angles,blocksize,OrderStrategy);
     
     sumOfErrors = 0;
     
