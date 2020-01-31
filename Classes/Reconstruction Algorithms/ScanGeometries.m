@@ -177,7 +177,6 @@ classdef ScanGeometries
                         
                         starts = ( (dataDims - targetDetectorDims) ./ 2) + 1;
                         ends = starts + targetDetectorDims - 1;
-                        
                         detectorData_I0(:,:,i) = frameData_I0(starts(2):ends(2), starts(1):ends(1));
                         detectorData_I(:,:,i) = frameData_I(starts(2):ends(2), starts(1):ends(1));
                         

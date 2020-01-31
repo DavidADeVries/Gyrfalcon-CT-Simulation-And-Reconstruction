@@ -1,7 +1,7 @@
 function [ f ] = OSC_TV(app, projRef, projData, geo, angles, maxiter, useRayRejection, catheterMapLoadPath, varargin)
 %
 
-%% parse inputs
+%% Parse Inputs
 [nIterTV,c,initialBlockSize,finalBlockSize,blockSizeReductionPower,OrderStrategy] = parse_inputs(...
     projData,geo,angles,varargin);
 
@@ -11,15 +11,13 @@ if ~isfield(geo,'rotDetector')
 end
 
 
-%% Create weigthing matrices for the SART step
+%% Create weighting matrices for the SART step
 % the reason we do this, instead of calling the SART fucntion is not to
-% recompute the weigths every ASD-POCS iteration, thus effectively doubling
+% recompute the weights every ASD-POCS iteration, thus effectively doubling
 % the computational time
 
 
-% initialize image as FDK reconstruction
-% f = FDK(log(projRef ./ projData), geo, angles);
-% f = imgaussfilt3(f,5);
+% Initialize image at 0.1cm
 f = 0.001 .* ones(geo.nVoxel','single');
 
 stop_criteria = 0;
@@ -63,29 +61,6 @@ if useRayRejection
     end    
 end
 
-% calc compensator
-% ref = Atb(ones(size(projData),'single'), geo, angles);
-% refMinusCatheters = Atb(single(~catheterMaps), geo, angles);
-% 
-% compensator = refMinusCatheters ./ ref;
-% compensator(compensator == Inf) = 1;
-% compensator(compensator == 0) = 1;
-% 
-% cathLoc = cathLoc | compensator < 0.01;
-% 
-% catheterMaps = Ax(single(cathLoc),geo,angles, 'ray-voxel');
-% catheterMaps = catheterMaps > 0;
-
-% calc compensator
-% % ref = Atb(ones(size(projData),'single'), geo, angles);
-% % refMinusCatheters = Atb(single(~catheterMaps), geo, angles);
-% % 
-% % compensator = refMinusCatheters ./ ref;
-% % compensator(compensator == Inf) = 1;
-% % compensator(compensator == 0) = 1;
-% % 
-% % compensator(compensator <= 0.5) = 0.5;
-
 while ~stop_criteria %OSC-TV
     iter=iter+1;
     
@@ -114,7 +89,8 @@ while ~stop_criteria %OSC-TV
         end
     end
     
-    [alphablocks,orig_index] = order_subsets(angles,blocksize,OrderStrategy, changeRange);
+    %[alphablocks,orig_index] = order_subsets(angles,blocksize,OrderStrategy, changeRange);
+    [alphablocks,orig_index] = order_subsets(angles,blocksize,OrderStrategy);
     
     sumOfErrors = 0;
     
@@ -139,33 +115,8 @@ while ~stop_criteria %OSC-TV
         end
         
         sumOfErrors = sumOfErrors + sum(sum(sum(abs(errors))));
-       
-        
-%         indices = orig_index{jj};
-        
-%         errorSample = errors(:,50:650,:);
-%         
-%         m = mean(errorSample(:));
-%         d = std(errorSample(:));
-%         
-%         div = 1*(1 + (2*(iter-1)/maxiter));
-%         
-% %         if iter < 0.5*maxiter
-% %             div = 1;
-% %         end
-%         
-%         
-%         errorSample(errorSample > (m + d/div)) = m + d/div;
-%         errorSample(errorSample < (m - d/div)) = m - d/div;
-%         
-%         errors(:,50:650,:)= errorSample;
-        
-%         if jj == 1
-%             cathError = errors(catheterMaps(:,:,orig_index{jj}));
-%             val = mean(cathError(:));
-%         end
-%         errors(catheterMaps(:,:,orig_index{jj})) = 0;
 
+        % Calculate OSC step using TIGRE Atb function
         f = f + (f .*  ...
             (length(alphablocks{jj}) ./ length(alphablocks{1})) .* ...
             Atb(errors, geo, alphablocks{jj}) ./...
@@ -174,19 +125,8 @@ while ~stop_criteria %OSC-TV
         
         % Non-negativity constrain
         f = max(f,1e-8);
-        
-%         if iter == 1 && jj == 1
-%             f = f ./ (compensator);
-%         end
-        
-        % assign inside of catheter to be the same of the bordering pixels
-%         if useRayRejection
-%             f = setCatheterPixels(f, cathLoc);
-%         end
+      
     end
-    
-    
-    %figure(100+iter);imshow(f(:,:,128),[0,10/1000]);
     
     geo.offDetector = offDetector;
     geo.offOrigin = offOrigin;
@@ -203,8 +143,6 @@ while ~stop_criteria %OSC-TV
         %  Call GPU to minimize TV
         f = minimizeTV2(f, tvConstant, nIterTV);    %   This is the MATLAB CODE, the functions are sill in the library, but CUDA is used nowadays
     end
-    
-%    figure(200+iter);imshow(f(:,:,216/2),[0,12/1000]);
     
     % update status output
     string = [' (e=', num2str(sumOfErrors/numel(projRef)), ', dp=', num2str(dp), ')'];
